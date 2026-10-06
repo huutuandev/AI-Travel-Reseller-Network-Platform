@@ -1,0 +1,17 @@
+services:
+
+  frontend:
+    build:
+      context: ./FE
+
+    container_name: ai-travel-fe
+
+    ports:
+      - "3000:3000"
+
+    volumes:
+      - ./FE:/app
+      - /app/node_modules
+      - /app/.next
+
+    command: npm run dev -- --hostname 0.0.0.0

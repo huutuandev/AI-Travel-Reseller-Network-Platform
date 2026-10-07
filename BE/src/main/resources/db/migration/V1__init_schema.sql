@@ -1,18 +1,33 @@
--- 1. users
+-- 1a. roles
+CREATE TABLE roles (
+    id UUID PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 1b. users
 CREATE TABLE users (
     id UUID PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100),
     phone VARCHAR(20),
-    role VARCHAR(20),
     status VARCHAR(20) DEFAULT 'ACTIVE',
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT users_email_unique UNIQUE (email),
-    CONSTRAINT users_role_check CHECK (role IN ('ADMIN', 'MERCHANT', 'RESELLER')),
     CONSTRAINT users_status_check CHECK (status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED')),
     CONSTRAINT users_email_check CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+);
+
+-- 1c. user_roles
+CREATE TABLE user_roles (
+    user_id UUID NOT NULL,
+    role_id UUID NOT NULL,
+    PRIMARY KEY (user_id, role_id),
+    CONSTRAINT user_roles_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT user_roles_role_fk FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 
 -- 2. merchants

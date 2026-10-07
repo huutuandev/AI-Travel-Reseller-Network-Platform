@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "users")
@@ -27,8 +29,14 @@ public class User {
     @Column(length = 20)
     private String phone;
 
-    @Column(length = 20)
-    private String role; // ADMIN, MERCHANT, RESELLER
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @Builder.Default
+    private Set<Role> roles = new HashSet<>();
 
     @Column(length = 20)
     @Builder.Default

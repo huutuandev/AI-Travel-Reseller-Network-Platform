@@ -112,10 +112,8 @@ public class CampaignService {
     private String generateLandingSlug(String name, String productName) {
         String baseName = name != null ? removeAccents(name).replaceAll("[^a-zA-Z0-9\\s]", "").replaceAll("\\s+", "-").toLowerCase() : "reseller";
         String baseProduct = productName != null ? removeAccents(productName).replaceAll("[^a-zA-Z0-9\\s]", "").replaceAll("\\s+", "-").toLowerCase() : "product";
-        
         if (baseName.isEmpty()) baseName = "reseller";
         if (baseProduct.isEmpty()) baseProduct = "product";
-        
         String base = "/r/" + baseName + "-" + baseProduct + "-" + UUID.randomUUID().toString().substring(0, 4);
         if (base.length() > 140) {
             base = base.substring(0, 140) + "-" + UUID.randomUUID().toString().substring(0, 4);

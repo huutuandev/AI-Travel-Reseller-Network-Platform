@@ -29,38 +29,8 @@ public class CampaignController {
     private final CampaignService campaignService;
 
     @Operation(
-            summary = "Tham gia chiến dịch và nhận Tracking Link",
             security = @SecurityRequirement(name = "BearerAuth")
     )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "Tham gia chiến dịch thành công hoặc đã tham gia",
-                    content = @Content(
-                            schema = @Schema(implementation = JoinCampaignResponse.class)
-                    )
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401",
-                    description = "Không có quyền truy cập / Chưa đăng nhập",
-                    content = @Content
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "403",
-                    description = "Người dùng không có quyền (không phải RESELLER hoặc bị khóa)",
-                    content = @Content
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "Không tìm thấy chiến dịch",
-                    content = @Content
-            ),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "409",
-                    description = "Chiến dịch không hoạt động",
-                    content = @Content
-            )
-    })
     @PostMapping("/{campaignId}/join")
     public ResponseEntity<ApiResponse<JoinCampaignResponse>> joinCampaign(
             @Parameter(description = "ID của chiến dịch", required = true)

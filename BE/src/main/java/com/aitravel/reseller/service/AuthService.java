@@ -46,6 +46,12 @@ public class AuthService {
 
     @Transactional
     public void register(RegisterRequest request) {
+        Role resellerRole = roleRepository.findByName("ROLE_RESELLER")
+                .orElseGet(() -> roleRepository.save(Role.builder()
+                        .name("ROLE_RESELLER")
+                        .description("Reseller Role")
+                        .build()));
+
         String email = request.getEmail();
         Optional<User> existingUserOpt = userRepository.findByEmail(email);
 
@@ -59,11 +65,11 @@ public class AuthService {
             }
             existingUser.setFullName(request.getFullName());
             existingUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+            existingUser.setRoles(Set.of(resellerRole));
+            existingUser.setStatus("INACTIVE");
             userRepository.save(existingUser);
+            generateAndSendOtp(email);
         } else {
-            Role resellerRole = roleRepository.findByName("ROLE_RESELLER")
-                    .orElseGet(() -> roleRepository.save(Role.builder().name("ROLE_RESELLER").description("Reseller Role").build()));
-
             User newUser = User.builder()
                     .email(email)
                     .passwordHash(passwordEncoder.encode(request.getPassword()))
@@ -72,9 +78,8 @@ public class AuthService {
                     .roles(Set.of(resellerRole))
                     .build();
             userRepository.save(newUser);
+            generateAndSendOtp(email);
         }
-
-        generateAndSendOtp(email);
     }
 
     @Transactional

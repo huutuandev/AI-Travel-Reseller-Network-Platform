@@ -62,7 +62,8 @@ public class SecurityConfig {
                         "/api/v1/auth/verify-reset-otp",
                         "/api/v1/auth/reset-password"
                 ).permitAll()
-                .requestMatchers("/api/v1/reseller/**").hasRole("RESELLER")
+                .requestMatchers("/api/v1/reseller/**").hasAnyAuthority("RESELLER")
+                .requestMatchers("/api/v1/management/**").hasAnyAuthority("ADMIN", "MERCHANT")
                 .anyRequest().authenticated()
             );
 

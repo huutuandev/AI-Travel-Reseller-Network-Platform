@@ -1,7 +1,11 @@
 package com.aitravel.reseller.service;
 
 import com.aitravel.reseller.dto.respone.JoinCampaignResponse;
+import com.aitravel.reseller.dto.request.CampaignRequest;
+import com.aitravel.reseller.dto.respone.CampaignResponse;
 import com.aitravel.reseller.entity.Campaign;
+import com.aitravel.reseller.entity.Merchant;
+import com.aitravel.reseller.entity.Product;
 import com.aitravel.reseller.entity.Reseller;
 import com.aitravel.reseller.entity.Role;
 import com.aitravel.reseller.entity.TrackingLink;
@@ -9,6 +13,8 @@ import com.aitravel.reseller.entity.User;
 import com.aitravel.reseller.exception.ForbiddenException;
 import com.aitravel.reseller.exception.ResourceNotFoundException;
 import com.aitravel.reseller.repository.CampaignRepository;
+import com.aitravel.reseller.repository.MerchantRepository;
+import com.aitravel.reseller.repository.ProductRepository;
 import com.aitravel.reseller.repository.ResellerRepository;
 import com.aitravel.reseller.repository.TrackingLinkRepository;
 import com.aitravel.reseller.repository.UserRepository;
@@ -19,9 +25,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +37,8 @@ import java.util.regex.Pattern;
 public class CampaignService {
 
     private final CampaignRepository campaignRepository;
+    private final MerchantRepository merchantRepository;
+    private final ProductRepository productRepository;
     private final ResellerRepository resellerRepository;
     private final TrackingLinkRepository trackingLinkRepository;
     private final UserRepository userRepository;
@@ -38,7 +48,7 @@ public class CampaignService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ForbiddenException("Người dùng không tồn tại"));
 
-        if (!"ACTIVE".equals(user.getStatus())) {
+        if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
             throw new ForbiddenException("Tài khoản người dùng không hoạt động");
         }
 
@@ -61,14 +71,14 @@ public class CampaignService {
                     return resellerRepository.saveAndFlush(newReseller);
                 });
 
-        if (!"ACTIVE".equals(reseller.getStatus())) {
+        if (!"ACTIVE".equalsIgnoreCase(reseller.getStatus())) {
             throw new ForbiddenException("Tài khoản Reseller không hoạt động");
         }
 
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chiến dịch"));
 
-        if (!"ACTIVE".equals(campaign.getStatus())) {
+        if (!"ACTIVE".equalsIgnoreCase(campaign.getStatus())) {
             throw new IllegalStateException("Chiến dịch không hoạt động");
         }
 
@@ -140,6 +150,98 @@ public class CampaignService {
                 .landingSlug(link.getLandingSlug())
                 .commissionSnapshot(link.getCommissionSnapshot())
                 .resellerSplitSnapshot(link.getResellerSplitSnapshot())
+                .build();
+    }
+
+    @Transactional
+    public CampaignResponse createCampaign(CampaignRequest request) {
+        Merchant merchant = merchantRepository.findById(request.getMerchantId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Merchant"));
+        
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Product"));
+
+        Campaign campaign = Campaign.builder()
+                .merchant(merchant)
+                .product(product)
+                .name(request.getName())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .commissionRate(request.getCommissionRate())
+                .resellerSplitRate(request.getResellerSplitRate() != null ? request.getResellerSplitRate() : new java.math.BigDecimal("60.00"))
+                .guidelines(request.getGuidelines())
+                .status(request.getStatus() != null ? request.getStatus() : "ACTIVE")
+                .createdAt(java.time.Instant.now())
+                .build();
+
+        campaign = campaignRepository.save(campaign);
+        return mapToCampaignResponse(campaign);
+    }
+
+    @Transactional
+    public CampaignResponse updateCampaign(UUID id, CampaignRequest request) {
+        Campaign campaign = campaignRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chiến dịch"));
+
+        if (!campaign.getMerchant().getId().equals(request.getMerchantId())) {
+            Merchant merchant = merchantRepository.findById(request.getMerchantId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Merchant"));
+            campaign.setMerchant(merchant);
+        }
+
+        if (!campaign.getProduct().getId().equals(request.getProductId())) {
+            Product product = productRepository.findById(request.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Product"));
+            campaign.setProduct(product);
+        }
+
+        campaign.setName(request.getName());
+        campaign.setStartDate(request.getStartDate());
+        campaign.setEndDate(request.getEndDate());
+        campaign.setCommissionRate(request.getCommissionRate());
+        
+        if (request.getResellerSplitRate() != null) {
+            campaign.setResellerSplitRate(request.getResellerSplitRate());
+        }
+        if (request.getGuidelines() != null) {
+            campaign.setGuidelines(request.getGuidelines());
+        }
+        if (request.getStatus() != null) {
+            campaign.setStatus(request.getStatus());
+        }
+
+        campaign = campaignRepository.save(campaign);
+        return mapToCampaignResponse(campaign);
+    }
+
+    public CampaignResponse getCampaignById(UUID id) {
+        Campaign campaign = campaignRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chiến dịch"));
+        return mapToCampaignResponse(campaign);
+    }
+
+    public List<CampaignResponse> getAllCampaigns() {
+        return campaignRepository.findAll().stream()
+                .map(this::mapToCampaignResponse)
+                .collect(Collectors.toList());
+    }
+
+
+    private CampaignResponse mapToCampaignResponse(Campaign campaign) {
+        return CampaignResponse.builder()
+                .id(campaign.getId())
+                .merchantId(campaign.getMerchant().getId())
+                .merchantName(campaign.getMerchant().getName())
+                .productId(campaign.getProduct().getId())
+                .productName(campaign.getProduct().getName())
+                .name(campaign.getName())
+                .startDate(campaign.getStartDate())
+                .endDate(campaign.getEndDate())
+                .commissionRate(campaign.getCommissionRate())
+                .resellerSplitRate(campaign.getResellerSplitRate())
+                .guidelines(campaign.getGuidelines())
+                .status(campaign.getStatus())
+                .createdAt(campaign.getCreatedAt())
                 .build();
     }
 }

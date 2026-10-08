@@ -1,9 +1,12 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   # 1. Cấu hình kết nối PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/mydatabase
-    username: root
-    password: rootpassword
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/mydatabase}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   # Cấu hình Hibernate/JPA cho PostgreSQL
@@ -18,16 +21,36 @@ spring:
   # 2. Cấu hình kết nối Redis
   data:
     redis:
-      host: localhost
-      port: 6379
-      # password: yourpassword # Bỏ comment nếu bạn có cài mật khẩu ở file docker-compose
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
 
   # 3. Cấu hình kết nối RabbitMQ
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: root
-    password: rootpassword
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+
+  # 4. Cấu hình Email SMTP (Dummy/Mailtrap cho dev)
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  # 5. Cấu hình JWT
+  security:
+    jwt:
+      secret: ${JWT_SECRET}
+      access-token-expiration: ${JWT_ACCESS_EXPIRATION} # 15 phút
+      refresh-token-expiration: ${JWT_REFRESH_EXPIRATION} # 7 ngày
 
 server:
-  port: 8080 # Port của ứng dụng Spring Boot
+  port: ${SERVER_PORT:8080} # Port của ứng dụng Spring Boot

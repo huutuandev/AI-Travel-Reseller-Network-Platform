@@ -1,1 +1,147 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Wayfarer Network platform administration prototype"><title>System configuration - Wayfarer Platform</title><link rel="stylesheet" href="../shared/styles.css"><script defer src="../shared/scripts.js"></script></head><body><div class="shell platform-shell"><aside class="sidebar"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.3 5.3-5.3 2.3 2.3-5.3 5.3-2.3Z"/></svg></span>Wayfarer <span class="muted">Platform</span></a><div class="nav-label">PLATFORM OPERATIONS</div><nav class="nav"><a class="" href="dashboard.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 14h7v7H3z"/></svg>Platform overview</a><a class="" href="tenants.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 8v6M23 11h-6"/></svg>Tenant management</a><a class="" href="tenant-detail.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-5 8v-5h4v5"/></svg>Tenant detail</a><a class="active" href="system-config.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>System configuration</a></nav><div class="sidebar-foot">Platform-level sample data - No live tenants</div></aside><main class="main"><header class="topbar"><div class="split"><button class="mobile-menu secondary" data-menu aria-label="Toggle navigation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><span class="crumb">Platform Admin / System configuration</span></div><div class="top-actions"><div class="user"><span class="avatar">PO</span><span class="user-name"><strong>Platform Owner</strong><small>Platform administrator</small></span></div></div></header><div class="content"><div class="page-heading"><div><div class="eyebrow">PLATFORM OPERATIONS</div><h1>System configuration</h1><p>Review platform-wide routing concepts, AI templates and operational logs.</p></div></div><div class="notice" style="margin-bottom:18px">All controls below are local UI examples. Changes are not saved to a platform service.</div><form class="panel" data-demo-form><section class="form-section"><div class="form-section-head"><span class="step-number">01</span><div><h2>Tenant routing</h2><p>Conceptual defaults for branded tenant experiences.</p></div></div><div class="form-grid"><div class="form-field"><label for="route-mode">Tenant resolution mode</label><select id="route-mode"><option>Subdomain preview</option><option>Custom domain (planned)</option></select></div><div class="form-field"><label for="base-domain">Sample base domain</label><input id="base-domain" value="aitravel.example"><span class="form-helper">Example only; no DNS or domain lookup is active.</span></div></div></section><section class="form-section"><div class="form-section-head"><span class="step-number">02</span><div><h2>AI content templates</h2><p>Sample prompt guidance for caption and video-script generation.</p></div></div><div class="form-grid"><div class="form-field"><label for="caption-template">Social caption template</label><textarea id="caption-template">Use product highlights, destination context and the selected tone. Avoid unverified claims.</textarea></div><div class="form-field"><label for="video-template">Video script template</label><textarea id="video-template">Create a short opening hook, three itinerary moments and a clear call to explore the campaign.</textarea></div></div></section><div class="form-actions"><span data-feedback class="hint"></span><button type="submit">Save preview settings</button></div></form><section class="panel"><div class="panel-head"><div><h2>Recent platform logs</h2><div class="panel-sub">Illustrative operational events</div></div><span class="badge">Sample log</span></div><div class="table-wrap"><table><thead><tr><th>Time</th><th>Event</th><th>Scope</th><th>Result</th></tr></thead><tbody><tr><td>15 Oct 2026 - 09:14</td><td>Tenant configuration loaded</td><td>tn_lantern_tide</td><td><span class="badge active">Success</span></td></tr><tr><td>15 Oct 2026 - 08:42</td><td>AI content template preview</td><td>Platform template</td><td><span class="badge">Demo only</span></td></tr><tr><td>14 Oct 2026 - 18:06</td><td>Tenant status review</td><td>tn_coastal_routes</td><td><span class="badge pending">Pending</span></td></tr></tbody></table></div></section><p class="demo-note">Illustrative platform data - Static prototype only</p></div></main></div></body></html>
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Wayfarer Network platform administration prototype">
+    <title>System configuration - Wayfarer Platform</title>
+    <link rel="stylesheet" href="../shared/styles.css">
+    <script defer src="../shared/scripts.js"></script>
+</head>
+
+<body>
+    <div class="shell platform-shell">
+        <aside class="sidebar"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true"><svg
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="m15.8 8.2-2.3 5.3-5.3 2.3 2.3-5.3 5.3-2.3Z" />
+                    </svg></span>Wayfarer <span class="muted">Platform</span></a>
+            <div class="nav-label">PLATFORM OPERATIONS</div>
+            <nav class="nav"><a class="" href="dashboard.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
+                        <path d="M3 3h7v7H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 14h7v7H3z" />
+                    </svg>Platform overview</a><a class="" href="tenants.html"><svg class="nav-icon" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <path
+                            d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 8v6M23 11h-6" />
+                    </svg>Tenant management</a><a class="" href="tenant-detail.html"><svg class="nav-icon"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-5 8v-5h4v5" />
+                    </svg>Tenant detail</a><a class="active" href="system-config.html"><svg class="nav-icon"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" />
+                    </svg>System configuration</a></nav>
+            <div class="sidebar-foot">Platform-level sample data - No live tenants</div>
+        </aside>
+        <main class="main">
+            <header class="topbar">
+                <div class="split"><button class="mobile-menu secondary" data-menu aria-label="Toggle navigation"><svg
+                            viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 6h16M4 12h16M4 18h16" />
+                        </svg></button><span class="crumb">Platform Admin / System configuration</span></div>
+                <div class="top-actions">
+                    <div class="user"><span class="avatar">PO</span><span class="user-name"><strong>Platform
+                                Owner</strong><small>Platform administrator</small></span></div>
+                </div>
+            </header>
+            <div class="content">
+                <div class="page-heading">
+                    <div>
+                        <div class="eyebrow">PLATFORM OPERATIONS</div>
+                        <h1>System configuration</h1>
+                        <p>Review platform-wide routing concepts, AI templates and operational logs.</p>
+                    </div>
+                </div>
+                <div class="notice" style="margin-bottom:18px">All controls below are local UI examples. Changes are not
+                    saved to a platform service.</div>
+                <form class="panel" data-demo-form>
+                    <section class="form-section">
+                        <div class="form-section-head"><span class="step-number">01</span>
+                            <div>
+                                <h2>Tenant routing</h2>
+                                <p>Conceptual defaults for branded tenant experiences.</p>
+                            </div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-field"><label for="route-mode">Tenant resolution mode</label><select
+                                    id="route-mode">
+                                    <option>Subdomain preview</option>
+                                    <option>Custom domain (planned)</option>
+                                </select></div>
+                            <div class="form-field"><label for="base-domain">Sample base domain</label><input
+                                    id="base-domain" value="aitravel.example"><span class="form-helper">Example only; no
+                                    DNS or domain lookup is active.</span></div>
+                        </div>
+                    </section>
+                    <section class="form-section">
+                        <div class="form-section-head"><span class="step-number">02</span>
+                            <div>
+                                <h2>AI content templates</h2>
+                                <p>Sample prompt guidance for caption and video-script generation.</p>
+                            </div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-field"><label for="caption-template">Social caption
+                                    template</label><textarea
+                                    id="caption-template">Use product highlights, destination context and the selected tone. Avoid unverified claims.</textarea>
+                            </div>
+                            <div class="form-field"><label for="video-template">Video script template</label><textarea
+                                    id="video-template">Create a short opening hook, three itinerary moments and a clear call to explore the campaign.</textarea>
+                            </div>
+                        </div>
+                    </section>
+                    <div class="form-actions"><span data-feedback class="hint"></span><button type="submit">Save preview
+                            settings</button></div>
+                </form>
+                <section class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Recent platform logs</h2>
+                            <div class="panel-sub">Illustrative operational events</div>
+                        </div><span class="badge">Sample log</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Event</th>
+                                    <th>Scope</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>15 Oct 2026 - 09:14</td>
+                                    <td>Tenant configuration loaded</td>
+                                    <td>tn_lantern_tide</td>
+                                    <td><span class="badge active">Success</span></td>
+                                </tr>
+                                <tr>
+                                    <td>15 Oct 2026 - 08:42</td>
+                                    <td>AI content template preview</td>
+                                    <td>Platform template</td>
+                                    <td><span class="badge">Demo only</span></td>
+                                </tr>
+                                <tr>
+                                    <td>14 Oct 2026 - 18:06</td>
+                                    <td>Tenant status review</td>
+                                    <td>tn_coastal_routes</td>
+                                    <td><span class="badge pending">Pending</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <p class="demo-note">Illustrative platform data - Static prototype only</p>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

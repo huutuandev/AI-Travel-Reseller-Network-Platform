@@ -1,1 +1,173 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Wayfarer Network platform administration prototype"><title>SunWorld Travel - Wayfarer Platform</title><link rel="stylesheet" href="../shared/styles.css"><script defer src="../shared/scripts.js"></script></head><body><div class="shell platform-shell"><aside class="sidebar"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.3 5.3-5.3 2.3 2.3-5.3 5.3-2.3Z"/></svg></span>Wayfarer <span class="muted">Platform</span></a><div class="nav-label">PLATFORM OPERATIONS</div><nav class="nav"><a class="" href="dashboard.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 14h7v7H3z"/></svg>Platform overview</a><a class="" href="tenants.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 8v6M23 11h-6"/></svg>Tenant management</a><a class="active" href="tenant-detail.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-5 8v-5h4v5"/></svg>Tenant detail</a><a class="" href="system-config.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>System configuration</a></nav><div class="sidebar-foot">Platform-level sample data - No live tenants</div></aside><main class="main"><header class="topbar"><div class="split"><button class="mobile-menu secondary" data-menu aria-label="Toggle navigation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><span class="crumb">Platform Admin / SunWorld Travel</span></div><div class="top-actions"><div class="user"><span class="avatar">PO</span><span class="user-name"><strong>Platform Owner</strong><small>Platform administrator</small></span></div></div></header><div class="content"><div class="page-heading"><div><div class="eyebrow">TENANT MANAGEMENT</div><h1>SunWorld Travel</h1><p>Tenant profile, branding and platform usage overview.</p></div><div class="detail-actions"><span class="badge active" data-tenant-status>Active</span><button class="secondary" type="button" data-tenant-toggle>Suspend tenant</button></div></div><div class="grid kpis"><article class="kpi"><div class="kpi-label">Active campaigns</div><div class="kpi-value">18</div><div class="trend">Tenant-scoped sample</div></article><article class="kpi"><div class="kpi-label">Resellers</div><div class="kpi-value">426</div><div class="trend">398 active</div></article><article class="kpi"><div class="kpi-label">Tracked clicks - 30 days</div><div class="kpi-value">48,290</div><div class="trend">Across tenant campaigns</div></article><article class="kpi"><div class="kpi-label">Attributed bookings</div><div class="kpi-value">1,204</div><div class="trend">Illustrative usage data</div></article></div><div class="grid two-col"><section class="panel"><div class="panel-head"><h2>Tenant information</h2><span class="badge">Business account</span></div><dl class="detail-list"><div><dt>Tenant ID</dt><dd>tn_sunworld</dd></div><div><dt>Sample subdomain</dt><dd>sunworld.aitravel.example</dd></div><div><dt>Created</dt><dd>08 March 2026</dd></div><div><dt>Primary contact</dt><dd>Mai Tran - admin@sunworld.example</dd></div><div><dt>Data scope</dt><dd>Tenant-scoped workspace</dd></div></dl><p class="notice">This sample subdomain illustrates tenant branding only. Domain routing is not implemented.</p></section><section class="panel"><div class="panel-head"><h2>Brand preview</h2><span class="badge active">White label configured</span></div><div class="tenant-brand-preview"><span class="tenant-brand-mark">S</span><div><strong>SunWorld Travel</strong><small>Discover your next journey</small></div></div><div class="list"><div class="list-item"><span>Brand palette</span><span><i class="swatch" style="background:#b84932"></i><i class="swatch" style="background:#164c52"></i><i class="swatch" style="background:#f4e8ce"></i></span></div><div class="list-item"><span>Storefront status</span><span class="badge active">Preview ready</span></div></div></section></div><section class="panel"><div class="panel-head"><div><h2>Recent tenant activity</h2><div class="panel-sub">Platform-visible sample events</div></div><a href="tenants.html">Back to tenants</a></div><div class="table-wrap"><table><thead><tr><th>Event</th><th>Area</th><th>When</th></tr></thead><tbody><tr><td>Campaign updated: Ha Long Bay Weekend Escape</td><td>Campaign management</td><td>14 Oct 2026 - 10:42</td></tr><tr><td>Brand colors saved</td><td>White label</td><td>13 Oct 2026 - 16:08</td></tr><tr><td>Reseller approved</td><td>Partner network</td><td>13 Oct 2026 - 09:27</td></tr></tbody></table></div></section><p class="demo-note">Illustrative platform data - Static prototype only</p></div></main></div></body></html>
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Wayfarer Network platform administration prototype">
+    <title>SunWorld Travel - Wayfarer Platform</title>
+    <link rel="stylesheet" href="../shared/styles.css">
+    <script defer src="../shared/scripts.js"></script>
+</head>
+
+<body>
+    <div class="shell platform-shell">
+        <aside class="sidebar"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true"><svg
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="m15.8 8.2-2.3 5.3-5.3 2.3 2.3-5.3 5.3-2.3Z" />
+                    </svg></span>Wayfarer <span class="muted">Platform</span></a>
+            <div class="nav-label">PLATFORM OPERATIONS</div>
+            <nav class="nav"><a class="" href="dashboard.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
+                        <path d="M3 3h7v7H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 14h7v7H3z" />
+                    </svg>Platform overview</a><a class="" href="tenants.html"><svg class="nav-icon" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <path
+                            d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 8v6M23 11h-6" />
+                    </svg>Tenant management</a><a class="active" href="tenant-detail.html"><svg class="nav-icon"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-5 8v-5h4v5" />
+                    </svg>Tenant detail</a><a class="" href="system-config.html"><svg class="nav-icon"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" />
+                    </svg>System configuration</a></nav>
+            <div class="sidebar-foot">Platform-level sample data - No live tenants</div>
+        </aside>
+        <main class="main">
+            <header class="topbar">
+                <div class="split"><button class="mobile-menu secondary" data-menu aria-label="Toggle navigation"><svg
+                            viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 6h16M4 12h16M4 18h16" />
+                        </svg></button><span class="crumb">Platform Admin / SunWorld Travel</span></div>
+                <div class="top-actions">
+                    <div class="user"><span class="avatar">PO</span><span class="user-name"><strong>Platform
+                                Owner</strong><small>Platform administrator</small></span></div>
+                </div>
+            </header>
+            <div class="content">
+                <div class="page-heading">
+                    <div>
+                        <div class="eyebrow">TENANT MANAGEMENT</div>
+                        <h1>SunWorld Travel</h1>
+                        <p>Tenant profile, branding and platform usage overview.</p>
+                    </div>
+                    <div class="detail-actions"><span class="badge active" data-tenant-status>Active</span><button
+                            class="secondary" type="button" data-tenant-toggle>Suspend tenant</button></div>
+                </div>
+                <div class="grid kpis">
+                    <article class="kpi">
+                        <div class="kpi-label">Active campaigns</div>
+                        <div class="kpi-value">18</div>
+                        <div class="trend">Tenant-scoped sample</div>
+                    </article>
+                    <article class="kpi">
+                        <div class="kpi-label">Resellers</div>
+                        <div class="kpi-value">426</div>
+                        <div class="trend">398 active</div>
+                    </article>
+                    <article class="kpi">
+                        <div class="kpi-label">Tracked clicks - 30 days</div>
+                        <div class="kpi-value">48,290</div>
+                        <div class="trend">Across tenant campaigns</div>
+                    </article>
+                    <article class="kpi">
+                        <div class="kpi-label">Attributed bookings</div>
+                        <div class="kpi-value">1,204</div>
+                        <div class="trend">Illustrative usage data</div>
+                    </article>
+                </div>
+                <div class="grid two-col">
+                    <section class="panel">
+                        <div class="panel-head">
+                            <h2>Tenant information</h2><span class="badge">Business account</span>
+                        </div>
+                        <dl class="detail-list">
+                            <div>
+                                <dt>Tenant ID</dt>
+                                <dd>tn_sunworld</dd>
+                            </div>
+                            <div>
+                                <dt>Sample subdomain</dt>
+                                <dd>sunworld.aitravel.example</dd>
+                            </div>
+                            <div>
+                                <dt>Created</dt>
+                                <dd>08 March 2026</dd>
+                            </div>
+                            <div>
+                                <dt>Primary contact</dt>
+                                <dd>Mai Tran - admin@sunworld.example</dd>
+                            </div>
+                            <div>
+                                <dt>Data scope</dt>
+                                <dd>Tenant-scoped workspace</dd>
+                            </div>
+                        </dl>
+                        <p class="notice">This sample subdomain illustrates tenant branding only. Domain routing is not
+                            implemented.</p>
+                    </section>
+                    <section class="panel">
+                        <div class="panel-head">
+                            <h2>Brand preview</h2><span class="badge active">White label configured</span>
+                        </div>
+                        <div class="tenant-brand-preview"><span class="tenant-brand-mark">S</span>
+                            <div><strong>SunWorld Travel</strong><small>Discover your next journey</small></div>
+                        </div>
+                        <div class="list">
+                            <div class="list-item"><span>Brand palette</span><span><i class="swatch"
+                                        style="background:#b84932"></i><i class="swatch"
+                                        style="background:#164c52"></i><i class="swatch"
+                                        style="background:#f4e8ce"></i></span></div>
+                            <div class="list-item"><span>Storefront status</span><span class="badge active">Preview
+                                    ready</span></div>
+                        </div>
+                    </section>
+                </div>
+                <section class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Recent tenant activity</h2>
+                            <div class="panel-sub">Platform-visible sample events</div>
+                        </div><a href="tenants.html">Back to tenants</a>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Event</th>
+                                    <th>Area</th>
+                                    <th>When</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Campaign updated: Ha Long Bay Weekend Escape</td>
+                                    <td>Campaign management</td>
+                                    <td>14 Oct 2026 - 10:42</td>
+                                </tr>
+                                <tr>
+                                    <td>Brand colors saved</td>
+                                    <td>White label</td>
+                                    <td>13 Oct 2026 - 16:08</td>
+                                </tr>
+                                <tr>
+                                    <td>Reseller approved</td>
+                                    <td>Partner network</td>
+                                    <td>13 Oct 2026 - 09:27</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <p class="demo-note">Illustrative platform data - Static prototype only</p>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

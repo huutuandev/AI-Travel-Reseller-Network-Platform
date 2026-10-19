@@ -1,25 +1,59 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import { StoreFooter, StoreNav } from "../page"
-
-const products = {
-  halong: { title:"Ha Long Bay Weekend Escape", product:"Ha Long Bay cruise", location:"HA LONG BAY · VIETNAM", short:"Ha Long Bay", price:420, image:"/images/halong-bay.svg", description:"A slow sailing journey through emerald waters and limestone karsts.", duration:"Two unhurried nights", feeling:"Quiet discovery", number:"01" },
-  hoian: { title:"Hoi An Lantern Season", product:"Hoi An riverside stay", location:"HOI AN · VIETNAM", short:"Hoi An", price:280, image:"/images/hoi-an.svg", description:"Stay by the river and discover lantern-lit streets after dusk.", duration:"Three nights", feeling:"Old town evenings", number:"02" },
-  phuquoc: { title:"Phu Quoc Island Escape", product:"Phu Quoc beach stay", location:"PHU QUOC · VIETNAM", short:"Phu Quoc", price:380, image:"/images/phu-quoc.svg", description:"A sunlit island hideaway with soft sand and clear blue water.", duration:"Four island nights", feeling:"Coastal reset", number:"03" },
-}
+import { ArrowLeft, ArrowUpRight, CalendarDays, Check, Clock3, MapPin, Tag } from "lucide-react"
+import { StoreFooter, StoreNav } from "@/components/storefront/store-chrome"
+import { getJourney } from "@/lib/storefront-data"
 
 export default function ProductDetailPage() {
-  return <Suspense fallback={<main className="product-detail">Loading journey…</main>}><ProductDetailContent/></Suspense>
+  return <Suspense fallback={<main className="product-detail">Loading journey…</main>}><ProductDetailContent /></Suspense>
 }
 
 function ProductDetailContent() {
-  const searchParams=useSearchParams()
-  const requested=searchParams.get("product")
-  const key=requested&&requested in products?requested as keyof typeof products:"halong"
-  const item=products[key]
-  const checkout=`/storefront/checkout?product=${key}`
-  return <><div className="announcement"><span>THE LANTERN &amp; TIDE COLLECTION</span><i/><span>A thoughtful way to discover Vietnam</span><Link href="/storefront#journeys">Explore the collection <b>→</b></Link></div><StoreNav current="The collection"/><main className="product-detail"><div className="detail-breadcrumb"><Link href="/storefront">Home</Link><span>/</span><Link href="/storefront#journeys">The collection</Link><span>/</span><span>{item.short}</span></div><section className="detail-grid"><div className="detail-visual"><img src={item.image} alt={`${item.short}, Vietnam`}/><div className="visual-caption"><span className="visual-pin">LT</span><span>CURATED IN VIETNAM</span><b>{item.number} — 03</b></div><div className="visual-vertical">A SLOWER WAY TO SEE THE WORLD</div></div><div className="detail-copy"><div className="detail-eyebrow"><span className="overline">THE LANTERN &amp; TIDE COLLECTION</span><span className="detail-id">NO. <b>{item.number}</b></span></div><span className="detail-location">{item.location}</span><h1>{item.title}</h1><p className="detail-product">{item.product}</p><p className="detail-lead">{item.description}</p><div className="detail-rule"/><div className="detail-facts"><div><span>THE PACE</span><strong>{item.duration}</strong></div><div><span>THE FEELING</span><strong>{item.feeling}</strong></div></div><p className="detail-body">Wake to a quiet horizon, spend the day drifting between limestone islands, then return to a private deck as the bay turns gold. Your local host can help tailor the details to your pace.</p><div className="detail-includes"><span><i>01</i> A locally hosted experience</span><span><i>02</i> Thoughtfully selected stays</span><span><i>03</i> Room to make it your own</span></div><div className="detail-booking"><div><span>YOUR JOURNEY, FROM</span><strong>${item.price} <small>/ guest</small></strong><small>Sample rate · Final details confirmed by the travel partner</small></div><Link className="store-button" href={checkout}>Plan this journey <b>→</b></Link></div><p className="detail-prototype-note">Illustrative experience and pricing for this prototype.</p></div></section><section className="itinerary"><div className="itinerary-heading"><span className="overline">A FEEL FOR THE JOURNEY</span><h2>Every day has room<br/>to become its own.</h2></div><div className="itinerary-days"><article><span>DAY 01</span><div><h3>Arrive, then exhale</h3><p>Meet your local host and settle in. The first evening is intentionally yours.</p></div></article><article><span>DAY 02</span><div><h3>Follow the water</h3><p>A day shaped around the place: its people, its rhythms and the moments in between.</p></div></article><article><span>DAY 03</span><div><h3>Leave a little later</h3><p>A final slow morning before you decide where the road goes next.</p></div></article></div></section><section className="detail-bottom-cta"><div><span className="overline">A GOOD PLACE TO BEGIN</span><h2>Make this journey<br/><em>your own.</em></h2></div><Link className="store-button" href={checkout}>Check your journey <b>→</b></Link></section></main><StoreFooter/></>
+  const searchParams = useSearchParams()
+  const item = getJourney(searchParams.get("product"))
+  const checkout = `/storefront/checkout?product=${item.key}`
+
+  return <div className="store-detail-page">
+    <StoreNav current="The collection" returnTo={`/storefront/product-detail?product=${item.key}`} detail />
+    <main className="product-detail">
+      <Link className="detail-back-link" href="/storefront#destinations"><ArrowLeft aria-hidden="true" /> Back to journeys</Link>
+      <header className="detail-page-heading">
+        <div><span className="detail-location">{item.location}</span><h1>{item.title}</h1><p>{item.description}</p></div>
+        <span className="detail-number">JOURNEY <b>{item.number}</b></span>
+      </header>
+      <div className="detail-meta-row"><span><Clock3 />{item.nights.toLowerCase()}</span><span><MapPin />{item.short}, Vietnam</span><span><Tag />{item.type.toLowerCase()}</span></div>
+
+      <section className="detail-purchase-grid" aria-label="Journey overview and booking">
+        <div className="detail-gallery" aria-label={`${item.short} destination gallery`}>
+          <div className="detail-gallery-main"><Image className={`destination-photo destination-photo-${item.key}`} src={item.image} alt={`${item.short} landscape, Vietnam`} fill priority sizes="(max-width: 700px) 100vw, 44vw" /><span className="gallery-location"><MapPin aria-hidden="true" />{item.region}</span><div className="visual-caption"><span className="visual-pin">LT</span><span>A JOURNEY THROUGH {item.short.toUpperCase()}</span></div></div>
+          <div className="detail-gallery-aside"><div className="detail-gallery-thumb"><Image src={item.thumbnail} alt={`Illustration inspired by ${item.short}`} fill sizes="(max-width: 700px) 44vw, 20vw" /><span>THE PLACE, AT YOUR PACE</span></div><div className="detail-gallery-note"><span className="overline">A LITTLE MORE OF VIETNAM</span><p>{item.feeling}, with time left for the unplanned parts.</p><Link href="#overview">Explore the journey <ArrowUpRight /></Link></div></div>
+        </div>
+
+        <aside className="detail-booking-card">
+          <span className="detail-booking-kicker">A LANTERN &amp; TIDE JOURNEY</span>
+          <h2>{item.product}</h2>
+          <div className="detail-booking-location"><MapPin />{item.short}, Vietnam</div>
+          <div className="detail-rate"><span>From</span><strong>${item.price.toLocaleString("en-US")}</strong><small>/ guest</small></div>
+          <span className="detail-rate-note">Illustrative sample rate</span>
+          <Link className="detail-book-button" href={checkout}>Plan this journey <ArrowUpRight /></Link>
+          <div className="detail-booking-foot"><CalendarDays /><span>Choose your preferred date and party size in the next step.</span></div>
+          <p>Availability and final arrangements are confirmed by the travel partner.</p>
+        </aside>
+      </section>
+
+      <nav className="detail-tabs" aria-label="Journey details"><a className="is-current" href="#overview">Overview</a><a href="#included">What&apos;s included</a><a href="#tour-details">Tour details</a></nav>
+
+      <section className="detail-overview-section" id="overview"><div className="detail-section-heading"><span className="overline">A THOUGHTFUL WAY TO EXPLORE</span><h2>Make the most of {item.short}.</h2><p>{item.description} The pace is yours, with local insight to help you get closer to the character of the place.</p></div><div className="detail-overview-facts"><article><span><MapPin /></span><div><small>DESTINATION</small><strong>{item.short}, Vietnam</strong></div></article><article><span><Clock3 /></span><div><small>PACE &amp; DURATION</small><strong>{item.duration}</strong></div></article><article><span><Tag /></span><div><small>JOURNEY STYLE</small><strong>{item.type.toLowerCase()}</strong></div></article><article><span><Check /></span><div><small>THE FEELING</small><strong>{item.feeling}</strong></div></article></div></section>
+
+      <section className="detail-included-section" id="included"><div><span className="overline">THE GOOD DETAILS</span><h2>Considered from the start.</h2></div><ul><li><Check />A locally hosted experience</li><li><Check />Thoughtfully selected stays</li><li><Check />A flexible pace with room to make it your own</li></ul></section>
+
+      <section className="detail-itinerary-section" id="tour-details"><div className="detail-section-heading"><span className="overline">A FEEL FOR THE JOURNEY</span><h2>Let the days unfold.</h2><p>A sample rhythm to help you imagine the trip. Your travel partner can confirm the final itinerary with you.</p></div><div className="detail-itinerary-list"><article><span>01</span><div><h3>Arrive and settle in</h3><p>Meet your local host, get comfortable, and enjoy an easy first evening.</p></div></article><article><span>02</span><div><h3>Find the local rhythm</h3><p>Explore the character of the place, with time for food, people, and the moments in between.</p></div></article><article><span>03</span><div><h3>Take the day as it comes</h3><p>Leave space for a slower morning and decide what you would like to discover next.</p></div></article></div></section>
+      <section className="detail-end-cta"><div><span className="overline">READY WHEN YOU ARE</span><h2>Let&apos;s plan {item.short}.</h2></div><Link className="detail-book-button" href={checkout}>Continue to booking <ArrowUpRight /></Link></section>
+    </main>
+    <StoreFooter />
+  </div>
 }

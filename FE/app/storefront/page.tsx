@@ -1,37 +1,77 @@
-﻿"use client"
+"use client"
 
+import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
-
-const journeys = [
-  { key: "halong", image: "/images/halong-bay.svg", region: "THE NORTHEAST COAST", type: "SEA · SLOW TRAVEL", nights: "2 NIGHTS", name: "Ha Long Bay Weekend Escape", short: "Ha Long Bay", description: "Sail among ancient limestone peaks and wake to a softer kind of morning.", price: 420, feature: "Ha Long Bay, unhurried", duration: "Two nights on the water" },
-  { key: "hoian", image: "/images/hoi-an.svg", region: "THE OLD TOWN", type: "CULTURE · BOUTIQUE STAY", nights: "3 NIGHTS", name: "Hoi An Lantern Season", short: "Hoi An", description: "A riverside hideaway and evenings that belong to the old town.", price: 280, feature: "Hoi An after the lanterns", duration: "Three nights by the river" },
-  { key: "phuquoc", image: "/images/phu-quoc.svg", region: "THE SOUTHERN ISLANDS", type: "ISLAND · COASTAL STAY", nights: "4 NIGHTS", name: "Phu Quoc Island Escape", short: "Phu Quoc", description: "Clear water, long afternoons and nowhere else you need to be.", price: 380, feature: "Phu Quoc, all to yourself", duration: "Four nights by the sea" },
-]
+import { Suspense, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { CalendarDays, MapPin, Search, Sparkles } from "lucide-react"
+import { StoreFooter, StoreNav } from "@/components/storefront/store-chrome"
+import { TravelProductCard } from "@/components/storefront/travel-product-card"
+import { storefrontJourneys as journeys } from "@/lib/storefront-data"
 
 export default function StorefrontHome() {
-  const [slide, setSlide] = useState(0)
-  const [query, setQuery] = useState("")
-  const item = journeys[slide]
-  const visible = journeys.filter((journey) => `${journey.name} ${journey.short} ${journey.type}`.toLowerCase().includes(query.toLowerCase()))
-  const move = (amount: number) => setSlide((current) => (current + amount + journeys.length) % journeys.length)
-  return <>
-    <div className="announcement"><span>THE LANTERN &amp; TIDE COLLECTION</span><i/><span>A thoughtful way to discover Vietnam</span><a href="#journeys">Explore the collection <b>→</b></a></div>
-    <StoreNav current="The collection" />
-    <main>
-      <section className="store-hero"><div className="hero-copy"><span className="overline">CONSIDERED JOURNEYS · VIETNAM</span><h1>Go where the<br/><em>day slows down.</em></h1><p>Quietly extraordinary places, local hosts and the little details that make a journey your own.</p><a className="store-button light" href="#journeys">Discover the collection <b>→</b></a><div className="hero-assurance"><span>Curated with care</span><i/><span>Hosted by locals</span><i/><span>Made for you</span></div></div>
-        <div className="hero-art"><img src={item.image} alt={`${item.short}, Vietnam`}/><div className="hero-art-shade"/><span className="hero-art-label"><span>{item.region}</span><b>0{slide+1} <i>/</i> 03</b></span><div className="hero-caption-card"><span className="caption-icon">LT</span><div><small>{slide===0?"THE SIGNATURE ESCAPE":slide===1?"A SLOWER CITY STAY":"THE ISLAND EDIT"}</small><strong>{item.feature}</strong><span>{item.duration} · From <b>${item.price}</b></span></div><Link href={`/storefront/product-detail?product=${item.key}`} aria-label={`Discover ${item.feature}`}>→</Link></div><div className="hero-art-outline"/><div className="hero-slider-controls"><button onClick={()=>move(-1)} aria-label="Previous journey">←</button><div className="hero-slider-dots">{journeys.map((journey,index)=><button key={journey.key} className={slide===index?"is-active":""} aria-label={`Show ${journey.short} journey`} aria-current={slide===index?"true":undefined} onClick={()=>setSlide(index)}/>)}</div><button onClick={()=>move(1)} aria-label="Next journey">→</button></div></div>
-        <span className="hero-side-note">A SMALL COLLECTION OF VERY GOOD PLACES · EST. IN VIETNAM</span></section>
-      <section className="trust-strip"><div><span className="trust-mark">01</span><p><strong>Chosen, never crowded</strong><small>Only places we&apos;d send a friend.</small></p></div><i/><div><span className="trust-mark">02</span><p><strong>Rooted in local knowledge</strong><small>Meet the people behind the place.</small></p></div><i/><div><span className="trust-mark">03</span><p><strong>Space for the unexpected</strong><small>Plans that leave room to wander.</small></p></div></section>
-      <section className="intro editorial-section" id="approach"><div className="editorial-kicker"><span className="overline">A DIFFERENT KIND OF TRAVEL</span><span className="editorial-number">01 / OUR POINT OF VIEW</span></div><div className="intro-grid"><h2>Not more places.<br/><em>More presence.</em></h2><div><p>We believe the best journeys aren&apos;t measured in miles. They&apos;re found in a long lunch, a familiar face, and the feeling that you arrived at just the right moment.</p><a className="text-link" href="#journal">A little more about us →</a></div></div></section>
-      <section className="journeys" id="journeys"><div className="section-title"><div><span className="overline">THE COLLECTION · 2026 / 27</span><h2>Somewhere to begin.</h2><p>Three distinct ways to find your own rhythm in Vietnam.</p></div><label className="trip-search"><span>⌕</span><input type="search" value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search a destination" aria-label="Search journeys"/></label></div><div className="trip-grid">{visible.map((journey)=><article key={journey.key} className={`trip-card ${journey.key==="halong"?"trip-card-featured":""}`}><Link href={`/storefront/product-detail?product=${journey.key}`}><div className="trip-image"><img src={journey.image} alt={`${journey.short}, Vietnam`}/><span className="trip-number">0{journeys.indexOf(journey)+1}</span><span className="trip-location">{journey.region}</span></div><div className="trip-copy"><div className="trip-card-meta"><span>{journey.type}</span><span>{journey.nights}</span></div><h3>{journey.name}</h3><p>{journey.description}</p><div className="trip-card-bottom"><span>From <strong>${journey.price}</strong> <small>/ guest</small></span><b>↗</b></div></div></Link></article>)}</div>{visible.length===0&&<p>No journeys match your search.</p>}<div className="collection-foot"><span>Three journeys. A thousand ways to make them yours.</span><span>Prices shown are illustrative sample rates.</span></div></section>
-      <section className="manifesto" id="journal"><div className="manifesto-art"><img src="/images/hoi-an.svg" alt="Lantern-lit streets of Hoi An"/><span className="manifesto-stamp">L&amp;T<br/><small>FIELD NOTE 08</small></span></div><div className="manifesto-copy"><span className="overline">A NOTE FROM THE ROAD</span><h2>Take the long way.<br/><em>It tends to be better.</em></h2><p>Our local partners know when the light falls across the bay, which lane smells of fresh coffee, and where the afternoon goes quiet. That&apos;s where we like to start.</p><a className="text-link" href="#journeys">Find your own somewhere →</a></div></section>
-      <section className="store-cta"><span className="overline">WHENEVER YOU&apos;RE READY</span><h2>Your next story is<br/>closer than you think.</h2><a className="store-button light" href="#journeys">Find your journey →</a><span className="cta-orbit"/></section>
-    </main><StoreFooter/>
-  </>
+  return <Suspense fallback={<main className="storefront-loading">Opening the collection…</main>}><StorefrontHomeContent /></Suspense>
 }
 
-export function StoreNav({ current }: { current: string }) { return <header className="site-nav"><Link className="store-brand" href="/storefront"><span className="brand-seal">L<span>&amp;</span>T</span><span className="brand-name">LANTERN <i>&amp;</i> TIDE<small>TRAVEL, THOUGHTFULLY</small></span></Link><nav aria-label="Main navigation"><Link className={current==="The collection"?"nav-current":""} href="/storefront#journeys">The collection</Link><Link href="/storefront#approach">Our approach</Link><Link href="/storefront#journal">Field notes</Link></nav><Link className="nav-cta" href="/storefront#journeys">Plan your escape <b>↗</b></Link></header> }
-export function StoreFooter() { return <footer className="store-footer"><Link className="store-brand" href="/storefront"><span className="brand-seal">L<span>&amp;</span>T</span><span className="brand-name">LANTERN <i>&amp;</i> TIDE<small>TRAVEL, THOUGHTFULLY</small></span></Link><div className="footer-links"><Link href="/storefront#journeys">Journeys</Link><Link href="/storefront#approach">Our approach</Link><Link href="/">Platform preview</Link></div><div className="footer-legal"><span>TRAVEL THOUGHTFULLY. LEAVE LIGHTLY.</span><small>Sample tenant storefront · Prototype only</small></div></footer> }
+function StorefrontHomeContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const [slide, setSlide] = useState(0)
+  const [category, setCategory] = useState("all")
+  const [destination, setDestination] = useState("all")
+  const [duration, setDuration] = useState("all")
+  const [budget, setBudget] = useState("all")
+  const query = (searchParams.get("search") ?? "").trim().toLowerCase()
+  const featured = journeys[slide]
+  const visibleJourneys = journeys.filter((journey) => {
+    const matchesSearch = !query || `${journey.title} ${journey.short} ${journey.type}`.toLowerCase().includes(query)
+    const matchesCategory = category === "all" || (category === "coast" ? /sea|island/i.test(journey.type) : /culture|boutique/i.test(journey.type))
+    const matchesDestination = destination === "all" || journey.key === destination
+    const matchesDuration = duration === "all" || (duration === "weekend" ? journey.key === "halong" : journey.key !== "halong")
+    const matchesBudget = budget === "all" || (budget === "under-350" ? journey.price < 350 : journey.price >= 350)
+    return matchesSearch && matchesCategory && matchesDestination && matchesDuration && matchesBudget
+  })
+  const moveSlide = (direction: number) => setSlide((current) => (current + direction + journeys.length) % journeys.length)
 
+  return <div className="store-home">
+    <StoreNav current="Home" returnTo="/storefront" home />
+    <main>
+      <section className="home-hero" aria-label="Discover Vietnam">
+        <Image className={`home-hero-image destination-photo destination-photo-${featured.key}`} src={featured.image} alt={`${featured.short}, Vietnam`} fill priority sizes="100vw" />
+        <div className="home-hero-overlay" />
+        <div className="home-hero-content">
+          <span className="home-eyebrow"><i /> LANTERN &amp; TIDE · VIETNAM</span>
+          <h1>Find your kind<br />of <em>somewhere.</em></h1>
+          <p>Remarkable places, thoughtful local stays, and journeys made to feel like your own.</p>
+          <div className="home-hero-controls">
+            <button type="button" onClick={() => moveSlide(-1)} aria-label="Previous destination">←</button>
+            <div>{journeys.map((journey, index) => <button key={journey.key} type="button" onClick={() => setSlide(index)} className={slide === index ? "is-active" : ""} aria-label={`Show ${journey.short}`} aria-current={slide === index ? "true" : undefined} />)}</div>
+            <button type="button" onClick={() => moveSlide(1)} aria-label="Next destination">→</button>
+            <span>{String(slide + 1).padStart(2, "0")} <i>/</i> {String(journeys.length).padStart(2, "0")}</span>
+          </div>
+        </div>
+        <Link className="home-feature-link" href={`/storefront/product-detail?product=${featured.key}`}>
+          <span>FEATURED JOURNEY</span><strong>{featured.feature}</strong><small>{featured.duration} · From <b>${featured.price.toLocaleString("en-US")}</b> / guest</small><i aria-hidden="true">↗</i>
+        </Link>
+        <form className="home-search" onSubmit={(event) => { event.preventDefault(); document.getElementById("destinations")?.scrollIntoView({ behavior: "smooth" }) }}>
+          <label><MapPin /><span>DESTINATION<select value={destination} onChange={(event) => setDestination(event.target.value)}><option value="all">Anywhere in Vietnam</option>{journeys.map((journey) => <option key={journey.key} value={journey.key}>{journey.short}</option>)}</select></span></label>
+          <label><Sparkles /><span>TRIP TYPE<select value={category} onChange={(event) => setCategory(event.target.value)}><option value="all">Any experience</option><option value="coast">Coast &amp; islands</option><option value="culture">Culture &amp; stays</option></select></span></label>
+          <label><CalendarDays /><span>DURATION<select value={duration} onChange={(event) => setDuration(event.target.value)}><option value="all">Any duration</option><option value="weekend">A weekend</option><option value="long">3+ nights</option></select></span></label>
+          <label><span className="home-currency">$</span><span>YOUR BUDGET<select value={budget} onChange={(event) => setBudget(event.target.value)}><option value="all">Any budget</option><option value="under-350">Under $350</option><option value="over-350">$350 and above</option></select></span></label>
+          <button type="submit"><Search /> Search</button>
+        </form>
+      </section>
 
+      <section className="home-destinations" id="destinations">
+        <div className="home-section-heading"><div><span className="home-section-kicker">A FEW PLACES TO BEGIN</span><h2>Popular destinations</h2><p>Small, considered journeys across Vietnam.</p></div><a href="#why-lantern">Why travel with us <span>↗</span></a></div>
+        {query && <p className="home-search-result">Showing journeys matching “{searchParams.get("search") ?? ""}”</p>}
+        <div className="home-destination-grid">{visibleJourneys.map((journey) => <TravelProductCard key={journey.key} journey={journey} />)}</div>
+        {visibleJourneys.length === 0 && <div className="home-no-results"><span>No journeys match these filters yet.</span><button type="button" onClick={() => { setCategory("all"); setDestination("all"); setDuration("all"); setBudget("all"); router.push("/storefront") }}>Clear filters</button></div>}
+        <p className="home-sample-note">Illustrative sample journeys and prices. Availability and final details are confirmed by the travel partner.</p>
+      </section>
+
+      <section className="home-why" id="why-lantern"><span className="home-section-kicker">THE LANTERN &amp; TIDE DIFFERENCE</span><h2>Travel well.<br /><em>Feel more.</em></h2><div className="home-why-items"><article><span>01</span><div><h3>Chosen with care</h3><p>A focused collection of stays and experiences, curated around place and character.</p></div></article><article><span>02</span><div><h3>Rooted in Vietnam</h3><p>Local knowledge shapes the small details that make a trip feel personal.</p></div></article><article><span>03</span><div><h3>Room to make it yours</h3><p>Start with a thoughtful plan, then leave space for the moments you discover.</p></div></article></div></section>
+    </main>
+    <StoreFooter />
+  </div>
+}

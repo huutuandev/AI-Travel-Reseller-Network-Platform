@@ -46,3 +46,21 @@ Use these development-only accounts on `/login` to preview the role dashboards. 
 | Supplier | `supplier@mekong.test` | `SupplierDemo2026!` |
 
 The role account definitions live in `lib/mock-auth.ts`. Replace the frontend mock adapter when a real authentication service is available. This implementation is for local demonstration only; backend authorization is required for production.
+
+## Customer storefront demo account
+
+Use the shared `/login` page to preview the customer sign-in flow. Storefront links open it with the storefront return path; customer accounts use a dedicated browser session and do not share internal dashboard roles. `/storefront/login` remains as a compatibility redirect.
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Storefront customer | `traveler@lantern-tide.test` | `TravelDemo2026!` |
+
+Customer mock account logic is in `lib/customer-auth.ts`. New customer sign-ups are stored in the current browser only. Sample checkout requests are also browser-local; no payment or reservation is sent to a server.
+
+## Storefront photo credits
+
+The demonstration destination photos are local frontend assets sourced from Unsplash. Each source page marks its photo free to use under the Unsplash License:
+
+- Ha Long Bay: [Pierre Bonvalot](https://unsplash.com/photos/limestone-karsts-rise-from-the-water-in-a-scenic-bay-wPquuVxGqBc)
+- Hoi An: [Rebecca N.](https://unsplash.com/photos/a-bunch-of-lanterns-are-lit-up-in-the-dark-oBVH5LSpWXE)
+- Phu Quoc: [Vivu Vietnam](https://unsplash.com/photos/a-beach-with-palm-trees-and-a-boat-in-the-water-IVJVh1v1PVs)

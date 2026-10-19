@@ -1,1 +1,124 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Conversion review - Wayfarer Network</title><link rel="stylesheet" href="../shared/styles.css"><link rel="stylesheet" href="../shared/styles.css"><script defer src="../shared/scripts.js"></script></head><body><div class="shell"><aside class="sidebar"><a class="brand" href="../index.html">WN Wayfarer <span class="muted">Network</span></a><div class="nav-label">Tenant Admin</div><nav class="nav"><a class="" href="dashboard.html">Overview</a><a class="" href="products.html">Products</a><a class="" href="campaigns.html">Campaigns</a><a class="" href="resellers.html">Resellers</a><a class="active" href="conversion-review.html">Conversions</a><a class="" href="ai-content.html">AI Content</a><a class="" href="ai-content-review.html">AI content review</a><a class="" href="tracking-attribution.html">Tracking</a><a class="" href="commissions.html">Commissions</a><a class="" href="settings.html">Brand settings</a></nav><div class="sidebar-foot">Static prototype - Sample data</div></aside><main class="main"><header class="topbar"><div><button class="mobile-menu secondary" data-menu aria-label="Toggle navigation">Menu</button><span class="crumb">Tenant Admin / Conversion review</span></div><div class="top-actions"><input class="top-search" type="search" data-search placeholder="Search this page" aria-label="Search this page"></div></header><div class="content"><div class="page-heading"><div><div class="eyebrow">Tenant Admin</div><h1>Conversion review</h1><p>Illustrative workspace - Sample data - No backend connected</p></div></div><div class="grid kpis"><article class="kpi"><div class="kpi-label">Pending review</div><div class="kpi-value" data-pending-count>3</div><div class="trend">Awaiting tenant confirmation</div></article><article class="kpi"><div class="kpi-label">Approved this month</div><div class="kpi-value">128</div><div class="trend">Illustrative sample</div></article><article class="kpi"><div class="kpi-label">Flagged</div><div class="kpi-value">1</div><div class="trend">Needs investigation</div></article></div><section class="panel"><div class="toolbar"><input class="search" type="search" data-search placeholder="Search order, campaign or reseller"><select data-filter="status"><option>All status</option><option>Pending</option><option>Approved</option><option>Flagged</option></select></div><div class="table-wrap"><table><thead><tr><th>Booking</th><th>Campaign / product</th><th>Reseller</th><th>Amount</th><th>Commission</th><th>Status</th><th>Review</th></tr></thead><tbody><tr data-row><td>BK-20418<small class="row-meta">14 Oct 2026</small></td><td>Ha Long Bay Weekend Escape<small class="row-meta">Ha Long Bay cruise</small></td><td>Mia Nguyen</td><td>$722.50</td><td>$86.70</td><td><span class="badge pending" data-review-status>Pending</span></td><td><button class="button small" data-conversion-action="approve">Approve</button> <button class="button small secondary" data-conversion-action="reject">Reject</button></td></tr><tr data-row><td>BK-20392<small class="row-meta">13 Oct 2026</small></td><td>Hoi An Lantern Season<small class="row-meta">Hoi An stay</small></td><td>Coastline Journeys</td><td>$420.00</td><td>$42.00</td><td><span class="badge pending" data-review-status>Pending</span></td><td><button class="button small" data-conversion-action="approve">Approve</button> <button class="button small secondary" data-conversion-action="reject">Reject</button></td></tr><tr data-row><td>BK-20310<small class="row-meta">12 Oct 2026</small></td><td>Phu Quoc Island Escape<small class="row-meta">Beach stay</small></td><td>Northstar Travel</td><td>$380.00</td><td>$38.00</td><td><span class="badge pending" data-review-status>Pending</span></td><td><button class="button small" data-conversion-action="approve">Approve</button> <button class="button small secondary" data-conversion-action="reject">Reject</button></td></tr></tbody></table></div></section><p class="demo-note">Conversion review is a local UI demonstration. No booking or payout records are changed.</p></div></main></div></body></html>
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Conversion review - Wayfarer Network</title>
+    <link rel="stylesheet" href="../shared/styles.css">
+    <link rel="stylesheet" href="../shared/styles.css">
+    <script defer src="../shared/scripts.js"></script>
+</head>
+
+<body>
+    <div class="shell">
+        <aside class="sidebar"><a class="brand" href="../index.html">WN Wayfarer <span class="muted">Network</span></a>
+            <div class="nav-label">Tenant Admin</div>
+            <nav class="nav"><a class="" href="dashboard.html">Overview</a><a class=""
+                    href="products.html">Products</a><a class="" href="campaigns.html">Campaigns</a><a class=""
+                    href="resellers.html">Resellers</a><a class="active" href="conversion-review.html">Conversions</a><a
+                    class="" href="ai-content.html">AI Content</a><a class="" href="ai-content-review.html">AI content
+                    review</a><a class="" href="tracking-attribution.html">Tracking</a><a class=""
+                    href="commissions.html">Commissions</a><a class="" href="settings.html">Brand settings</a></nav>
+            <div class="sidebar-foot">Static prototype - Sample data</div>
+        </aside>
+        <main class="main">
+            <header class="topbar">
+                <div><button class="mobile-menu secondary" data-menu aria-label="Toggle navigation">Menu</button><span
+                        class="crumb">Tenant Admin / Conversion review</span></div>
+                <div class="top-actions"><input class="top-search" type="search" data-search
+                        placeholder="Search this page" aria-label="Search this page"></div>
+            </header>
+            <div class="content">
+                <div class="page-heading">
+                    <div>
+                        <div class="eyebrow">Tenant Admin</div>
+                        <h1>Conversion review</h1>
+                        <p>Illustrative workspace - Sample data - No backend connected</p>
+                    </div>
+                </div>
+                <div class="grid kpis">
+                    <article class="kpi">
+                        <div class="kpi-label">Pending review</div>
+                        <div class="kpi-value" data-pending-count>3</div>
+                        <div class="trend">Awaiting tenant confirmation</div>
+                    </article>
+                    <article class="kpi">
+                        <div class="kpi-label">Approved this month</div>
+                        <div class="kpi-value">128</div>
+                        <div class="trend">Illustrative sample</div>
+                    </article>
+                    <article class="kpi">
+                        <div class="kpi-label">Flagged</div>
+                        <div class="kpi-value">1</div>
+                        <div class="trend">Needs investigation</div>
+                    </article>
+                </div>
+                <section class="panel">
+                    <div class="toolbar"><input class="search" type="search" data-search
+                            placeholder="Search order, campaign or reseller"><select data-filter="status">
+                            <option>All status</option>
+                            <option>Pending</option>
+                            <option>Approved</option>
+                            <option>Flagged</option>
+                        </select></div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Booking</th>
+                                    <th>Campaign / product</th>
+                                    <th>Reseller</th>
+                                    <th>Amount</th>
+                                    <th>Commission</th>
+                                    <th>Status</th>
+                                    <th>Review</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-row>
+                                    <td>BK-20418<small class="row-meta">14 Oct 2026</small></td>
+                                    <td>Ha Long Bay Weekend Escape<small class="row-meta">Ha Long Bay cruise</small>
+                                    </td>
+                                    <td>Mia Nguyen</td>
+                                    <td>$722.50</td>
+                                    <td>$86.70</td>
+                                    <td><span class="badge pending" data-review-status>Pending</span></td>
+                                    <td><button class="button small" data-conversion-action="approve">Approve</button>
+                                        <button class="button small secondary"
+                                            data-conversion-action="reject">Reject</button></td>
+                                </tr>
+                                <tr data-row>
+                                    <td>BK-20392<small class="row-meta">13 Oct 2026</small></td>
+                                    <td>Hoi An Lantern Season<small class="row-meta">Hoi An stay</small></td>
+                                    <td>Coastline Journeys</td>
+                                    <td>$420.00</td>
+                                    <td>$42.00</td>
+                                    <td><span class="badge pending" data-review-status>Pending</span></td>
+                                    <td><button class="button small" data-conversion-action="approve">Approve</button>
+                                        <button class="button small secondary"
+                                            data-conversion-action="reject">Reject</button></td>
+                                </tr>
+                                <tr data-row>
+                                    <td>BK-20310<small class="row-meta">12 Oct 2026</small></td>
+                                    <td>Phu Quoc Island Escape<small class="row-meta">Beach stay</small></td>
+                                    <td>Northstar Travel</td>
+                                    <td>$380.00</td>
+                                    <td>$38.00</td>
+                                    <td><span class="badge pending" data-review-status>Pending</span></td>
+                                    <td><button class="button small" data-conversion-action="approve">Approve</button>
+                                        <button class="button small secondary"
+                                            data-conversion-action="reject">Reject</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <p class="demo-note">Conversion review is a local UI demonstration. No booking or payout records are
+                    changed.</p>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

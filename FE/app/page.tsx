@@ -1,69 +1,58 @@
-import Image from "next/image";
+import Link from "next/link"
+import { ArrowRight, ArrowUpRight, BarChart3, Bot, Check, Compass, Link2, MousePointer2, ShieldCheck, Sparkles, Store, Users, Wallet } from "lucide-react"
+
+const features = [
+  { icon: Users, title: "A partner network that grows with you", text: "Bring travel creators, local experts, and agencies into one organized workspace." },
+  { icon: Compass, title: "Campaigns made for travel", text: "Package experiences, set partner terms, and launch seasonal offers in minutes." },
+  { icon: MousePointer2, title: "Clear referral attribution", text: "See the journey from partner link to booking with transparent click and conversion reporting." },
+  { icon: Wallet, title: "Bookings and commissions", text: "Review conversions and keep partner earnings easy to understand." },
+  { icon: Bot, title: "AI-assisted marketing", text: "Help partners shape campaign copy for their audience while your brand stays in control." },
+  { icon: Store, title: "Your own travel storefront", text: "Give every campaign a polished, branded place for travelers to explore and book." },
+]
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen overflow-hidden bg-[#fbfcfa] text-slate-900">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
+        <Link href="/" className="flex items-center gap-2.5 font-semibold tracking-tight"><span className="flex size-9 items-center justify-center rounded-xl bg-teal-700 text-white"><Compass className="size-5" /></span>Wayfarer <span className="font-normal text-slate-500">Network</span></Link>
+        <div className="hidden items-center gap-8 text-sm text-slate-600 md:flex"><a href="#platform" className="hover:text-teal-800">Platform</a><a href="#how-it-works" className="hover:text-teal-800">How it works</a><a href="#partners" className="hover:text-teal-800">For travel teams</a></div>
+        <div className="flex items-center gap-3"><Link href="/storefront" className="hidden px-3 py-2 text-sm font-medium text-slate-700 sm:inline-flex">Preview storefront</Link><Link href="/login" className="hidden px-3 py-2 text-sm font-medium text-slate-700 sm:inline-flex">Sign in</Link><Link href="/signup" className="inline-flex items-center gap-2 rounded-full bg-teal-800 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-teal-900">Get started <ArrowRight className="size-4" /></Link></div>
+      </nav>
+
+      <section className="mx-auto grid max-w-7xl items-center gap-12 px-5 pb-20 pt-12 sm:px-8 md:grid-cols-[1fr_0.94fr] md:gap-8 md:pb-28 md:pt-20">
+        <div className="relative z-10">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-teal-100 bg-teal-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.13em] text-teal-800"><Sparkles className="size-3.5" /> Travel partnerships, reimagined</div>
+          <h1 className="max-w-2xl text-5xl font-semibold leading-[1.06] tracking-[-0.045em] sm:text-6xl lg:text-[4.45rem]">Great trips grow through <span className="text-teal-700">great partners.</span></h1>
+          <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">One connected workspace to launch travel experiences, support your reseller network, and understand every booking along the way.</p>
+          <div className="mt-8 flex flex-wrap gap-3"><Link href="/signup" className="inline-flex items-center gap-2 rounded-full bg-teal-800 px-6 py-3.5 font-medium text-white shadow-lg shadow-teal-900/10 transition hover:-translate-y-0.5 hover:bg-teal-900">Build your network <ArrowRight className="size-4" /></Link><a href="#platform" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3.5 font-medium text-slate-700 transition hover:border-teal-200 hover:text-teal-800">Explore the platform <ArrowUpRight className="size-4" /></a></div>
+          <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-500"><span className="inline-flex items-center gap-2"><Check className="size-4 text-teal-700" />For travel brands and operators</span><span className="inline-flex items-center gap-2"><Check className="size-4 text-teal-700" />Partner-first by design</span></div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="relative mx-auto w-full max-w-[600px]">
+          <div className="absolute -right-10 -top-10 size-56 rounded-full bg-amber-100/70 blur-3xl" /><div className="absolute -bottom-12 -left-8 size-56 rounded-full bg-teal-100 blur-3xl" />
+          <div className="relative rounded-[1.7rem] border border-white bg-white p-3 shadow-[0_30px_90px_-35px_rgba(15,70,65,.35)] sm:p-4">
+            <div className="overflow-hidden rounded-[1.25rem] bg-[#f7f9f7]">
+              <div className="flex items-center justify-between border-b border-slate-200/80 bg-white px-5 py-4"><div className="flex items-center gap-2.5"><span className="flex size-8 items-center justify-center rounded-lg bg-teal-800 text-white"><Compass className="size-4" /></span><span className="text-sm font-semibold">Wayfarer <span className="font-normal text-slate-400">workspace</span></span></div><div className="flex items-center gap-2"><span className="size-2 rounded-full bg-emerald-500"/><span className="text-xs text-slate-500">Live overview</span><span className="ml-2 flex size-8 items-center justify-center rounded-full bg-amber-100 text-xs font-semibold text-amber-900">AM</span></div></div>
+              <div className="p-5 sm:p-6"><div className="flex items-start justify-between"><div><p className="text-xs font-medium text-slate-500">MONDAY, OCTOBER 19</p><h2 className="mt-1 text-xl font-semibold tracking-tight">Your network at a glance</h2></div><span className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">Last 30 days⌄</span></div>
+                <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4"><Metric title="Bookings" number="326" change="↑ 12.8%"/><Metric title="Partner clicks" number="18.4k" change="↑ 8.4%"/><Metric title="Active partners" number="84" change="↑ 12 new"/><Metric title="Commissions" number="$12.8k" change="Ready to review"/></div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-[1.35fr_0.85fr]"><div className="rounded-xl border border-slate-200 bg-white p-4"><div className="flex items-center justify-between"><div><p className="text-sm font-semibold">Network performance</p><p className="mt-1 text-xs text-slate-500">Clicks and attributed bookings</p></div><BarChart3 className="size-4 text-teal-700"/></div><div className="mt-5 flex h-28 items-end gap-2 border-b border-slate-100 px-1">{[35,48,42,62,55,75,66,86,71,94,80,100].map((height,i)=><div key={i} className="flex flex-1 items-end gap-0.5"><span style={{height:`${height}%`}} className="w-1/2 rounded-t bg-teal-700/80"/><span style={{height:`${Math.max(15,height*.36)}%`}} className="w-1/2 rounded-t bg-amber-400"/></div>)}</div><div className="mt-2 flex justify-between text-[10px] text-slate-400"><span>Sep 15</span><span>Sep 29</span><span>Oct 13</span></div></div>
+                  <div className="rounded-xl border border-slate-200 bg-white p-4"><p className="text-sm font-semibold">Top campaigns</p><CampaignRow name="Ha Long Bay Escape" metric="124 bookings" color="bg-sky-100"/><CampaignRow name="Hoi An Lantern Season" metric="86 bookings" color="bg-amber-100"/><CampaignRow name="Phu Quoc Island" metric="59 bookings" color="bg-emerald-100"/></div></div>
+                <div className="mt-3 flex items-center gap-3 rounded-xl border border-teal-100 bg-teal-50/80 px-4 py-3"><span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-800"><Link2 className="size-4"/></span><p className="text-xs leading-5 text-slate-600"><strong className="text-slate-800">Attribution you can follow.</strong> Each partner link connects a referral to its campaign and booking.</p><ShieldCheck className="ml-auto hidden size-4 shrink-0 text-teal-700 sm:block"/></div>
+              </div>
+            </div>
+          </div>
+          <div className="absolute -bottom-5 -left-5 hidden items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3.5 shadow-xl sm:flex"><span className="flex size-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700"><Users className="size-5"/></span><span><strong className="block text-sm">Partner joined</strong><small className="text-xs text-slate-500">Coastline Journeys</small></span><span className="ml-3 text-xs font-semibold text-emerald-700">Just now</span></div>
         </div>
-      </main>
-    </div>
-  );
+      </section>
+
+      <section id="platform" className="border-y border-slate-200/70 bg-white py-20 sm:py-24"><div className="mx-auto max-w-7xl px-5 sm:px-8"><div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[.16em] text-teal-800">One platform, connected journey</p><h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Everything your travel partner program needs to move forward.</h2><p className="mt-4 leading-7 text-slate-600">Bring the moving parts of reseller growth into one clear, collaborative workflow.</p></div><div className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">{features.map(({icon:Icon,title,text})=><article key={title} className="group"><span className="flex size-11 items-center justify-center rounded-xl bg-teal-50 text-teal-800 transition group-hover:bg-teal-800 group-hover:text-white"><Icon className="size-5"/></span><h3 className="mt-4 font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{text}</p></article>)}</div></div></section>
+
+      <section id="how-it-works" className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 md:grid-cols-2 md:items-center md:py-24"><div><p className="text-xs font-semibold uppercase tracking-[.16em] text-teal-800">A simpler way to grow</p><h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">From experience to recommendation to booking.</h2><p className="mt-4 leading-7 text-slate-600">Give partners the tools and context to tell your travel story, while your team keeps a clear view of performance.</p><div className="mt-8 space-y-5">{[["01","Shape your offer","Organize products into campaigns with clear details and partner terms."],["02","Invite the right partners","Share a discovery space where resellers can find and join your campaigns."],["03","Learn from every journey","Review referral activity, bookings, and commissions in one workspace."]].map(([num,title,text])=><div key={num} className="flex gap-4"><span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-teal-200 text-xs font-semibold text-teal-800">{num}</span><div><h3 className="font-semibold">{title}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{text}</p></div></div>)}</div></div><div id="partners" className="rounded-[1.75rem] bg-[#eaf2ed] p-6 sm:p-9"><div className="rounded-2xl bg-white p-6 shadow-sm sm:p-8"><div className="flex items-center justify-between"><div><p className="text-xs font-medium uppercase tracking-wider text-slate-400">Your partner storefront</p><h3 className="mt-2 text-2xl font-semibold">Discover somewhere new.</h3></div><span className="flex size-10 items-center justify-center rounded-full bg-amber-100 text-amber-800"><Compass className="size-5"/></span></div><div className="mt-6 grid grid-cols-2 gap-3"><div className="rounded-xl bg-[url('/images/halong-bay.svg')] bg-cover bg-center p-4 pt-20 text-white"><span className="rounded-full bg-black/30 px-2 py-1 text-[10px]">VIETNAM</span><p className="mt-2 font-semibold">Ha Long Bay escape</p></div><div className="rounded-xl bg-[url('/images/hoi-an.svg')] bg-cover bg-center p-4 pt-20 text-white"><span className="rounded-full bg-black/30 px-2 py-1 text-[10px]">CULTURE</span><p className="mt-2 font-semibold">Hoi An by lanternlight</p></div></div><div className="mt-4 flex items-center justify-between rounded-xl border border-slate-100 p-4"><div><p className="text-sm font-semibold">Ready for your next story?</p><p className="mt-1 text-xs text-slate-500">Campaigns, links and useful content in one place.</p></div><ArrowRight className="size-4 text-teal-800"/></div></div></div></section>
+
+      <section className="px-5 pb-16 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 rounded-[1.75rem] bg-teal-900 px-7 py-10 text-white sm:px-12 sm:py-12 md:flex-row md:items-center"><div><p className="text-xs font-semibold uppercase tracking-[.16em] text-teal-200">Your next chapter starts here</p><h2 className="mt-3 max-w-xl text-3xl font-semibold tracking-tight">Make it easier for great trips to find their people.</h2></div><Link href="/signup" className="inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-5 py-3 font-medium text-teal-900 transition hover:bg-teal-50">Get started <ArrowRight className="size-4"/></Link></div></section>
+      <footer className="border-t border-slate-200/70"><div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-7 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8"><Link href="/" className="font-semibold text-slate-800">Wayfarer <span className="font-normal text-slate-500">Network</span></Link><span>Travel experiences grow better together.</span><span>© 2026 Wayfarer Network · Product preview</span></div></footer>
+    </main>
+  )
 }
+
+function Metric({title,number,change}:{title:string;number:string;change:string}) { return <div className="rounded-xl border border-slate-200 bg-white p-3"><p className="text-[11px] text-slate-500">{title}</p><p className="mt-1 text-xl font-semibold tracking-tight">{number}</p><p className="mt-1 truncate text-[10px] font-medium text-emerald-700">{change}</p></div> }
+function CampaignRow({name,metric,color}:{name:string;metric:string;color:string}) { return <div className="mt-3 flex items-center gap-2.5"><span className={`size-8 rounded-lg ${color}`}/><span className="min-w-0 flex-1"><strong className="block truncate text-xs">{name}</strong><small className="text-[10px] text-slate-500">{metric}</small></span><ArrowRight className="size-3.5 text-slate-400"/></div> }

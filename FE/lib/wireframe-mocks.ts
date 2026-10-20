@@ -97,9 +97,9 @@ export const supplierProducts: WireframeTable = {
 }
 
 export const resellerCampaignCards = [
-  {name:"Ha Long Bay Weekend Escape", product:"Ha Long Bay cruise", category:"Tours & cruises", destination:"Ha Long Bay", commission:"12%", dates:"01 Oct 2026 — 31 Dec 2026", status:"Open", image:"/images/halong-bay.svg"},
-  {name:"Hoi An Lantern Season", product:"Hoi An stay", category:"Hotels", destination:"Hoi An", commission:"10%", dates:"15 Oct 2026 — 31 Jan 2027", status:"Open", image:"/images/hoi-an.svg"},
-  {name:"Phu Quoc Island Escape", product:"Phu Quoc beach stay", category:"Hotels", destination:"Phu Quoc", commission:"$38 / booking", dates:"14 Oct 2026 — 28 Feb 2027", status:"Open", image:"/images/phu-quoc.svg"},
+  {name:"Ha Long Bay Weekend Escape", product:"Ha Long Bay cruise", category:"Tours & cruises", destination:"Ha Long Bay", commission:"12%", dates:"01 Oct 2026 — 31 Dec 2026", status:"Open", image:"/images/halong-bay-photo.jpg"},
+  {name:"Hoi An Lantern Season", product:"Hoi An stay", category:"Hotels", destination:"Hoi An", commission:"10%", dates:"15 Oct 2026 — 31 Jan 2027", status:"Open", image:"/images/hoi-an-photo.jpg"},
+  {name:"Phu Quoc Island Escape", product:"Phu Quoc beach stay", category:"Hotels", destination:"Phu Quoc", commission:"$38 / booking", dates:"14 Oct 2026 — 28 Feb 2027", status:"Open", image:"/images/phu-quoc-photo.jpg"},
 ]
 
 export const publishedAiAssets = [

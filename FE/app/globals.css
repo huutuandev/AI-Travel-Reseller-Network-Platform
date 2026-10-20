@@ -73,14 +73,14 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.43 0.09 185);
+  --sidebar: oklch(0.985 0.012 150);
+  --sidebar-foreground: oklch(0.31 0.035 155);
+  --sidebar-primary: oklch(0.53 0.11 153);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: oklch(0.955 0.022 150);
+  --sidebar-accent-foreground: oklch(0.33 0.055 155);
+  --sidebar-border: oklch(0.92 0.018 150);
+  --sidebar-ring: oklch(0.69 0.09 153);
 }
 
 .dark {
@@ -126,6 +126,209 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+.workspace-sidebar [data-sidebar="sidebar"] {
+  border-color: #e1e9df;
+  background: linear-gradient(180deg, #f1f6ef 0%, #fafcf9 36%, #fff 76%, #fffaf1 100%);
+}
+
+.workspace-brand-mark {
+  background: linear-gradient(145deg, #6b9270 0%, #426e52 48%, #294e3b 100%);
+  box-shadow: inset 0 1px 0 #ffffff50, 0 8px 18px #41694c2b, 0 0 0 4px #ffffffb8;
+}
+
+.workspace-role-card {
+  border: 1px solid #dfe9dc;
+  background: linear-gradient(115deg, #edf5e9 0%, #f8fbf6 72%, #fff 100%);
+  box-shadow: inset 0 1px 0 #fff, 0 7px 18px #426a480b;
+}
+
+.workspace-nav-link[data-active="true"] {
+  outline: 1px solid #e3ece0;
+}
+
+.workspace-sidebar-footer {
+  background: linear-gradient(180deg, transparent, #ffffff70);
+}
+
+.workspace-brand-mark {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: transform 240ms ease, box-shadow 240ms ease;
+}
+
+.workspace-brand-mark::after {
+  position: absolute;
+  inset: 1px;
+  border: 1px solid #ffffff40;
+  border-radius: inherit;
+  content: "";
+  pointer-events: none;
+}
+
+.workspace-brand:hover .workspace-brand-mark {
+  transform: translateY(-1px) rotate(-3deg);
+  box-shadow: inset 0 1px 0 #ffffff70, 0 12px 24px #41694c38, 0 0 0 4px #ffffffc9;
+}
+
+.workspace-nav-link {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid transparent;
+  background: linear-gradient(120deg, #ffffffc9 0%, #f8faf7d9 100%);
+  box-shadow: inset 0 1px 0 #ffffffd9;
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background 220ms ease;
+}
+
+.workspace-nav-link::before {
+  position: absolute;
+  z-index: 0;
+  inset: 25% auto 25% 0;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(180deg, #8ba878, #c9a766);
+  content: "";
+  opacity: 0;
+  transition: inset 220ms ease, opacity 220ms ease;
+}
+
+.workspace-nav-link::after {
+  position: absolute;
+  z-index: 0;
+  top: -35%;
+  bottom: -35%;
+  left: -42%;
+  width: 28%;
+  background: linear-gradient(90deg, transparent, #ffffffa8, transparent);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transform: skewX(-18deg);
+}
+
+.workspace-nav-link > * {
+  position: relative;
+  z-index: 1;
+}
+
+.workspace-nav-link:hover {
+  transform: translate(2px, -1px);
+  border-color: #e1eadd;
+  background: linear-gradient(120deg, #fff 0%, #f4f8f1 100%);
+  box-shadow: inset 0 1px 0 #fff, 0 7px 17px #34553d12;
+}
+
+.workspace-nav-link:hover::after {
+  opacity: 1;
+  animation: workspace-nav-sheen 750ms ease-out;
+}
+
+.workspace-nav-link[data-active="true"] {
+  border-color: #54775b;
+  background: linear-gradient(110deg, #496a51 0%, #5b7b62 58%, #6a896f 100%);
+  color: #fff;
+  box-shadow: inset 0 1px 0 #ffffff32, 0 8px 20px #294e3b35, 0 0 0 3px #78947724;
+}
+
+.workspace-nav-link[data-active="true"]::before {
+  inset-block: 10%;
+  width: 5px;
+  background: linear-gradient(180deg, #f0d28b, #d4ad62);
+  opacity: 1;
+  box-shadow: 0 0 12px #e4c77970;
+}
+
+.workspace-nav-icon {
+  box-shadow: inset 0 1px 0 #ffffff, 0 3px 9px #34553d0c;
+}
+
+.workspace-nav-link[data-active="true"] .workspace-nav-icon {
+  background: linear-gradient(145deg, #fffdf6 0%, #efe5c9 100%);
+  color: #365b40;
+  box-shadow: inset 0 1px 0 #fff, 0 4px 12px #173a2840;
+  outline: 1px solid #f5dfaa;
+}
+
+.workspace-nav-link[data-active="true"] .workspace-nav-icon svg {
+  filter: drop-shadow(0 1px 2px #173a2840);
+  stroke-width: 2.25;
+}
+
+.workspace-nav-link[data-active="true"]:hover {
+  border-color: #45654c;
+  background: linear-gradient(110deg, #405f47 0%, #53735a 58%, #628067 100%);
+  color: #fff;
+  box-shadow: inset 0 1px 0 #ffffff40, 0 11px 23px #294e3b42, 0 0 0 3px #78947732;
+}
+
+.workspace-nav-link[data-active="true"]:hover::after {
+  background: linear-gradient(90deg, transparent, #ffffff9c, transparent);
+}
+
+.workspace-role-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.workspace-role-card::before {
+  position: absolute;
+  top: 0;
+  right: 14px;
+  left: 14px;
+  height: 2px;
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(90deg, #8ba878, #d5b66e, #8ba878);
+  content: "";
+  opacity: .75;
+}
+
+.workspace-role-card::after {
+  position: absolute;
+  top: -39px;
+  right: -30px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #dcebcf 0%, #e8f1df80 38%, transparent 72%);
+  content: "";
+  pointer-events: none;
+}
+
+.workspace-role-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.workspace-role-card:hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 #fff, 0 11px 22px #426a4814;
+}
+
+@keyframes workspace-nav-sheen {
+  from { left: -42%; }
+  to { left: 125%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-brand-mark,
+  .workspace-nav-link,
+  .workspace-role-card {
+    transition: none;
+  }
+
+  .workspace-brand:hover .workspace-brand-mark,
+  .workspace-nav-link:hover,
+  .workspace-role-card:hover {
+    transform: none;
+  }
+
+  .workspace-nav-link:hover::after {
+    animation: none;
   }
 }
 

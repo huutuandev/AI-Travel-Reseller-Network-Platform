@@ -34,7 +34,7 @@ function StorefrontHomeContent() {
   const moveSlide = (direction: number) => setSlide((current) => (current + direction + journeys.length) % journeys.length)
 
   return <div className="store-home">
-    <StoreNav current="Home" returnTo="/storefront" home />
+    <StoreNav current="Home" returnTo="/storefront" />
     <main>
       <section className="home-hero" aria-label="Discover Vietnam">
         <Image className={`home-hero-image destination-photo destination-photo-${featured.key}`} src={featured.image} alt={`${featured.short}, Vietnam`} fill priority sizes="100vw" />
@@ -62,7 +62,7 @@ function StorefrontHomeContent() {
         </form>
       </section>
 
-      <section className="home-destinations" id="destinations">
+      <section className="home-destinations" id="destinations"><span className="home-anchor-alias" id="journeys" />
         <div className="home-section-heading"><div><span className="home-section-kicker">A FEW PLACES TO BEGIN</span><h2>Popular destinations</h2><p>Small, considered journeys across Vietnam.</p></div><a href="#why-lantern">Why travel with us <span>↗</span></a></div>
         {query && <p className="home-search-result">Showing journeys matching “{searchParams.get("search") ?? ""}”</p>}
         <div className="home-destination-grid">{visibleJourneys.map((journey) => <TravelProductCard key={journey.key} journey={journey} />)}</div>
@@ -70,7 +70,7 @@ function StorefrontHomeContent() {
         <p className="home-sample-note">Illustrative sample journeys and prices. Availability and final details are confirmed by the travel partner.</p>
       </section>
 
-      <section className="home-why" id="why-lantern"><span className="home-section-kicker">THE LANTERN &amp; TIDE DIFFERENCE</span><h2>Travel well.<br /><em>Feel more.</em></h2><div className="home-why-items"><article><span>01</span><div><h3>Chosen with care</h3><p>A focused collection of stays and experiences, curated around place and character.</p></div></article><article><span>02</span><div><h3>Rooted in Vietnam</h3><p>Local knowledge shapes the small details that make a trip feel personal.</p></div></article><article><span>03</span><div><h3>Room to make it yours</h3><p>Start with a thoughtful plan, then leave space for the moments you discover.</p></div></article></div></section>
+      <section className="home-why" id="why-lantern"><span className="home-anchor-alias" id="approach" /><span className="home-section-kicker">THE LANTERN &amp; TIDE DIFFERENCE</span><h2>Travel well.<br /><em>Feel more.</em></h2><div className="home-why-items"><article><span>01</span><div><h3>Chosen with care</h3><p>A focused collection of stays and experiences, curated around place and character.</p></div></article><article><span>02</span><div><h3>Rooted in Vietnam</h3><p>Local knowledge shapes the small details that make a trip feel personal.</p></div></article><article><span>03</span><div><h3>Room to make it yours</h3><p>Start with a thoughtful plan, then leave space for the moments you discover.</p></div></article></div></section>
     </main>
     <StoreFooter />
   </div>

@@ -207,3 +207,241 @@
     opacity: 0;
   }
 }
+
+/* Customer audience on the shared sign-in route gets a storefront-specific presentation. */
+.customer-login-page {
+  grid-template-columns: minmax(0, 1.08fr) minmax(460px, 0.92fr);
+  background: #f3f7fb;
+  color: #18314b;
+}
+
+.customer-login-page > section:first-child {
+  position: relative;
+  isolation: isolate;
+  display: flex !important;
+  min-height: 100svh;
+  justify-content: space-between;
+  padding: clamp(32px, 5vw, 76px);
+  background: #123d67 url("/images/halong-bay-photo.jpg") center / cover no-repeat;
+}
+
+.customer-login-page > section:first-child::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(135deg, #10375be8 0%, #164f7f9e 52%, #112d4e78 100%);
+  content: "";
+}
+
+.customer-login-page > section:first-child > a,
+.customer-login-page > section:last-child > a {
+  color: #17456f;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.customer-login-page > section:first-child > a {
+  padding: 11px 14px;
+  border: 1px solid #ffffffc4;
+  border-radius: 10px;
+  background: #ffffffed;
+  box-shadow: 0 12px 32px #0c284524;
+}
+
+.customer-login-page > section:first-child > a span,
+.customer-login-page > section:last-child > a span {
+  background: linear-gradient(135deg, #287dcc, #145f9d);
+}
+
+.customer-login-page > section:first-child > div:nth-child(2) > p:first-child {
+  color: #d4eafa;
+  font-size: 11px;
+}
+
+.customer-login-page > section:first-child h1 {
+  max-width: 650px;
+  color: #fff;
+  font-size: clamp(48px, 5.4vw, 76px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -2.8px;
+}
+
+.customer-login-page > section:first-child > div:nth-child(2) > p:last-of-type {
+  max-width: 460px;
+  color: #e4eef7;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.customer-login-page > section:first-child > div:nth-child(2) > div span:first-child {
+  background: #ffad59;
+}
+
+.customer-login-page > section:first-child > div:last-child {
+  border-color: #ffffff62;
+  border-radius: 12px;
+  background: #ffffffed;
+  box-shadow: 0 16px 38px #0c28452e;
+}
+
+.customer-login-page > section:first-child > div:last-child > div > span:first-child {
+  background: #edf5fc;
+  color: #287dcc;
+}
+
+.customer-login-page > section:first-child > div:last-child strong {
+  color: #203b56;
+  font-size: 14px;
+}
+
+.customer-login-page > section:first-child > div:last-child small {
+  color: #708398;
+  font-size: 11px;
+}
+
+.customer-login-page > section:last-child {
+  min-height: 100svh;
+  padding: 34px clamp(26px, 5vw, 76px);
+  background: linear-gradient(160deg, #fff, #f8fbfe);
+}
+
+.customer-login-page > section:last-child > a {
+  display: none;
+}
+
+.customer-login-page > section:last-child > div {
+  max-width: 460px;
+}
+
+.customer-login-page > section:last-child > div > p:first-child {
+  color: #2878b7;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.customer-login-page > section:last-child h2 {
+  color: #173d68;
+  font-size: clamp(32px, 3vw, 42px);
+  font-weight: 700;
+  letter-spacing: -1.2px;
+}
+
+.customer-login-page > section:last-child > div > p:nth-child(3) {
+  color: #6f8195;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.customer-login-page form label {
+  color: #304c67;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.customer-login-page form input:not([type="checkbox"]) {
+  height: 49px;
+  border-color: #dce6ef;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.customer-login-page form input:focus {
+  border-color: #6ca9d7;
+  box-shadow: 0 0 0 4px #e5f2fc;
+}
+
+.customer-login-page form button[type="submit"] {
+  height: 49px;
+  border-radius: 8px;
+  background: linear-gradient(110deg, #287dcc, #176bb8);
+  font-size: 13px;
+  box-shadow: 0 10px 22px #287dcc2d;
+}
+
+.customer-login-page form button[type="submit"]:hover {
+  background: linear-gradient(110deg, #f18b32, #e77d24);
+}
+
+.customer-login-page > section:last-child > div > div:nth-of-type(2) {
+  border-color: #dce8f1;
+  border-radius: 10px;
+  background: #f3f8fc;
+}
+
+.customer-login-page > section:last-child > div > div:nth-of-type(2) p:first-child {
+  color: #284761;
+  font-size: 14px;
+}
+
+.customer-login-page > section:last-child > div > div:nth-of-type(2) p:nth-child(2) {
+  color: #74879b;
+  font-size: 11px;
+}
+
+.customer-login-page > section:last-child > div > div:nth-of-type(2) button {
+  border-color: #dce6ef;
+  border-radius: 7px;
+  color: #37536e;
+  font-size: 11px;
+}
+
+.customer-login-page > section:last-child > div > div:nth-of-type(2) button:hover {
+  border-color: #8fc0e6;
+  color: #176db2;
+}
+
+.customer-login-page > section:last-child > div > p:last-child {
+  color: #6f8295;
+  font-size: 12px;
+}
+
+.customer-login-page > section:last-child > div > p:last-child a {
+  color: #2478b7;
+}
+
+@media (max-width: 900px) {
+  .customer-login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-login-page > section:first-child {
+    min-height: 380px;
+    padding: 26px;
+  }
+
+  .customer-login-page > section:last-child {
+    min-height: 720px;
+  }
+}
+
+@media (max-width: 700px) {
+  .customer-login-page > section:first-child {
+    min-height: 275px;
+    padding: 18px 20px 23px;
+  }
+
+  .customer-login-page > section:first-child > div:nth-child(2) {
+    margin-top: 20px;
+  }
+
+  .customer-login-page > section:first-child h1 {
+    margin-top: 10px;
+    font-size: 36px;
+    letter-spacing: -1.3px;
+  }
+
+  .customer-login-page > section:first-child > div:nth-child(2) > p:last-of-type,
+  .customer-login-page > section:first-child > div:last-child {
+    display: none;
+  }
+
+  .customer-login-page > section:last-child {
+    min-height: calc(100svh - 275px);
+    padding: 22px 20px;
+  }
+
+  .customer-login-page > section:last-child h2 {
+    font-size: 30px;
+  }
+}

@@ -41,7 +41,7 @@ function CheckoutContent() {
   }
 
   return <div className="store-checkout-page">
-    <StoreNav current="Home" returnTo={`/storefront/checkout?product=${item.key}`} home />
+    <StoreNav current="Booking" returnTo={`/storefront/checkout?product=${item.key}`} />
     <main className="checkout-shell">
       <div className="checkout-progress" aria-label="Booking progress"><span className="is-current"><i>1</i> TRAVEL DETAILS</span><b /><span><i>2</i> SAMPLE CONFIRMATION</span></div>
       <div className="checkout-title"><span className="overline">A GOOD JOURNEY STARTS HERE</span><h1>Secure checkout</h1><p>Share a few details so your travel partner can prepare your request.</p></div>

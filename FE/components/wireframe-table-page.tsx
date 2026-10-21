@@ -1,7 +1,6 @@
 ﻿"use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { ArrowUpRight, Check, Copy, Search } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -17,7 +16,6 @@ const badgeStyles: Record<string, string> = {
 }
 
 export function WireframeTablePage({ config, hrefPrefix }: { config: WireframeTable; hrefPrefix: string }) {
-  const router = useRouter()
   const [rows, setRows] = useState(config.rows)
   const [query, setQuery] = useState("")
   const [filters, setFilters] = useState<string[]>(config.filters?.map((filter)=>filter.values[0]) ?? [])
@@ -53,16 +51,11 @@ export function WireframeTablePage({ config, hrefPrefix }: { config: WireframeTa
   }
 
   function performDetailAction(action: string, row: string[]) {
-    if (config.title === "My Products") {
-      const product = row[0].startsWith("Hoi An") ? "hoian" : row[0].startsWith("Phu Quoc") ? "phuquoc" : "halong"
-      router.push(`/supplier/product-detail?product=${product}`)
-      return
-    }
     setFeedback(`${action} selected for ${row[0]}. This preview does not save changes.`)
   }
 
   return <>
-    <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[.15em] text-teal-800">{hrefPrefix==="/tenant"?"Tenant workspace":hrefPrefix==="/reseller"?"Reseller Portal":"Supplier Portal"}</p><h1 className="mt-1 text-3xl font-semibold tracking-tight">{config.title}</h1><p className="mt-1 max-w-3xl text-sm text-slate-500">{config.description}</p></div>{config.title==="Campaign management"&&<Link href="/tenant/campaign-create" className="inline-flex items-center gap-2 rounded-md bg-teal-800 px-4 py-2 text-sm font-medium text-white hover:bg-teal-900">Create campaign <ArrowUpRight className="size-4"/></Link>}{config.title==="My campaigns"&&<Link href="/reseller/campaign-marketplace" className="inline-flex items-center gap-2 rounded-md bg-teal-800 px-4 py-2 text-sm font-medium text-white hover:bg-teal-900">Browse campaigns <ArrowUpRight className="size-4"/></Link>}</div>
+    <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[.15em] text-teal-800">{hrefPrefix==="/tenant"?"Tenant workspace":"Reseller Portal"}</p><h1 className="mt-1 text-3xl font-semibold tracking-tight">{config.title}</h1><p className="mt-1 max-w-3xl text-sm text-slate-500">{config.description}</p></div>{config.title==="Campaign management"&&<Link href="/tenant/campaign-create" className="inline-flex items-center gap-2 rounded-md bg-teal-800 px-4 py-2 text-sm font-medium text-white hover:bg-teal-900">Create campaign <ArrowUpRight className="size-4"/></Link>}{config.title==="My campaigns"&&<Link href="/reseller/campaign-marketplace" className="inline-flex items-center gap-2 rounded-md bg-teal-800 px-4 py-2 text-sm font-medium text-white hover:bg-teal-900">Browse campaigns <ArrowUpRight className="size-4"/></Link>}</div>
     {config.metrics&&<div className={`grid gap-4 sm:grid-cols-2 ${config.metrics.length>3?"xl:grid-cols-4":"xl:grid-cols-3"}`}>{config.metrics.map((metric)=><Card key={metric.label} className="border-slate-200/80 shadow-sm"><CardHeader className="pb-2"><CardDescription>{metric.label}</CardDescription><CardTitle className="text-2xl">{metric.value}</CardTitle></CardHeader>{metric.note&&<CardContent className="text-xs text-slate-500">{metric.note}</CardContent>}</Card>)}</div>}
     {config.title==="Performance analytics"&&<Card className="border-slate-200/80 shadow-sm"><CardHeader className="flex flex-row items-center justify-between"><CardTitle>Clicks &amp; conversions</CardTitle><select aria-label="Analytics period" value={filters[0]} onChange={event=>setFilters(current=>current.map((value,index)=>index===0?event.target.value:value))} className="h-9 rounded-md border border-input bg-background px-3 text-sm"><option>Last 30 days</option></select></CardHeader><CardContent><div className="flex h-56 items-end gap-2 border-b border-slate-100 px-1 sm:gap-4">{[[40,20],[55,35],[47,27],[72,52],[64,44],[83,63],[67,47],[94,74],[76,56],[86,66],[71,51],[100,80]].map(([clicks,conversions],index)=><div key={index} className="flex h-full flex-1 items-end justify-center gap-1"><span className="w-2/5 rounded-t bg-teal-700" style={{height:`${clicks}%`}}/><span className="w-2/5 rounded-t bg-amber-400" style={{height:`${conversions}%`}}/></div>)}</div><div className="mt-3 flex justify-between text-[10px] text-slate-400"><span>Sep 15</span><span>Sep 22</span><span>Sep 29</span><span>Oct 6</span><span>Oct 13</span></div><div className="mt-3 flex gap-5 text-xs text-slate-500"><span className="flex items-center gap-2"><i className="size-2.5 rounded-sm bg-teal-700"/>Clicks</span><span className="flex items-center gap-2"><i className="size-2.5 rounded-sm bg-amber-400"/>Conversions</span></div></CardContent></Card>}
     <Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>{config.title}</CardTitle><CardDescription>{config.description}</CardDescription></CardHeader><CardContent className="space-y-4"><div className="flex flex-col gap-3 lg:flex-row"><div className="relative min-w-[220px] flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"/><Input type="search" aria-label={config.searchPlaceholder} placeholder={config.searchPlaceholder} value={query} onChange={(event)=>setQuery(event.target.value)} className="pl-9"/></div>{config.filters?.filter((filter)=>config.title!=="Performance analytics"||filter.column>=0).map((filter,index)=><select key={filter.label} aria-label={filter.label} value={filters[index]} onChange={(event)=>setFilters((current)=>current.map((value,i)=>i===index?event.target.value:value))} className="h-9 rounded-md border border-input bg-background px-3 text-sm"><option disabled>{filter.label}</option>{filter.values.map((value)=><option key={value}>{value}</option>)}</select>)}</div>

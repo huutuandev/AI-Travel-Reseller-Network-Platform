@@ -43,7 +43,6 @@ Use these development-only accounts on `/login` to preview the role dashboards. 
 | Platform Admin | `admin@wayfarer.test` | `AdminDemo2026!` |
 | Tenant | `avery@lantern-tide.test` | `TenantDemo2026!` |
 | Reseller | `jordan@partner.test` | `ResellerDemo2026!` |
-| Supplier | `supplier@mekong.test` | `SupplierDemo2026!` |
 
 The role account definitions live in `lib/mock-auth.ts`. Replace the frontend mock adapter when a real authentication service is available. This implementation is for local demonstration only; backend authorization is required for production.
 

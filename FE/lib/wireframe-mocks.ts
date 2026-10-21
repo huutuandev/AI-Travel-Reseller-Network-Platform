@@ -89,13 +89,6 @@ export const resellerTables: Record<string, WireframeTable> = {
   },
 }
 
-export const supplierProducts: WireframeTable = {
-  title:"My Products", description:"Products and availability shared with tenant partners.", searchPlaceholder:"Search products",
-  filters:[{label:"Status",values:["All statuses","Active","Review","Paused"],column:4}],
-  columns:["Product","Destination","Retail price","Availability","Status","Action"],
-  rows:[["Ha Long Bay cruise · Cruise - 2 nights","Ha Long Bay","$420 / guest","12 slots","Active","Edit"],["Hoi An riverside stay · Boutique hotel - 3 nights","Hoi An","$280 / stay","8 rooms","Review","Edit"],["Phu Quoc beach stay · Beach resort - 4 nights","Phu Quoc","$380 / stay","16 rooms","Active","Edit"]], action:"details",
-}
-
 export const resellerCampaignCards = [
   {name:"Ha Long Bay Weekend Escape", product:"Ha Long Bay cruise", category:"Tours & cruises", destination:"Ha Long Bay", commission:"12%", dates:"01 Oct 2026 — 31 Dec 2026", status:"Open", image:"/images/halong-bay-photo.jpg"},
   {name:"Hoi An Lantern Season", product:"Hoi An stay", category:"Hotels", destination:"Hoi An", commission:"10%", dates:"15 Oct 2026 — 31 Jan 2027", status:"Open", image:"/images/hoi-an-photo.jpg"},

@@ -13,7 +13,6 @@ export const tenantDashboard = {
     { type: "New conversion", partner: "The Wandering Lens", campaign: "Ha Long Bay Weekend Escape", time: "Yesterday", status: "In review" },
   ],
 }
-
 export const platformAdminDashboard = {
   metrics: [
     { label: "Total tenants", value: "248", note: "12 added this month" },
@@ -93,19 +92,5 @@ export const resellerDashboard = {
     { campaign: "Ha Long Bay Weekend Escape", order: "ORD-20418 · Cruise booking", amount: "$86.70", date: "14 Oct 2026", status: "Pending" },
     { campaign: "Hoi An Lantern Season", order: "ORD-20392 · Hotel stay", amount: "$42.00", date: "13 Oct 2026", status: "Approved" },
     { campaign: "Phu Quoc Island Escape", order: "ORD-20118 · Island stay", amount: "$38.00", date: "09 Oct 2026", status: "Paid" },
-  ],
-}
-
-export const supplierDashboard = {
-  metrics: [
-    { label: "Products listed", value: "18", note: "Across 3 destinations" },
-    { label: "Active campaigns", value: "7", note: "Tenant-approved listings" },
-    { label: "Availability alerts", value: "2", note: "Review upcoming dates" },
-    { label: "Product views", value: "1,284", note: "Last 30 days · sample" },
-  ],
-  availability: [
-    { product: "Ha Long Bay cruise", status: "2 dates", pending: true },
-    { product: "Hoi An riverside stay", status: "Available", pending: false },
-    { product: "Phu Quoc beach stay", status: "Available", pending: false },
   ],
 }

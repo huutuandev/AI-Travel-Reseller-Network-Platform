@@ -2,16 +2,15 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ArrowUpRight, Compass, ExternalLink, LogOut, Sparkles } from "lucide-react"
+import { Compass, ExternalLink, LogOut } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "@/components/ui/sidebar"
 import type { UserRole } from "@/lib/mock-auth"
-import { accountNavigation, roleNavigation } from "@/lib/role-navigation"
+import { roleNavigation } from "@/lib/role-navigation"
 
 const roleNames: Record<UserRole, string> = {
-  "platform-admin": "Platform Operations",
+  "platform-admin": "Platform Admin",
   tenant: "Tenant Dashboard",
-  reseller: "Reseller Portal",
-  supplier: "Supplier Portal",
+  reseller: "Reseller Dashboard",
 }
 
 export function AppSidebar({ role, onLogout, ...props }: React.ComponentProps<typeof Sidebar> & { role: UserRole; onLogout: () => void }) {
@@ -30,15 +29,7 @@ export function AppSidebar({ role, onLogout, ...props }: React.ComponentProps<ty
             <span className="mt-1 block whitespace-nowrap text-[9px] font-semibold uppercase tracking-[.16em] text-slate-400">Travel partner platform</span>
           </span>
         </Link>
-
-        <div className="workspace-role-card mx-1 mt-3 flex items-center gap-3 rounded-2xl p-3 group-data-[collapsible=icon]:hidden">
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/80 text-emerald-800 shadow-sm ring-1 ring-emerald-100"><Sparkles className="size-[17px]" /></span>
-          <span className="min-w-0">
-            <span className="block text-[9px] font-bold uppercase tracking-[.16em] text-emerald-800/70">Your workspace</span>
-            <span className="mt-0.5 block truncate text-[13px] font-semibold text-slate-800">{roleNames[role]}</span>
-          </span>
-          <ArrowUpRight className="ml-auto size-4 shrink-0 text-slate-400" />
-        </div>
+        <p className="px-3 pt-2 text-xs font-semibold uppercase tracking-[.12em] text-slate-500 group-data-[collapsible=icon]:hidden">{roleNames[role]}</p>
       </SidebarHeader>
 
       <SidebarContent className="px-2">
@@ -66,18 +57,6 @@ export function AppSidebar({ role, onLogout, ...props }: React.ComponentProps<ty
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-auto pb-3">
-          <SidebarGroupLabel className="px-3 text-[10px] font-bold uppercase tracking-[.15em] text-slate-400">Account</SidebarGroupLabel>
-          <SidebarMenu className="gap-1">
-            {accountNavigation.map(({ label, icon: Icon, href }) => (
-              <SidebarMenuItem key={href}>
-                <SidebarMenuButton isActive={pathname === href} tooltip={label} render={<Link href={href} aria-current={pathname === href ? "page" : undefined} />} className="workspace-nav-link h-10 rounded-xl px-2.5 text-[13px] text-slate-600 hover:bg-white hover:text-emerald-900 hover:shadow-sm data-[active=true]:bg-white data-[active=true]:font-semibold data-[active=true]:text-emerald-900 [&>svg]:hidden">
-                  <span className="workspace-nav-icon grid size-7 shrink-0 place-items-center rounded-[9px] bg-white/70 text-slate-500 ring-1 ring-slate-200/80 transition-colors group-data-[active=true]/menu-button:bg-emerald-50 group-data-[active=true]/menu-button:text-emerald-800 group-data-[active=true]/menu-button:ring-emerald-100 group-data-[collapsible=icon]:size-4 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:ring-0"><Icon className="size-4" strokeWidth={1.9} /></span><span>{label}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="px-3 pb-4 pt-2">

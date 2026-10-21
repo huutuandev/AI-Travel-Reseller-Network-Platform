@@ -1,4 +1,4 @@
-export type UserRole = "platform-admin" | "tenant" | "reseller" | "supplier"
+export type UserRole = "platform-admin" | "tenant" | "reseller"
 
 export type MockUser = {
   id: string
@@ -18,14 +18,12 @@ export const MOCK_USERS: MockUser[] = [
   { id: "usr-platform-001", name: "Platform Owner", email: "admin@wayfarer.test", password: "AdminDemo2026!", role: "platform-admin", title: "Platform administrator", status: "active" },
   { id: "usr-tenant-001", name: "Avery Morgan", email: "avery@lantern-tide.test", password: "TenantDemo2026!", role: "tenant", title: "Tenant administrator", tenantId: "tenant-lantern-tide", status: "active" },
   { id: "usr-reseller-001", name: "Jordan Lee", email: "jordan@partner.test", password: "ResellerDemo2026!", role: "reseller", title: "Travel partner", status: "active" },
-  { id: "usr-supplier-001", name: "Minh Tran", email: "supplier@mekong.test", password: "SupplierDemo2026!", role: "supplier", title: "Supplier manager", tenantId: "tenant-mekong-experiences", status: "active" },
 ]
 
 export const ROLE_HOME: Record<UserRole, string> = {
   "platform-admin": "/platform-admin/dashboard",
   tenant: "/dashboard",
   reseller: "/reseller/dashboard",
-  supplier: "/supplier/dashboard",
 }
 
 const SESSION_KEY = "wayfarer-demo-session"

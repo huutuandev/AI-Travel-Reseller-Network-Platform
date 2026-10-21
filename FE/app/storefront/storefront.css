@@ -1066,3 +1066,21 @@ body.store-page{background:#fcfcfa;color:#34483d}
 .store-checkout-page .checkout-confidence article p{font-size:11px}
 .store-checkout-page .checkout-primary-button{font-size:13px}
 @media(max-width:700px){.store-checkout-page .checkout-title p{font-size:13px}.store-checkout-page .checkout-form-heading h2{font-size:18px}.store-checkout-page .checkout-form-heading p{font-size:12px}.store-checkout-page .checkout-fields label{font-size:12px}.store-checkout-page .checkout-fields input,.store-checkout-page .checkout-fields select,.store-checkout-page .checkout-fields textarea{min-height:46px;font-size:14px}.store-checkout-page .checkout-fields input::placeholder,.store-checkout-page .checkout-fields textarea::placeholder{font-size:12px}.store-checkout-page .checkout-order-content>small{font-size:10px}}
+
+/* Keep booking layouts comfortable on tablets as well as phones. */
+@media(max-width:900px){
+  .store-detail-page .detail-purchase-grid{grid-template-columns:minmax(0,1fr)}
+  .store-checkout-page .checkout-shell{margin-inline:16px}
+  .store-checkout-page .checkout-layout{grid-template-columns:minmax(0,1fr);gap:20px}
+  .store-checkout-page .checkout-aside{grid-row:1;margin-top:0}
+  .store-checkout-page .checkout-form{grid-row:2}
+}
+@media(max-width:420px){
+  .store-checkout-page .checkout-progress{justify-content:space-between;gap:8px;padding-inline:12px}
+  .store-checkout-page .checkout-progress>span{gap:5px;font-size:7px}
+  .store-checkout-page .checkout-progress>b{width:clamp(12px,6vw,20px)}
+}
+
+@media(max-width:390px){
+  .store-page .site-nav nav.is-open>a:nth-child(2){display:flex}
+}

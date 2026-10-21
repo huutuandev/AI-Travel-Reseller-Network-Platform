@@ -34,7 +34,7 @@ function StorefrontHomeContent() {
   const moveSlide = (direction: number) => setSlide((current) => (current + direction + journeys.length) % journeys.length)
 
   return <div className="store-home">
-    <StoreNav current="Home" returnTo="/storefront" />
+    <StoreNav current="Home" />
     <main>
       <section className="home-hero" aria-label="Discover Vietnam">
         <Image className={`home-hero-image destination-photo destination-photo-${featured.key}`} src={featured.image} alt={`${featured.short}, Vietnam`} fill priority sizes="100vw" />

@@ -1,5 +1,5 @@
 import {
-  Activity, BadgeDollarSign, BarChart3, Bot, Building2, Compass,
+  Activity, BadgeDollarSign, BarChart3, Bot, Compass,
   FileCheck2, LayoutDashboard, Link2, Package, Palette, Settings2, ShoppingBag,
   Store, Users, Wallet,
 } from "lucide-react"
@@ -9,7 +9,6 @@ export const roleNavigation: Record<UserRole, { label: string; icon: typeof Layo
   "platform-admin": [
     { label: "Platform overview", icon: LayoutDashboard, href: "/platform-admin/dashboard" },
     { label: "Tenant management", icon: Users, href: "/platform-admin/tenants" },
-    { label: "Tenant details", icon: Building2, href: "/platform-admin/tenant-detail" },
     { label: "System configuration", icon: Settings2, href: "/platform-admin/system-config" },
   ],
   tenant: [

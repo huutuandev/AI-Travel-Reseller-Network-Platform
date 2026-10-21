@@ -46,7 +46,7 @@ function ProductDetailContent() {
   const visibleGalleryImages = Array.from({ length: 4 }, (_, index) => (galleryOffset + index) % galleryImages.length)
 
   return <div className="store-detail-page">
-    <StoreNav current="Tours" returnTo={`/storefront/product-detail?product=${item.key}`} />
+    <StoreNav current="Tours" />
     <main className="product-detail">
       <Link className="detail-back-link" href="/storefront#destinations"><ArrowLeft aria-hidden="true" /> Back to journeys</Link>
       <header className="detail-page-heading">

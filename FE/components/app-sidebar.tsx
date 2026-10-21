@@ -44,12 +44,13 @@ export function AppSidebar({ role, onLogout, ...props }: React.ComponentProps<ty
                     isActive={isActive}
                     tooltip={label}
                     render={<Link href={href} aria-current={isActive ? "page" : undefined} />}
-                    className="workspace-nav-link group/nav-link h-11 rounded-xl px-2.5 text-[13px] font-medium text-slate-600 transition-all duration-200 hover:translate-x-0.5 hover:bg-white hover:text-emerald-900 hover:shadow-[0_5px_16px_rgba(44,83,57,0.07)] data-[active=true]:bg-white data-[active=true]:font-semibold data-[active=true]:text-emerald-900 data-[active=true]:shadow-[0_6px_18px_rgba(44,83,57,0.1)] [&>svg]:hidden"
+                    className={`workspace-nav-link group/nav-link h-11 rounded-xl px-2.5 text-[13px] font-medium text-slate-600 transition-all duration-200 hover:translate-x-0.5 hover:bg-white hover:text-emerald-900 hover:shadow-[0_5px_16px_rgba(44,83,57,0.07)] [&>svg]:hidden ${isActive ? "workspace-nav-link-active" : ""}`}
                   >
-                    <span className="workspace-nav-icon grid size-8 shrink-0 place-items-center rounded-[10px] bg-white/70 text-slate-500 ring-1 ring-slate-200/80 transition-colors group-data-[active=true]/menu-button:bg-emerald-50 group-data-[active=true]/menu-button:text-emerald-800 group-data-[active=true]/menu-button:ring-emerald-100 group-data-[collapsible=icon]:size-4 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:ring-0">
+                    <span className={`workspace-nav-icon grid size-8 shrink-0 place-items-center rounded-[10px] bg-white/70 text-slate-500 ring-1 ring-slate-200/80 transition-colors group-data-[collapsible=icon]:size-4 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:ring-0 ${isActive ? "workspace-nav-icon-active" : ""}`}>
                       <Icon className="size-[17px]" strokeWidth={1.9} />
                     </span>
                     <span>{label}</span>
+                    {isActive && <span aria-hidden="true" className="ml-auto mr-1 size-2.5 shrink-0 rounded-full bg-emerald-300 ring-[3px] ring-emerald-100/70 group-data-[collapsible=icon]:hidden" />}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )

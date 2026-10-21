@@ -17,11 +17,11 @@ export function AppSidebar({ role, onLogout, ...props }: React.ComponentProps<ty
   const pathname = usePathname()
 
   return (
-    <Sidebar collapsible="icon" className="workspace-sidebar" {...props}>
-      <SidebarHeader className="px-3 pb-3 pt-5">
-        <Link href="/" className="workspace-brand group flex items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-white/80">
-          <span className="workspace-brand-mark relative grid size-11 shrink-0 place-items-center rounded-2xl text-white">
-            <Compass className="size-[22px]" strokeWidth={1.7} />
+    <Sidebar collapsible="offcanvas" className="workspace-sidebar" {...props}>
+      <SidebarHeader className="px-3 pb-3 pt-5 group-data-[collapsible=icon]:px-1">
+        <Link href="/" className="workspace-brand group flex items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-white/80 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+          <span className="workspace-brand-mark relative grid size-11 shrink-0 place-items-center rounded-2xl text-white group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:rounded-xl">
+            <Compass className="size-[22px] group-data-[collapsible=icon]:size-4" strokeWidth={1.7} />
             <i className="absolute right-[7px] top-[7px] size-1.5 rounded-full bg-amber-300 ring-2 ring-[#294e3b]" />
           </span>
           <span className="min-w-0 leading-tight group-data-[collapsible=icon]:hidden">

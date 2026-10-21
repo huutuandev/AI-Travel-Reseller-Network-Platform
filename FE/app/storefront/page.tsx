@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { Suspense, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { CalendarDays, MapPin, Search, Sparkles } from "lucide-react"
 import { StoreFooter, StoreNav } from "@/components/storefront/store-chrome"
@@ -21,6 +21,14 @@ function StorefrontHomeContent() {
   const [destination, setDestination] = useState("all")
   const [duration, setDuration] = useState("all")
   const [budget, setBudget] = useState("all")
+  useEffect(() => {
+    const targetId = decodeURIComponent(window.location.hash.slice(1))
+    if (!targetId) return
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [])
   const query = (searchParams.get("search") ?? "").trim().toLowerCase()
   const featured = journeys[slide]
   const visibleJourneys = journeys.filter((journey) => {

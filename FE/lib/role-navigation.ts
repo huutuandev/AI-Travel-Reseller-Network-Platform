@@ -1,7 +1,7 @@
 import {
   Activity, BadgeDollarSign, BarChart3, Bot, Compass,
   FileCheck2, LayoutDashboard, Link2, Package, Palette, Settings2, ShoppingBag,
-  Store, Users, Wallet,
+  Store, Users, Video, Wallet,
 } from "lucide-react"
 import type { UserRole } from "@/lib/mock-auth"
 
@@ -20,6 +20,7 @@ export const roleNavigation: Record<UserRole, { label: string; icon: typeof Layo
     { label: "Commissions", icon: Wallet, href: "/tenant/commissions" },
     { label: "Conversion review", icon: FileCheck2, href: "/tenant/conversion-review" },
     { label: "AI Content", icon: Bot, href: "/tenant/ai-content" },
+    { label: "Video library", icon: Video, href: "/tenant/video-library" },
     { label: "AI content review", icon: FileCheck2, href: "/tenant/ai-content-review" },
     { label: "Brand settings", icon: Palette, href: "/tenant/settings" },
   ],

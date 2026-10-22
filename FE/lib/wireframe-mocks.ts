@@ -66,7 +66,7 @@ export const resellerTables: Record<string, WireframeTable> = {
     title:"My campaigns", description:"Joined and pending offers", searchPlaceholder:"Search this page",
     filters:[{label:"Status",values:["All statuses","Active","Pending"],column:2}],
     columns:["Campaign","Commission","Status","Joined","Actions"],
-    rows:[["Ha Long Bay Weekend Escape","12%","Active","10 Oct 2026","View · Tracking link"],["Hoi An Lantern Season","10%","Active","10 Oct 2026","View · Tracking link"],["Phu Quoc Island Escape","$38 / booking","Pending","10 Oct 2026","View · Tracking link"]],action:"details",
+    rows:[["Ha Long Bay Weekend Escape","12%","Active","10 Oct 2026","View · Tracking link · Get content"],["Hoi An Lantern Season","10%","Active","10 Oct 2026","View · Tracking link · Get content"],["Phu Quoc Island Escape","$38 / booking","Pending","10 Oct 2026","View · Tracking link · Get content"]],action:"details",
   },
   commissions: {
     title:"Commissions", description:"Illustrative attributed bookings and earnings.", searchPlaceholder:"Search this page",

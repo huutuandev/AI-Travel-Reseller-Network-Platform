@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, BadgeCheck, BellRing, Check, ChevronLeft, ChevronRight, CircleDollarSign, Copy, Eye, MapPin, PackagePlus, Pause, Play, Sparkles, Tag, X } from "lucide-react"
+import { ArrowRight, BadgeCheck, BellRing, Check, ChevronLeft, ChevronRight, CircleDollarSign, Clapperboard, Copy, Eye, FileText, Library, MapPin, PackagePlus, Pause, Play, Sparkles, Tag, Video, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -222,25 +222,121 @@ export function TenantProductsPage() {
   </>
 }
 
-export function ResellerSpecialPage({ slug }: { slug: string }) {
+export function ResellerSpecialPage({ slug, campaignName }: { slug: string; campaignName?: string }) {
   if(slug==="campaign-marketplace")return <Marketplace/>
   if(slug==="campaign-detail")return <ResellerCampaignDetail/>
+  if(slug==="campaign-content"||slug==="campaign-videos")return <ResellerCampaignVideos campaignName={campaignName}/>
   if(slug==="profile-settings")return <ResellerProfile/>
   if(slug==="ai-content")return <ResellerAiLibrary/>
   return <PageHeading eyebrow="Reseller Portal" title="Page not found" description="Choose a page from the reseller navigation."/>
 }
 
-function ResellerAiLibrary() {
+function ResellerCampaignVideos({ campaignName }: { campaignName?: string }) {
+  const journey = storefrontJourneys.find((item) => item.title === campaignName) ?? storefrontJourneys[0]
+  const videoOptions = [
+    { id: "highlights", title: `${journey.short} highlights`, duration: "15 sec", format: "Vertical · 9:16", scene: `Open with a sweeping view of ${journey.short}, then introduce the trip's standout moments.` },
+    { id: "experience", title: "The experience", duration: "30 sec", format: "Vertical · 9:16", scene: `Show travelers enjoying the experience: ${journey.description}` },
+    { id: "story", title: "A slower way to travel", duration: "60 sec", format: "Landscape · 16:9", scene: `Tell a calm travel story around ${journey.short}, its local atmosphere, and ${journey.duration.toLowerCase()}.` },
+  ]
+  const [selectedVideoId, setSelectedVideoId] = useState(videoOptions[0].id)
+  const [assetTab, setAssetTab] = useState<"all" | "content" | "videos">("all")
+  const [copied, setCopied] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const selectedVideo = videoOptions.find((video) => video.id === selectedVideoId) ?? videoOptions[0]
+  const videoBrief = `Create a ${selectedVideo.duration} ${selectedVideo.format.toLowerCase()} travel promo video for ${journey.title}. ${selectedVideo.scene} Use cinematic travel footage, warm natural light, and end with a clear invitation to explore the campaign.`
+
+  useEffect(() => {
+    setSelectedVideoId("highlights")
+    setCopied(false)
+    setSaved(false)
+  }, [journey.key])
+
+  async function copyBrief() {
+    try {
+      await navigator.clipboard.writeText(videoBrief)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1800)
+    } catch {
+      setCopied(false)
+    }
+  }
+
+  const tabs = [{ id: "all" as const, label: "All Assets" }, { id: "content" as const, label: "Content" }, { id: "videos" as const, label: "Videos" }]
+
+  return <>
+    <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <Link href="/reseller/my-campaigns" className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-teal-800 hover:underline"><ArrowRight className="size-4 rotate-180"/>Back to my campaigns</Link>
+        <PageHeading eyebrow="Campaign assets" title="Content Library" description={`Discover and download marketing assets for ${journey.title}.`}/>
+      </div>
+      <Badge className="bg-emerald-50 text-emerald-800">{journey.title === campaignName ? "Campaign selected" : "Sample campaign"}</Badge>
+    </div>
+
+    <Card className="overflow-hidden rounded-2xl border-slate-200/80 bg-white shadow-sm">
+      <CardHeader className="pb-4">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-teal-50 text-teal-800"><Library className="size-5"/></span>
+          <div><CardTitle>Content Library</CardTitle><CardDescription className="mt-1">Discover and download campaign marketing assets</CardDescription></div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div role="tablist" aria-label="Campaign asset type" className="grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1">
+          {tabs.map(tab=><button key={tab.id} type="button" role="tab" aria-selected={assetTab===tab.id} onClick={()=>setAssetTab(tab.id)} className={`min-h-11 rounded-lg px-3 text-sm font-medium transition ${assetTab===tab.id?"bg-white text-teal-900 shadow-sm":"text-slate-600 hover:text-slate-900"}`}>{tab.label}</button>)}
+        </div>
+
+        {assetTab==="all"&&<div className="grid gap-4 sm:grid-cols-2">
+          <button type="button" onClick={()=>setAssetTab("content")} className="group rounded-2xl border border-slate-200 bg-white p-5 text-left transition hover:border-teal-300 hover:bg-teal-50/40 hover:shadow-sm">
+            <span className="grid size-10 place-items-center rounded-xl bg-sky-50 text-sky-700"><FileText className="size-5"/></span>
+            <span className="mt-3 block text-base font-semibold text-slate-900">Social Content</span><span className="mt-1 block text-sm text-slate-500">Captions, post copy, hashtags</span>
+            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-teal-800">Browse content <ArrowRight className="size-4 transition group-hover:translate-x-0.5"/></span>
+          </button>
+          <button type="button" onClick={()=>setAssetTab("videos")} className="group rounded-2xl border border-slate-200 bg-white p-5 text-left transition hover:border-teal-300 hover:bg-teal-50/40 hover:shadow-sm">
+            <span className="grid size-10 place-items-center rounded-xl bg-violet-50 text-violet-700"><Clapperboard className="size-5"/></span>
+            <span className="mt-3 block text-base font-semibold text-slate-900">Marketing Videos</span><span className="mt-1 block text-sm text-slate-500">Campaign videos, reels, shorts</span>
+            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-teal-800">Browse videos <ArrowRight className="size-4 transition group-hover:translate-x-0.5"/></span>
+          </button>
+        </div>}
+
+        {(assetTab==="all"||assetTab==="content")&&<section className="space-y-4 border-t border-slate-100 pt-6">
+          <div className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-lg bg-sky-50 text-sky-700"><FileText className="size-4"/></span><div><h2 className="font-semibold text-slate-900">Social Content</h2><p className="text-sm text-slate-500">Captions, post copy, hashtags</p></div></div>
+          <ResellerAiLibrary key={journey.key} embedded campaignName={journey.title}/>
+        </section>}
+
+        {(assetTab==="all"||assetTab==="videos")&&<section className="space-y-4 border-t border-slate-100 pt-6">
+          <div className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-lg bg-violet-50 text-violet-700"><Clapperboard className="size-4"/></span><div><h2 className="font-semibold text-slate-900">Marketing Videos</h2><p className="text-sm text-slate-500">Campaign videos, reels, shorts</p></div></div>
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,.85fr)]">
+            <Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Available video concepts</CardTitle><CardDescription>{journey.title} · choose one to view its brief</CardDescription></CardHeader><CardContent className="space-y-3">
+              {videoOptions.map((video, index) => <button key={video.id} type="button" aria-pressed={selectedVideoId === video.id} onClick={() => { setSelectedVideoId(video.id); setCopied(false); setSaved(false) }} className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition ${selectedVideoId === video.id ? "border-teal-700 bg-teal-50/70 ring-2 ring-teal-700/10" : "border-slate-200 hover:border-teal-300 hover:bg-slate-50"}`}>
+                <span className="relative grid size-20 shrink-0 place-items-center overflow-hidden rounded-lg bg-slate-900"><Image src={journey.image} alt="" fill sizes="80px" className={`object-cover ${index === 1 ? "object-center" : index === 2 ? "object-bottom" : "object-top"}`}/><span className="absolute inset-0 grid place-items-center bg-slate-950/35 text-white"><Video className="size-5"/></span><span className="absolute bottom-1 right-1 rounded bg-black/70 px-1 py-0.5 text-[9px] font-semibold text-white">{video.duration}</span></span>
+                <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-slate-900">{video.title}</span><span className="mt-1 block text-xs text-slate-500">{video.format}</span><span className="mt-2 inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">Concept preview</span></span>
+                <span className={`grid size-5 shrink-0 place-items-center rounded-full border ${selectedVideoId === video.id ? "border-teal-700 bg-teal-700 text-white" : "border-slate-300 text-transparent"}`}><Check className="size-3"/></span>
+              </button>)}
+              <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-950">These are selectable video concepts with campaign artwork and briefs. No playable or downloadable video files have been published for this campaign yet.</p>
+            </CardContent></Card>
+            <Card className="overflow-hidden border-slate-200/80 shadow-sm">
+              <div className="relative aspect-video bg-slate-900"><Image src={journey.image} alt={`${journey.short} campaign artwork`} fill sizes="(max-width: 1280px) 100vw, 45vw" className="object-cover opacity-80"/><div className="absolute inset-0 grid place-items-center bg-slate-950/25"><span className="grid size-14 place-items-center rounded-full bg-white/95 text-teal-800 shadow-lg"><Video className="size-6"/></span></div><Badge className="absolute bottom-3 left-3 bg-white/95 text-slate-800">Concept preview · {selectedVideo.duration}</Badge></div>
+              <CardHeader className="pb-3"><CardTitle>{selectedVideo.title}</CardTitle><CardDescription>{journey.title} · {selectedVideo.format}</CardDescription></CardHeader>
+              <CardContent className="space-y-4"><div className="space-y-2"><Label htmlFor="campaign-video-brief">Selected video brief</Label><Textarea id="campaign-video-brief" readOnly value={videoBrief} rows={5} className="resize-none bg-slate-50 text-sm leading-6"/></div><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={copyBrief}>{copied?<Check className="size-4"/>:<Copy className="size-4"/>}{copied?"Copied":"Copy video brief"}</Button><Button className="bg-teal-800 hover:bg-teal-900" onClick={()=>setSaved(true)}>{saved?<Check className="size-4"/>:<Video className="size-4"/>}{saved?"Brief saved":"Save selected brief"}</Button></div></CardContent>
+            </Card>
+          </div>
+        </section>}
+      </CardContent>
+    </Card>
+  </>
+}
+
+function ResellerAiLibrary({ embedded = false, campaignName }: { embedded?: boolean; campaignName?: string }) {
   const [query,setQuery]=useState("")
-  const [campaign,setCampaign]=useState("All campaigns")
-  const [product,setProduct]=useState("All products")
+  const [campaign,setCampaign]=useState(campaignName??"All campaigns")
+  const products=Array.from(new Set(publishedAiAssets.filter(asset=>!campaignName||asset.campaign===campaignName).map(asset=>asset.product)))
+  const [product,setProduct]=useState(campaignName?products[0]??"All products":"All products")
   const [type,setType]=useState("All content types")
   const [language,setLanguage]=useState("All languages")
   const [feedback,setFeedback]=useState("")
   const [copiedAsset,setCopiedAsset]=useState("")
-  const entries=useMemo(()=>publishedAiAssets.filter(asset=>`${asset.copy} ${asset.campaign} ${asset.product} ${asset.type}`.toLowerCase().includes(query.toLowerCase())&&(campaign==="All campaigns"||asset.campaign===campaign)&&(product==="All products"||asset.product===product)&&(type==="All content types"||asset.type===type)&&(language==="All languages"||asset.language===language)),[campaign,language,product,query,type])
+  const entries=useMemo(()=>publishedAiAssets.filter(asset=>(!campaignName||asset.campaign===campaignName)&&`${asset.copy} ${asset.campaign} ${asset.product} ${asset.type}`.toLowerCase().includes(query.toLowerCase())&&(campaignName||campaign==="All campaigns"||asset.campaign===campaign)&&(product==="All products"||asset.product===product)&&(type==="All content types"||asset.type===type)&&(language==="All languages"||asset.language===language)),[campaign,campaignName,language,product,query,type])
   async function copy(value:string,key:string){try{await navigator.clipboard.writeText(value);setFeedback("");setCopiedAsset(key);window.setTimeout(()=>setCopiedAsset(current=>current===key?"":current),1600)}catch{setFeedback("Clipboard access is unavailable in this browser context.")}}
-  return <><PageHeading eyebrow="Reseller Portal" title="AI Content Library" description="Browse and copy campaign assets published by your travel partners."/><Card className="border-slate-200/80 shadow-sm"><CardContent className="grid gap-3 pt-5 sm:grid-cols-2 xl:grid-cols-5"><Pick label="Campaign" value={campaign} setValue={setCampaign} options={["All campaigns",...publishedAiAssets.map(item=>item.campaign)]}/><Pick label="Product" value={product} setValue={setProduct} options={["All products",...publishedAiAssets.map(item=>item.product)]}/><Pick label="Content type" value={type} setValue={setType} options={["All content types","Social caption","Promotional description","Hashtag suggestions"]}/><Pick label="Language" value={language} setValue={setLanguage} options={["All languages","English","Vietnamese"]}/><div className="space-y-2"><Label htmlFor="published-search">Search</Label><Input id="published-search" type="search" aria-label="Search published copy" placeholder="Search published copy" value={query} onChange={event=>setQuery(event.target.value)}/></div></CardContent></Card><div className="grid gap-4 lg:grid-cols-2">{entries.map(asset=><Card key={asset.campaign} className="border-slate-200/80 shadow-sm"><CardHeader><div className="flex items-start justify-between gap-2"><div><CardTitle className="text-base">{asset.type}</CardTitle><CardDescription className="mt-1">{asset.campaign} · {asset.product}</CardDescription></div><Badge variant="outline">{asset.language}</Badge></div></CardHeader><CardContent><p className="rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-700">{asset.copy}</p><div className="mt-3 flex items-center justify-between text-xs text-slate-500"><span>{asset.tone}</span><Button size="sm" variant="outline" onClick={()=>copy(asset.copy,`${asset.campaign}-${asset.type}`)}>{copiedAsset===`${asset.campaign}-${asset.type}`?<Check className="size-3.5"/>:<Copy className="size-3.5"/>}{copiedAsset===`${asset.campaign}-${asset.type}`?"Copied":"Copy"}</Button></div></CardContent></Card>)}</div>{feedback&&<p role="status" className="text-sm text-red-700">{feedback}</p>}{entries.length===0&&<p className="py-8 text-center text-sm text-slate-500">No published copy matches your filters.</p>}</>
+  return <>{!embedded&&<PageHeading eyebrow="Reseller Portal" title="AI Content Library" description="Browse and copy campaign assets published by your travel partners."/>}<div id={embedded?"campaign-content":undefined}><Card className="border-slate-200/80 shadow-sm"><CardContent className="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-5">{!campaignName&&<Pick label="Campaign" value={campaign} setValue={setCampaign} options={["All campaigns",...publishedAiAssets.map(item=>item.campaign)]}/>}<Pick label="Product" value={product} setValue={setProduct} options={campaignName?products:["All products",...products]}/><Pick label="Content type" value={type} setValue={setType} options={["All content types","Social caption","Promotional description","Hashtag suggestions"]}/><Pick label="Language" value={language} setValue={setLanguage} options={["All languages","English","Vietnamese"]}/><div className="space-y-2"><Label htmlFor="published-search">Search</Label><Input id="published-search" type="search" aria-label="Search published copy" placeholder="Search published copy" value={query} onChange={event=>setQuery(event.target.value)}/></div></CardContent></Card><div className="mt-5 grid gap-5 lg:grid-cols-2">{entries.map(asset=><Card key={`${asset.campaign}-${asset.type}`} className="border-slate-200/80 shadow-sm"><CardHeader><div className="flex items-start justify-between gap-2"><div><CardTitle className="text-base">{asset.type}</CardTitle><CardDescription className="mt-1">{asset.campaign} · {asset.product}</CardDescription></div><Badge variant="outline">{asset.language}</Badge></div></CardHeader><CardContent><p className="rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-700">{asset.copy}</p><div className="mt-3 flex items-center justify-between text-xs text-slate-500"><span>{asset.tone}</span><Button size="sm" variant="outline" onClick={()=>copy(asset.copy,`${asset.campaign}-${asset.type}`)}>{copiedAsset===`${asset.campaign}-${asset.type}`?<Check className="size-3.5"/>:<Copy className="size-3.5"/>}{copiedAsset===`${asset.campaign}-${asset.type}`?"Copied":"Copy"}</Button></div></CardContent></Card>)}</div>{feedback&&<p role="status" className="text-sm text-red-700">{feedback}</p>}{entries.length===0&&<p className="mt-5 rounded-xl border border-slate-200 bg-white px-5 py-8 text-center text-sm text-slate-500">No published copy matches this campaign and the current filters.</p>}</div></>
 }
 
 export function AccountSpecialPage({ page }: { page:string }) { return page==="profile"?<SharedProfile/>:page==="notifications"?<SharedNotifications/>:<PageHeading eyebrow="Account" title="Page not found" description="Choose a profile or notifications page."/> }

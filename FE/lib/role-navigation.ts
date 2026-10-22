@@ -31,6 +31,5 @@ export const roleNavigation: Record<UserRole, { label: string; icon: typeof Layo
     { label: "Tracking links", icon: Link2, href: "/reseller/tracking-links" },
     { label: "Commissions", icon: BadgeDollarSign, href: "/reseller/commissions" },
     { label: "Analytics", icon: BarChart3, href: "/reseller/analytics" },
-    { label: "AI Content Library", icon: Bot, href: "/reseller/ai-content" },
   ],
 }

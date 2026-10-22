@@ -73,7 +73,7 @@ function ProductDetailContent() {
         </aside>
       </section>
 
-      <nav className="detail-tabs" aria-label="Journey details"><a className="is-current" href="#overview">Overview</a><a href="#included">What&apos;s included</a><a href="#tour-details">Tour details</a></nav>
+      <nav className="detail-tabs" aria-label="Journey details"><a className="is-current" href="#overview">Overview</a></nav>
 
       <section className="detail-overview-section" id="overview"><div className="detail-section-heading"><span className="overline">A THOUGHTFUL WAY TO EXPLORE</span><h2>Make the most of {item.short}.</h2><p>{item.description} The pace is yours, with local insight to help you get closer to the character of the place.</p></div><div className="detail-overview-facts"><article><span><MapPin /></span><div><small>DESTINATION</small><strong>{item.short}, Vietnam</strong></div></article><article><span><Clock3 /></span><div><small>PACE &amp; DURATION</small><strong>{item.duration}</strong></div></article><article><span><Tag /></span><div><small>JOURNEY STYLE</small><strong>{item.type.toLowerCase()}</strong></div></article><article><span><Check /></span><div><small>THE FEELING</small><strong>{item.feeling}</strong></div></article></div></section>
 

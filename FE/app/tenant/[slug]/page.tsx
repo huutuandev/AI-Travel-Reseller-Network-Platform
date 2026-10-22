@@ -9,9 +9,16 @@ export function generateStaticParams() {
   return [...new Set([...Object.keys(tenantTables), ...specialPages])].map((slug) => ({ slug }))
 }
 
-export default async function TenantPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function TenantPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ campaign?: string }>
+}) {
   const { slug } = await params
-  if (specialPages.has(slug)) return <TenantSpecialPage slug={slug} />
+  const { campaign } = await searchParams
+  if (specialPages.has(slug)) return <TenantSpecialPage slug={slug} campaignName={campaign} />
   const config = tenantTables[slug]
   if (!config) notFound()
   return <WireframeTablePage config={config} hrefPrefix="/tenant" />

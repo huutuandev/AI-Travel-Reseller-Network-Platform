@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { useMemo, useRef, useState } from "react"
-import { Film, Play, Search, Sparkles, Upload, Video, WandSparkles, Clock3, MapPin } from "lucide-react"
+import { Film, Play, Search, Sparkles, Upload, Video, WandSparkles, Clock3, MapPin, CircleDollarSign } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -22,6 +22,8 @@ type VideoAsset = {
   status?: "Ready" | "Draft preview"
 }
 
+const referenceVideoRates: Record<string, number> = { "5 seconds": 0.6, "10 seconds": 1.2, "15 seconds": 1.8, "30 seconds": 3.6, "60 seconds": 7.2 }
+
 const sampleVideos: VideoAsset[] = [
   { id: "v-01", title: "A weekend among the karsts", campaign: "Ha Long Bay Weekend Escape", source: "AI generated", updated: "Today · 10:42 AM", duration: "0:32", image: storefrontJourneys[0].image },
   { id: "v-02", title: "Lanterns along the river", campaign: "Hoi An Lantern Season", source: "AI generated", updated: "Yesterday · 3:18 PM", duration: "0:27", image: storefrontJourneys[1].image },
@@ -39,6 +41,11 @@ export default function TenantVideoLibraryPage() {
   const [selectedCampaign, setSelectedCampaign] = useState(storefrontJourneys[0].key)
   const [videoStyle, setVideoStyle] = useState("Cinematic travel");
   const [videoLength, setVideoLength] = useState("30 seconds")
+  const [videoCount, setVideoCount] = useState("1")
+  const requestedVideoCount = Number(videoCount)
+  const safeVideoCount = Number.isSafeInteger(requestedVideoCount) && requestedVideoCount >= 1 ? requestedVideoCount : 1
+  const costPerVideo = referenceVideoRates[videoLength] ?? referenceVideoRates["30 seconds"]
+  const estimatedCost = costPerVideo * safeVideoCount
   const activeJourney = storefrontJourneys.find((journey) => journey.key === selectedCampaign) ?? storefrontJourneys[0]
 
   const filteredVideos = useMemo(() => videos.filter((video) => {
@@ -70,22 +77,22 @@ export default function TenantVideoLibraryPage() {
   }
 
   function generateCampaignVideo() {
-    const title = `${activeJourney.short} — ${videoStyle.toLowerCase()} concept`
-    const draft: VideoAsset = {
-      id: `ai-${activeJourney.key}-${Date.now()}`,
-      title,
+    const createdAt = Date.now()
+    const drafts: VideoAsset[] = Array.from({ length: safeVideoCount }, (_, index) => ({
+      id: `ai-${activeJourney.key}-${createdAt}-${index}`,
+      title: `${activeJourney.short} — ${videoStyle.toLowerCase()} concept${safeVideoCount > 1 ? ` ${index + 1}` : ""}`,
       campaign: activeJourney.title,
       source: "AI generated",
       updated: "Created just now",
       duration: `${videoLength} concept`,
       image: activeJourney.image,
       status: "Draft preview",
-    }
-    setVideos((current) => [draft, ...current])
+    }))
+    setVideos((current) => [...drafts, ...current])
     setFilter("All videos")
     setSearch("")
     setGeneratorOpen(false)
-    setMessage(`A campaign-based video concept for “${activeJourney.title}” was added to the library. Connect an AI video provider to render a playable video.`)
+    setMessage(`${safeVideoCount} campaign video concept${safeVideoCount === 1 ? "" : "s"} for “${activeJourney.title}” added to this browser preview. Reference API estimate: $${estimatedCost.toFixed(2)} USD. Actual video generation and billing require a connected AI provider.`)
   }
 
   const aiCount = videos.filter((video) => video.source === "AI generated").length
@@ -163,8 +170,12 @@ export default function TenantVideoLibraryPage() {
               </label>
               <label className="block space-y-2 text-sm font-medium text-slate-700" htmlFor="video-length">Target length
                 <select id="video-length" value={videoLength} onChange={(event) => setVideoLength(event.target.value)} className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-normal outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15">
-                  <option>15 seconds</option><option>30 seconds</option><option>60 seconds</option>
+                  <option>5 seconds</option><option>10 seconds</option><option>15 seconds</option><option>30 seconds</option><option>60 seconds</option>
                 </select>
+              </label>
+              <label className="block space-y-2 text-sm font-medium text-slate-700" htmlFor="video-count">Videos to create
+                <Input id="video-count" type="number" min={1} step={1} value={videoCount} onChange={(event) => setVideoCount(event.target.value)} onBlur={() => setVideoCount(String(safeVideoCount))} className="h-11 bg-white text-sm font-normal" />
+                <span className="block text-xs font-normal text-slate-500">Enter the number of video concepts to generate.</span>
               </label>
             </div>
 
@@ -175,6 +186,10 @@ export default function TenantVideoLibraryPage() {
                 <h3 className="font-semibold text-slate-900">{activeJourney.title}</h3>
                 <p className="text-sm leading-5 text-slate-600">{activeJourney.description}</p>
                 <div className="flex flex-wrap gap-2 text-xs text-slate-600"><span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1"><MapPin className="size-3.5"/>{activeJourney.short}</span><span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-1"><Clock3 className="size-3.5"/>{videoLength}</span></div>
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-3.5">
+                  <div className="flex items-center gap-2 text-emerald-800"><CircleDollarSign className="size-4"/><span className="text-xs font-semibold uppercase tracking-wide">Reference API cost</span></div>
+                  <div className="mt-2 flex items-end justify-between gap-3"><div><p className="text-xs text-slate-600">${costPerVideo.toFixed(2)} × {safeVideoCount} video{safeVideoCount === 1 ? "" : "s"}</p><p className="mt-0.5 text-[11px] text-slate-500">Reference rate in USD · {videoLength} each</p></div><strong className="text-xl font-semibold text-slate-900">${estimatedCost.toFixed(2)}</strong></div>
+                </div>
               </div>
             </div>
           </div>
@@ -183,7 +198,7 @@ export default function TenantVideoLibraryPage() {
             <Button variant="outline" className="h-10" onClick={() => setGeneratorOpen(false)}>Cancel</Button>
             <Button className="h-10 gap-2 bg-emerald-800 px-4 text-white hover:bg-emerald-900" onClick={generateCampaignVideo}><Sparkles className="size-4"/>Create video concept</Button>
           </div>
-          <p className="mt-3 text-xs leading-5 text-slate-500">This frontend preview adds a campaign-based concept card to the library. Rendering a playable video requires an AI video generation service.</p>
+          <p className="mt-3 text-xs leading-5 text-slate-500">API costs are reference estimates based on the displayed duration rates. This frontend preview adds concept cards; actual billing and playable video rendering require a connected AI video service.</p>
         </div>
       </DialogContent>
     </Dialog>

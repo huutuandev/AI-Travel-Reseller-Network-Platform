@@ -1,9 +1,9 @@
-﻿"use client"
+"use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, BadgeCheck, BellRing, Check, ChevronLeft, ChevronRight, CircleDollarSign, Clapperboard, Copy, Eye, FileText, Library, MapPin, PackagePlus, Pause, Play, Sparkles, Tag, Video, X } from "lucide-react"
+import { ArrowRight, BadgeCheck, BellRing, Check, ChevronLeft, ChevronRight, CircleDollarSign, Clapperboard, Copy, Eye, FileText, Heart, Library, MapPin, PackagePlus, Pause, Play, Sparkles, Tag, Video, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,12 +13,19 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { resellerCampaignCards, publishedAiAssets, tenantTables } from "@/lib/wireframe-mocks"
 import { storefrontJourneys } from "@/lib/storefront-data"
+import { useResellerCampaignMembership } from "@/lib/reseller-campaign-membership"
 
 const inputClass = "h-10 rounded-md border border-input bg-background px-3 text-sm"
 const fieldLabelClass = "text-sm font-medium"
 
 function PageHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
   return <div><p className="text-xs font-semibold uppercase tracking-[.15em] text-teal-800">{eyebrow}</p><h1 className="mt-1 text-3xl font-semibold tracking-tight">{title}</h1><p className="mt-1 text-sm text-slate-500">{description}</p></div>
+}
+
+function SocialPlatformLogo({ platform, className = "size-5" }: { platform: "TikTok" | "Facebook"; className?: string }) {
+  if (platform === "Facebook") return <svg aria-label="Facebook" role="img" viewBox="0 0 24 24" className={className}><path fill="#1877F2" d="M24 12c0-6.627-5.373-12-12-12S0 5.373 0 12c0 5.99 4.388 10.954 10.125 11.854V15.47H7.078V12h3.047V9.356c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.234 2.686.234v2.953h-1.513c-1.491 0-1.956.925-1.956 1.874V12h3.328l-.532 3.47h-2.796v8.384C19.612 22.954 24 17.99 24 12"/></svg>
+  const mark = "M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.03 2.6 1.6 4.07 1.79v4.08c-1.38-.05-2.76-.33-4.04-.88-.56-.25-1.1-.55-1.62-.89-.01 2.75.01 5.5-.02 8.24-.07 1.32-.51 2.63-1.28 3.71-1.24 1.81-3.39 2.99-5.59 3.02-1.35.08-2.69-.29-3.81-.99-1.86-1.16-2.9-3.38-2.63-5.57.21-2.07 1.58-3.99 3.48-4.84 1.08-.49 2.29-.7 3.47-.5.01 1.5-.04 3-.04 4.5-1-.32-2.18-.23-3.03.39-.62.43-1.08 1.11-1.19 1.86-.1.68.08 1.41.53 1.93.74.88 2.13 1.14 3.14.6.93-.49 1.47-1.53 1.47-2.57.05-4.41.03-8.81.03-13.22z"
+  return <svg aria-label="TikTok" role="img" viewBox="0 0 24 24" className={className}><path fill="#25F4EE" d={mark} transform="translate(-.55 .3)"/><path fill="#FE2C55" d={mark} transform="translate(.45 -.2)"/><path fill="currentColor" d={mark}/></svg>
 }
 
 function CampaignCreate() {
@@ -85,19 +92,25 @@ function Marketplace() {
   const [category,setCategory]=useState("All categories")
   const [destination,setDestination]=useState("All destinations")
   const [commission,setCommission]=useState("Any commission")
-  const [joined,setJoined]=useState<string[]>([])
-  const items=useMemo(()=>resellerCampaignCards.filter(item=>`${item.name} ${item.product} ${item.destination}`.toLowerCase().includes(query.toLowerCase())&&(category==="All categories"||item.category===category)&&(destination==="All destinations"||item.destination===destination)&&(commission==="Any commission"||(commission==="10%+"&&Number.parseFloat(item.commission)>=10))),[category,commission,destination,query])
-  function join(name:string){setJoined(current=>current.includes(name)?current:[...current,name])}
-  return <><PageHeading eyebrow="Reseller Portal" title="Campaign marketplace" description="Find travel experiences that fit your audience and request to join a partner campaign."/><Card className="border-slate-200/80 shadow-sm"><CardContent className="grid gap-3 pt-5 md:grid-cols-2 xl:grid-cols-4"><div className="space-y-2"><Label htmlFor="campaign-search">Search</Label><Input id="campaign-search" type="search" className={inputClass+" w-full"} placeholder="Search destinations" value={query} onChange={event=>setQuery(event.target.value)} /></div><Pick label="Category" value={category} setValue={setCategory} options={["All categories","Tours & cruises","Hotels","Packages"]}/><Pick label="Destination" value={destination} setValue={setDestination} options={["All destinations","Ha Long Bay","Hoi An","Phu Quoc"]}/><Pick label="Commission" value={commission} setValue={setCommission} options={["Any commission","10%+"]}/></CardContent></Card><div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{items.map(item=><Card key={item.name} className="group overflow-hidden rounded-2xl border-slate-200/80 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"><div className="relative h-48 overflow-hidden bg-slate-100"><Image src={item.image} alt={`${item.destination}, Vietnam`} fill sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105"/><div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#14271e]/65 via-transparent to-black/5"/><span className="absolute bottom-3 left-4 text-xs font-semibold text-white drop-shadow">{item.destination}, Vietnam</span></div><CardHeader><div className="flex items-start justify-between gap-3"><div><CardTitle className="text-lg">{item.name}</CardTitle><CardDescription className="mt-1">{item.product} · {item.destination}</CardDescription></div><Badge className="bg-emerald-50 text-emerald-800">{item.status}</Badge></div></CardHeader><CardContent><div className="flex items-center justify-between text-sm"><span className="text-slate-500">Commission</span><strong>{item.commission}</strong></div><p className="mt-2 text-xs text-slate-500">Campaign dates: {item.dates}</p><Link href={`/reseller/campaign-detail?campaign=${encodeURIComponent(item.name)}`} className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-teal-800">View details <ArrowRight className="size-4"/></Link><Button className="mt-3 w-full bg-teal-800 hover:bg-teal-900" variant={joined.includes(item.name)?"outline":"default"} onClick={()=>join(item.name)}>{joined.includes(item.name)?"Request pending":"Request to join"}</Button></CardContent></Card>)}</div>{items.length===0&&<p className="py-8 text-center text-sm text-slate-500">No campaigns match these filters.</p>}{joined.length>0&&<p role="status" className="text-sm text-emerald-800">Join requests marked pending in this preview: {joined.join(", ")}.</p>}</>
+  const [participationFilter,setParticipationFilter]=useState("All participation")
+  const [feedback,setFeedback]=useState("")
+  const { memberships, requestToJoin } = useResellerCampaignMembership()
+  const items=useMemo(()=>resellerCampaignCards.filter(item=>`${item.name} ${item.product} ${item.destination}`.toLowerCase().includes(query.toLowerCase())&&(category==="All categories"||item.category===category)&&(destination==="All destinations"||item.destination===destination)&&(commission==="Any commission"||(commission==="10%+"&&Number.parseFloat(item.commission)>=10))&&(participationFilter==="All participation"||participationFilter==="Active"&&memberships[item.name]?.status==="Active"||participationFilter==="Pending approval"&&memberships[item.name]?.status==="Pending"||participationFilter==="Not joined"&&!memberships[item.name])),[category,commission,destination,memberships,participationFilter,query])
+  function join(name:string){requestToJoin(name);setFeedback(`${name}: join request sent. You can follow its status in My campaigns.`)}
+  return <><PageHeading eyebrow="Reseller Portal" title="Campaign marketplace" description="Browse all travel campaigns and manage participation from their details."/><Card className="border-slate-200/80 shadow-sm"><CardContent className="grid gap-3 pt-5 md:grid-cols-2 xl:grid-cols-5"><div className="space-y-2"><Label htmlFor="campaign-search">Search</Label><Input id="campaign-search" type="search" className={inputClass+" w-full"} placeholder="Search destinations" value={query} onChange={event=>setQuery(event.target.value)} /></div><Pick label="Category" value={category} setValue={setCategory} options={["All categories","Tours & cruises","Hotels","Packages"]}/><Pick label="Destination" value={destination} setValue={setDestination} options={["All destinations","Ha Long Bay","Hoi An","Phu Quoc"]}/><Pick label="Commission" value={commission} setValue={setCommission} options={["Any commission","10%+"]}/><Pick label="Participation status" value={participationFilter} setValue={setParticipationFilter} options={["All participation","Active","Pending approval","Not joined"]}/></CardContent></Card>{feedback&&<p role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">{feedback} <Link href="/reseller/my-campaigns" className="font-semibold underline">View My campaigns</Link></p>}<div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{items.map(item=>{const participation=memberships[item.name];const membershipLabel=participation?.status==="Active"?"Active":participation?.status==="Pending"?"Pending approval":"Not joined";return <Card key={item.name} className="group overflow-hidden rounded-2xl border-slate-200/80 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"><div className="relative h-48 overflow-hidden bg-slate-100"><Image src={item.image} alt={`${item.destination}, Vietnam`} fill sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105"/><div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#14271e]/65 via-transparent to-black/5"/><span className="absolute bottom-3 left-4 text-xs font-semibold text-white drop-shadow">{item.destination}, Vietnam</span></div><CardHeader><div className="flex items-start justify-between gap-3"><div><CardTitle className="text-lg">{item.name}</CardTitle><CardDescription className="mt-1">{item.product} · {item.destination}</CardDescription></div><Badge className={participation?.status==="Pending"?"bg-amber-50 text-amber-900":participation?.status==="Active"?"bg-blue-50 text-blue-700":"bg-emerald-50 text-emerald-800"}>{membershipLabel}</Badge></div></CardHeader><CardContent><div className="flex items-center justify-between text-sm"><span className="text-slate-500">Commission</span><strong>{item.commission}</strong></div><p className="mt-2 text-xs text-slate-500">Campaign dates: {item.dates}</p><Link href={`/reseller/campaign-detail?campaign=${encodeURIComponent(item.name)}&from=campaign-marketplace`} className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-teal-800">View details <ArrowRight className="size-4"/></Link>{participation?.status==="Active"?<Link href={`/reseller/campaign-detail?campaign=${encodeURIComponent(item.name)}&from=campaign-marketplace`} className="mt-3 inline-flex h-10 min-h-10 w-full items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700">Manage campaign</Link>:participation?.status==="Pending"?<Button className="mt-3 h-10 min-h-10 w-full border-amber-300 bg-amber-50 text-amber-900 opacity-100 hover:bg-amber-50" variant="outline" disabled>Pending approval</Button>:<Button className="mt-3 h-10 min-h-10 w-full bg-emerald-700 hover:bg-emerald-800" onClick={()=>join(item.name)}>Request to join</Button>}</CardContent></Card>})}</div>{items.length===0&&<p className="py-8 text-center text-sm text-slate-500">No campaigns match these filters.</p>}</>
 }
 
-function ResellerCampaignDetail() {
-  const [requested,setRequested]=useState(false)
-  const [campaignName,setCampaignName]=useState(resellerCampaignCards[0].name)
+function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }: { campaignName?: string; returnTo?: string }) {
+  const campaignName=selectedCampaignName??resellerCampaignCards[0].name
   const [activeImageIndex,setActiveImageIndex]=useState(0)
   const [galleryOffset,setGalleryOffset]=useState(0)
-  useEffect(()=>{const selected=new URLSearchParams(window.location.search).get("campaign");if(selected&&resellerCampaignCards.some(item=>item.name===selected))setCampaignName(selected)},[])
+  const [socialUrl,setSocialUrl]=useState("")
+  const [socialError,setSocialError]=useState("")
+  const [trackedPost,setTrackedPost]=useState<{url:string;platform:"TikTok"|"Facebook";views:number;likes:number}|null>(null)
+  const socialResultsRef=useRef<HTMLElement|null>(null)
+  const { memberships, requestToJoin } = useResellerCampaignMembership()
   const campaign=resellerCampaignCards.find(item=>item.name===campaignName)??resellerCampaignCards[0]
+  const participation=memberships[campaign.name]
   const detailCopy:Record<string,{subtitle:string;description:string;expectations:string}>={
     "Ha Long Bay":{subtitle:"A slower way to see the bay",description:"A two-night cruise through the limestone karsts of Ha Long Bay, with quiet mornings on the water and time to explore hidden coves.",expectations:"A comfortable overnight cruise, meals on board and time to take in the limestone landscape at an unhurried pace."},
     "Hoi An":{subtitle:"A riverside stay close to the old town",description:"Three nights beside the Thu Bon River, with lantern-lit evenings, local dining and time to explore Hoi An at your own pace.",expectations:"A boutique riverside stay, easy access to the old town and unhurried evenings among Hoi An's lantern-lit streets."},
@@ -111,17 +124,83 @@ function ResellerCampaignDetail() {
   const galleryImages=photosByDestination[campaign.destination]??photosByDestination["Ha Long Bay"]
   const visibleGalleryImages=Array.from({length:4},(_,index)=>(galleryOffset+index)%galleryImages.length)
   const description=detailCopy[campaign.destination]??detailCopy["Ha Long Bay"]
-  useEffect(()=>{setActiveImageIndex(0);setGalleryOffset(0);setRequested(false)},[campaignName])
   const moveGallery=(direction:number)=>{const index=(activeImageIndex+direction+galleryImages.length)%galleryImages.length;setActiveImageIndex(index);setGalleryOffset(index)}
+  function trackSocialPost(rawUrl:string){
+    let parsedUrl:URL
+    try{parsedUrl=new URL(rawUrl.trim())}catch{setSocialError("Enter a valid TikTok or Facebook post link.");return}
+    const hostname=parsedUrl.hostname.toLowerCase().replace(/^www\./,"")
+    const platform=hostname==="tiktok.com"||hostname.endsWith(".tiktok.com")?"TikTok":hostname==="facebook.com"||hostname.endsWith(".facebook.com")||hostname==="fb.watch"?"Facebook":null
+    if((parsedUrl.protocol!=="https:"&&parsedUrl.protocol!=="http:")||!platform){setSocialError("Use a public post link from TikTok or Facebook.");return}
+    const normalizedUrl=parsedUrl.toString()
+    let hash=0
+    for(let index=0;index<normalizedUrl.length;index++)hash=(hash*31+normalizedUrl.charCodeAt(index))>>>0
+    const views=1400+(hash%198601)
+    const likes=Math.max(1,Math.round(views*(0.035+(hash%31)/1000)))
+    setTrackedPost({url:normalizedUrl,platform,views,likes})
+    setSocialUrl(rawUrl)
+    setSocialError("")
+  }
+  function addSocialPost(event:FormEvent<HTMLFormElement>){event.preventDefault();trackSocialPost(socialUrl)}
+  useEffect(()=>{if(trackedPost)socialResultsRef.current?.scrollIntoView({behavior:"smooth",block:"nearest"})},[trackedPost])
+  const backToMyCampaigns=returnTo==="my-campaigns"
   return <div className="space-y-5">
+    <Link href={backToMyCampaigns?"/reseller/my-campaigns":"/reseller/campaign-marketplace"} className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-teal-800 transition hover:bg-teal-50 hover:underline"><ArrowRight className="size-4 rotate-180"/>Back to {backToMyCampaigns?"My campaigns":"Campaign Marketplace"}</Link>
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex flex-wrap items-end justify-between gap-5 p-6 sm:p-8"><div className="max-w-3xl"><p className="text-xs font-semibold uppercase tracking-[.15em] text-teal-800">{campaign.destination} · Vietnam</p><h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">{campaign.name}</h1><p className="mt-2 text-lg text-slate-600">{description.subtitle}</p><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">{description.description}</p></div><div className="rounded-xl border border-emerald-100 bg-emerald-50/70 px-5 py-3"><span className="block text-[10px] font-semibold uppercase tracking-[.12em] text-emerald-800">Commission</span><strong className="mt-0.5 block text-2xl font-semibold text-emerald-950">{campaign.commission}</strong><span className="text-xs text-emerald-800/75">per eligible booking</span></div></div>
+      <div className="flex flex-wrap items-end justify-between gap-5 p-6 sm:p-8"><div className="max-w-3xl"><p className="text-xs font-semibold uppercase tracking-[.15em] text-teal-800">{campaign.destination} · Vietnam</p><h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">{campaign.name}</h1><div className="mt-3"><Badge className={participation?.status==="Active"?"bg-emerald-50 text-emerald-800":participation?.status==="Pending"?"bg-amber-50 text-amber-900":"bg-slate-100 text-slate-700"}>{participation?.status??"Not joined"}</Badge>{participation&&<span className="ml-2 text-xs text-slate-500">{participation.status==="Active"?"Joined":"Requested"} {participation.joinedAt}</span>}</div><p className="mt-2 text-lg text-slate-600">{description.subtitle}</p><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">{description.description}</p></div><div className="rounded-xl border border-emerald-100 bg-emerald-50/70 px-5 py-3"><span className="block text-[10px] font-semibold uppercase tracking-[.12em] text-emerald-800">Commission</span><strong className="mt-0.5 block text-2xl font-semibold text-emerald-950">{campaign.commission}</strong><span className="text-xs text-emerald-800/75">per eligible booking</span></div></div>
       <div className="grid gap-4 border-t border-slate-100 bg-[#f8faf8] p-4 sm:p-6 lg:grid-cols-[minmax(0,1.55fr)_minmax(270px,.85fr)]">
         <div className="relative min-h-[290px] overflow-hidden rounded-xl bg-slate-200 sm:min-h-[370px]"><Image key={galleryImages[activeImageIndex].src} src={galleryImages[activeImageIndex].src} alt={galleryImages[activeImageIndex].alt} fill priority sizes="(max-width: 1023px) 100vw, 62vw" className="object-cover"/><div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#10251c]/65 via-transparent to-black/10"/><span className="absolute bottom-4 left-4 rounded-full border border-white/30 bg-[#14291f]/45 px-3 py-1.5 text-[10px] font-semibold tracking-[.1em] text-white backdrop-blur">{galleryImages[activeImageIndex].caption}</span><span className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-semibold text-slate-700 shadow-sm">{String(activeImageIndex+1).padStart(2,"0")} / {String(galleryImages.length).padStart(2,"0")}</span></div>
         <div className="flex min-w-0 flex-col gap-3"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[.12em] text-slate-700">Campaign photos</p><p className="mt-1 text-xs text-slate-500">Select a photo to view it larger.</p></div><div className="flex gap-1.5"><Button type="button" variant="outline" size="icon" aria-label="Previous campaign photo" onClick={()=>moveGallery(-1)} className="size-9 rounded-lg border-slate-200 bg-white"><ChevronLeft className="size-4"/></Button><Button type="button" variant="outline" size="icon" aria-label="Next campaign photo" onClick={()=>moveGallery(1)} className="size-9 rounded-lg border-slate-200 bg-white"><ChevronRight className="size-4"/></Button></div></div><div className="grid flex-1 grid-cols-2 grid-rows-2 gap-2.5">{visibleGalleryImages.map(index=>{const photo=galleryImages[index];return <button type="button" key={photo.src} onClick={()=>setActiveImageIndex(index)} aria-label={`View ${photo.caption.toLowerCase()} photo`} aria-pressed={activeImageIndex===index} className={`group/photo relative min-h-[90px] overflow-hidden rounded-xl border bg-white text-left transition ${activeImageIndex===index?"border-emerald-700 ring-2 ring-emerald-700/20":"border-slate-200 hover:border-emerald-300"}`}><Image src={photo.src} alt="" fill sizes="(max-width: 1023px) 45vw, 20vw" className="object-cover transition duration-300 group-hover/photo:scale-105"/><span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent px-2.5 pb-2 pt-5 text-[9px] font-semibold tracking-wide text-white">{photo.caption}</span></button>})}</div></div>
       </div>
     </section>
-    <div className="grid gap-4 lg:grid-cols-[1fr_0.8fr]"><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Offer details</CardTitle></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2"><Detail label="Travel product" value={campaign.product}/><Detail label="Travel dates" value={campaign.dates}/><Detail label="Commission" value={`${campaign.commission} per confirmed booking`}/><Detail label="Category" value={campaign.category}/><div className="sm:col-span-2"><Detail label="What travelers can expect" value={description.expectations}/></div></CardContent></Card><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Participation terms</CardTitle><CardDescription>Before you request to join</CardDescription></CardHeader><CardContent className="space-y-3 text-sm leading-6 text-slate-600"><p>Commissions apply to completed bookings attributed to your active referral link.</p><p>Use accurate product details in your recommendations. Cancelled bookings are not eligible.</p><Button className="mt-2 w-full bg-teal-800 hover:bg-teal-900" disabled={requested} onClick={()=>setRequested(true)}>{requested?"Pending approval":"Apply to join campaign"}</Button>{requested&&<p role="status" className="text-xs text-amber-800">Applications are reviewed by the travel brand. Demo request is pending approval.</p>}</CardContent></Card></div>
+    {participation?.status==="Active"&&(
+      <Card className="overflow-hidden border-slate-200/80 shadow-sm">
+        <CardHeader className="gap-3 bg-gradient-to-r from-slate-50 via-white to-blue-50/60 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <CardTitle>Social post performance</CardTitle>
+            <CardDescription className="mt-1">Add your TikTok or Facebook post link to preview views and likes for this campaign.</CardDescription>
+          </div>
+          <Badge className="w-fit border border-slate-200 bg-white text-slate-600">Frontend demo</Badge>
+        </CardHeader>
+        <CardContent className="space-y-5 pt-5">
+          <form onSubmit={addSocialPost} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="min-w-0 flex-1 space-y-2">
+              <Label htmlFor="social-post-url">TikTok or Facebook post link</Label>
+              <Input id="social-post-url" type="url" inputMode="url" placeholder="https://www.tiktok.com/@name/video/..." value={socialUrl} onChange={event=>setSocialUrl(event.target.value)} required/>
+            </div>
+            <Button type="submit" className="h-10 shrink-0 bg-teal-800 hover:bg-teal-900">Show metrics</Button>
+          </form>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-1 text-xs font-medium text-slate-500">Try a demo link:</span>
+            <Button type="button" variant="outline" className="h-9 rounded-full border-slate-200 bg-white px-3 text-xs hover:border-slate-400 hover:bg-slate-50" onClick={()=>{setSocialUrl("https://www.tiktok.com/@wayfarer.demo/video/7350000000000000001");setTrackedPost(null);setSocialError("")}}><SocialPlatformLogo platform="TikTok" className="size-4"/>TikTok sample</Button>
+            <Button type="button" variant="outline" className="h-9 rounded-full border-slate-200 bg-white px-3 text-xs text-slate-700 hover:border-slate-400 hover:bg-slate-50" onClick={()=>{setSocialUrl("https://www.facebook.com/watch/?v=7350000000000000002");setTrackedPost(null);setSocialError("")}}><SocialPlatformLogo platform="Facebook" className="size-4"/>Facebook sample</Button>
+          </div>
+          {socialError&&<p role="alert" className="text-sm text-rose-700">{socialError}</p>}
+          <p className="text-xs leading-5 text-slate-500">Demo metrics are generated locally. Live TikTok and Facebook analytics will require a backend integration.</p>
+          {trackedPost&&(
+            <article ref={socialResultsRef} aria-live="polite" className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.07)]">
+              <div className={`flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5 ${trackedPost.platform==="TikTok"?"border-slate-800 bg-[#111318]":"border-blue-700 bg-[#1877F2]"}`}>
+                <div className="flex items-center gap-2.5">
+                  <span className="grid size-10 place-items-center rounded-xl bg-white shadow-sm"><SocialPlatformLogo platform={trackedPost.platform} className="size-6"/></span>
+                  <div><p className="text-sm font-semibold text-white">{trackedPost.platform} post performance</p><p className="text-[11px] text-white/75">Campaign insights | Demo preview</p></div>
+                </div>
+                <a href={trackedPost.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/20">Open post <ArrowRight className="size-3.5 -rotate-45"/></a>
+              </div>
+              <div className="grid gap-3 p-3 sm:grid-cols-2 sm:p-4">
+                <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-white p-4 sm:p-5">
+                  <div className="flex items-start justify-between"><div><p className="text-xs font-semibold uppercase tracking-[.12em] text-blue-700">Video views</p><p className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{trackedPost.views.toLocaleString()}</p></div><span className="grid size-11 place-items-center rounded-xl bg-white text-blue-600 shadow-sm ring-1 ring-blue-100"><Eye className="size-5"/></span></div>
+                  <p className="mt-2 text-xs text-slate-500">Sample reach for the linked post</p>
+                </div>
+                <div className="rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50 via-white to-white p-4 sm:p-5">
+                  <div className="flex items-start justify-between"><div><p className="text-xs font-semibold uppercase tracking-[.12em] text-rose-700">Likes</p><p className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{trackedPost.likes.toLocaleString()}</p></div><span className="grid size-11 place-items-center rounded-xl bg-white text-rose-500 shadow-sm ring-1 ring-rose-100"><Heart className="size-5"/></span></div>
+                  <p className="mt-2 text-xs text-slate-500">Sample engagement for the linked post</p>
+                </div>
+              </div>
+            </article>
+          )}
+        </CardContent>
+      </Card>
+    )}
+    <div className="grid gap-4 lg:grid-cols-[1fr_0.8fr]"><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Offer details</CardTitle></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2"><Detail label="Travel product" value={campaign.product}/><Detail label="Travel dates" value={campaign.dates}/><Detail label="Commission" value={`${campaign.commission} per confirmed booking`}/><Detail label="Category" value={campaign.category}/><div className="sm:col-span-2"><Detail label="What travelers can expect" value={description.expectations}/></div></CardContent></Card><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>{participation?.status==="Active"?"Your campaign":"Participation terms"}</CardTitle><CardDescription>{participation?.status==="Active"?"Manage your promotion and performance.":participation?.status==="Pending"?"Your participation request is awaiting review.":"Before you request to join"}</CardDescription></CardHeader><CardContent className="space-y-3 text-sm leading-6 text-slate-600"><p>Commissions apply to completed bookings attributed to your active referral link.</p><p>Use accurate product details in your recommendations. Cancelled bookings are not eligible.</p>{participation?.status==="Active"?<div className="flex flex-col gap-2 pt-2"><Link href="/reseller/tracking-links" className="inline-flex min-h-10 items-center justify-center rounded-md bg-teal-800 px-4 text-sm font-medium text-white hover:bg-teal-900">Manage tracking links <ArrowRight className="ml-2 size-4"/></Link><Link href={`/reseller/campaign-content?campaign=${encodeURIComponent(campaign.name)}`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-teal-900 hover:bg-slate-50">Get content <ArrowRight className="ml-2 size-4"/></Link><Link href="/reseller/analytics" className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-teal-900 hover:bg-slate-50">View stats <ArrowRight className="ml-2 size-4"/></Link></div>:participation?.status==="Pending"?<div className="rounded-xl border border-amber-200 bg-amber-50 p-4"><p className="font-semibold text-amber-950">Pending approval</p><p className="mt-1 text-xs leading-5 text-amber-900/80">Your request was sent on {participation.joinedAt}. You cannot submit another request while it is under review.</p></div>:<Button className="mt-2 w-full bg-teal-800 hover:bg-teal-900" onClick={()=>requestToJoin(campaign.name)}>Apply to join campaign</Button>}</CardContent></Card></div>
   </div>
 }
 
@@ -162,7 +241,7 @@ export function TenantProductsPage() {
   function startCreate(){setActiveId(null);setForm({name:"",category:"",destination:"",description:"",price:"",currency:"USD",status:"Active"});setDialog("create")}
   function startRecord(product:ProductRecord,mode:"edit"|"view"){setActiveId(product.id);setForm({name:product.name,category:product.category,destination:product.destination,description:product.description,price:product.price,currency:product.currency,status:product.status});setDialog(mode)}
   function save(event:React.FormEvent<HTMLFormElement>){event.preventDefault();const next:ProductRecord={id:activeId??Date.now(),...form};setProducts(current=>activeId?current.map(product=>product.id===activeId?next:product):[next,...current]);setDialog(null)}
-  const currencyLabel=(currency:string,price:string)=>currency==="USD"?`$${price}`:currency==="EUR"?`€${price}`:currency==="GBP"?`£${price}`:`₫${Number(price).toLocaleString("en-US")}`
+  const currencyLabel=(currency:string,price:string)=>currency==="USD"?`$${price}`:currency==="EUR"?`${price}`:currency==="GBP"?`£${price}`:`?${Number(price).toLocaleString("en-US")}`
   return <><div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[.15em] text-teal-800">Tenant workspace</p><h1 className="mt-1 text-3xl font-semibold tracking-tight">{source.title}</h1><p className="mt-1 text-sm text-slate-500">Illustrative travel partner workspace · Sample data</p></div><Button onClick={startCreate} className="bg-teal-800 hover:bg-teal-900">Add product</Button></div><Card className="border-slate-200/80 shadow-sm"><CardContent className="space-y-4 pt-5"><div className="flex flex-col gap-3 sm:flex-row"><Input type="search" aria-label="Search products" placeholder="Search products" value={query} onChange={event=>setQuery(event.target.value)} className="sm:max-w-md"/><select aria-label="Filter by category" className={inputClass} value={category} onChange={event=>setCategory(event.target.value)}><option>All categories</option><option>Hotels</option><option>Tours &amp; cruises</option><option>Packages</option></select></div><div className="overflow-x-auto"><table className="w-full min-w-[700px] text-left text-sm"><thead><tr className="border-b text-xs text-slate-500">{source.columns.map(label=><th key={label} className="pb-3 font-medium">{label}</th>)}</tr></thead><tbody>{filtered.map(product=><tr key={product.id} className="border-b last:border-0"><td className="py-3.5 font-medium">{product.name}</td><td className="py-3.5 text-slate-600">{product.category}</td><td className="py-3.5 text-slate-600">{currencyLabel(product.currency,product.price)}</td><td className="py-3.5"><Badge className={product.status==="Active"?"bg-emerald-50 text-emerald-800":"bg-slate-100 text-slate-700"}>{product.status}</Badge></td><td className="py-3.5"><Button size="sm" variant="link" className="px-1" onClick={()=>startRecord(product,"view")}>View</Button><Button size="sm" variant="link" className="px-1 text-teal-800" onClick={()=>startRecord(product,"edit")}>Edit</Button></td></tr>)}</tbody></table>{filtered.length===0&&<p className="py-8 text-center text-sm text-slate-500">No products match your search.</p>}</div></CardContent></Card><p className="text-xs text-slate-400">Illustrative sample data · No live account, email or tracking functions</p>
     {dialog&&<div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#14291f]/55 p-3 backdrop-blur-md sm:p-6" onMouseDown={event=>{if(event.target===event.currentTarget)setDialog(null)}}>
       <Card role="dialog" aria-modal="true" aria-labelledby="product-dialog-title" className="my-auto w-full max-w-5xl overflow-hidden rounded-[26px] border border-white/80 bg-white p-0 shadow-[0_32px_100px_-28px_rgba(17,44,29,0.55)]">
@@ -197,7 +276,7 @@ export function TenantProductsPage() {
                 <div className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-xl bg-[#fff5df] text-[#a57931]"><CircleDollarSign className="size-4"/></span><div><h3 className="text-sm font-semibold text-slate-800">Pricing &amp; visibility</h3><p className="text-xs text-slate-500">Set your retail price and listing status.</p></div></div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="Retail price *"><Input required type="number" min="0.01" step="0.01" placeholder="0.00" value={form.price} onChange={event=>setForm(current=>({...current,price:event.target.value}))} className="h-12 rounded-xl border-slate-200 bg-white px-4 text-sm shadow-sm transition placeholder:text-slate-400 focus-visible:border-[#789979] focus-visible:ring-4 focus-visible:ring-[#e6efe2]"/></Field>
-                  <Field label="Currency *"><select className={inputClass+" h-12 w-full rounded-xl border-slate-200 bg-white px-4 text-sm shadow-sm transition focus:border-[#789979] focus:outline-none focus:ring-4 focus:ring-[#e6efe2]"} value={form.currency} onChange={event=>setForm(current=>({...current,currency:event.target.value}))}><option value="USD">USD — US Dollar</option><option value="VND">VND — Vietnamese Dong</option><option value="EUR">EUR — Euro</option><option value="GBP">GBP — British Pound</option></select></Field>
+                  <Field label="Currency *"><select className={inputClass+" h-12 w-full rounded-xl border-slate-200 bg-white px-4 text-sm shadow-sm transition focus:border-[#789979] focus:outline-none focus:ring-4 focus:ring-[#e6efe2]"} value={form.currency} onChange={event=>setForm(current=>({...current,currency:event.target.value}))}><option value="USD">USD  US Dollar</option><option value="VND">VND  Vietnamese Dong</option><option value="EUR">EUR  Euro</option><option value="GBP">GBP  British Pound</option></select></Field>
                   <Field label="Status *"><select className={inputClass+" h-12 w-full rounded-xl border-slate-200 bg-white px-4 text-sm shadow-sm transition focus:border-[#789979] focus:outline-none focus:ring-4 focus:ring-[#e6efe2]"} value={form.status} onChange={event=>setForm(current=>({...current,status:event.target.value}))}><option>Active</option><option>Draft</option></select></Field>
                 </div>
               </section>
@@ -222,10 +301,10 @@ export function TenantProductsPage() {
   </>
 }
 
-export function ResellerSpecialPage({ slug, campaignName }: { slug: string; campaignName?: string }) {
+export function ResellerSpecialPage({ slug, campaignName, returnTo }: { slug: string; campaignName?: string; returnTo?: string }) {
   if(slug==="campaign-marketplace")return <Marketplace/>
-  if(slug==="campaign-detail")return <ResellerCampaignDetail/>
-  if(slug==="campaign-content"||slug==="campaign-videos")return <ResellerCampaignVideos campaignName={campaignName}/>
+  if(slug==="campaign-detail")return <ResellerCampaignDetail key={campaignName??resellerCampaignCards[0].name} campaignName={campaignName} returnTo={returnTo}/>
+  if(slug==="campaign-content"||slug==="campaign-videos")return <ResellerCampaignVideos key={campaignName??storefrontJourneys[0].title} campaignName={campaignName}/>
   if(slug==="profile-settings")return <ResellerProfile/>
   if(slug==="ai-content")return <ResellerAiLibrary/>
   return <PageHeading eyebrow="Reseller Portal" title="Page not found" description="Choose a page from the reseller navigation."/>
@@ -244,12 +323,6 @@ function ResellerCampaignVideos({ campaignName }: { campaignName?: string }) {
   const [saved, setSaved] = useState(false)
   const selectedVideo = videoOptions.find((video) => video.id === selectedVideoId) ?? videoOptions[0]
   const videoBrief = `Create a ${selectedVideo.duration} ${selectedVideo.format.toLowerCase()} travel promo video for ${journey.title}. ${selectedVideo.scene} Use cinematic travel footage, warm natural light, and end with a clear invitation to explore the campaign.`
-
-  useEffect(() => {
-    setSelectedVideoId("highlights")
-    setCopied(false)
-    setSaved(false)
-  }, [journey.key])
 
   async function copyBrief() {
     try {

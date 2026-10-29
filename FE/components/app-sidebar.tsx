@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { Compass, ExternalLink, LogOut } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "@/components/ui/sidebar"
 import type { UserRole } from "@/lib/mock-auth"
@@ -15,6 +15,7 @@ const roleNames: Record<UserRole, string> = {
 
 export function AppSidebar({ role, onLogout, ...props }: React.ComponentProps<typeof Sidebar> & { role: UserRole; onLogout: () => void }) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   return (
     <Sidebar collapsible="offcanvas" className="workspace-sidebar" {...props}>
@@ -37,7 +38,9 @@ export function AppSidebar({ role, onLogout, ...props }: React.ComponentProps<ty
           <SidebarGroupLabel className="px-3 text-[10px] font-bold uppercase tracking-[.15em] text-slate-400">Workspace menu</SidebarGroupLabel>
           <SidebarMenu className="gap-1">
             {roleNavigation[role].map(({ label, icon: Icon, href }) => {
-              const isActive = pathname === href || pathname.startsWith(`${href}/`) || (role === "reseller" && href === "/reseller/campaign-marketplace" && pathname === "/reseller/campaign-detail")
+              const isCampaignDetail = role === "reseller" && pathname === "/reseller/campaign-detail"
+              const detailOriginHref = searchParams.get("from") === "my-campaigns" ? "/reseller/my-campaigns" : "/reseller/campaign-marketplace"
+              const isActive = pathname === href || pathname.startsWith(`${href}/`) || (isCampaignDetail && href === detailOriginHref)
               return (
                 <SidebarMenuItem key={label}>
                   <SidebarMenuButton

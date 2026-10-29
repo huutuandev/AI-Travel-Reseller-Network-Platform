@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.UUID;
 
 @Component
@@ -23,6 +21,7 @@ import java.util.UUID;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final com.aitravel.reseller.repository.UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -33,17 +32,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = getJwtFromRequest(request);
 
             if (StringUtils.hasText(jwt) && jwtUtil.validateToken(jwt)) {
-                String email = jwtUtil.getUsernameFromToken(jwt);
                 String idStr = jwtUtil.getClaimsFromToken(jwt).get("id", String.class);
-                Collection<? extends GrantedAuthority> authorities = jwtUtil.getAuthoritiesFromToken(jwt);
 
-                CustomUserDetails userDetails = new CustomUserDetails(UUID.fromString(idStr), email, authorities);
+                var account = userRepository.findById(UUID.fromString(idStr));
+                if (account.isPresent() && "ACTIVE".equals(account.get().getStatus())) {
+                CustomUserDetails userDetails = new CustomUserDetails(account.get());
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);

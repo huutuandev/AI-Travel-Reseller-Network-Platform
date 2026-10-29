@@ -17,16 +17,16 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name = "full_name", length = 100)
+    @Column(name = "full_name", nullable = false, length = 255)
     private String fullName;
 
-    @Column(length = 20)
+    @Column(length = 50)
     private String phone;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -38,13 +38,16 @@ public class User {
     @Builder.Default
     private Set<Role> roles = new HashSet<>();
 
-    @Column(length = 20)
+    @Column(length = 50)
     @Builder.Default
     private String status = "ACTIVE";
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
+
+    @Column(name = "email_verified_at")
+    private Instant emailVerifiedAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")

@@ -48,7 +48,7 @@ public class AuthService {
     public void register(RegisterRequest request) {
         Role resellerRole = roleRepository.findByName("ROLE_RESELLER")
                 .orElseGet(() -> roleRepository.save(Role.builder()
-                        .name("ROLE_RESELLER")
+                        .name("ROLE_RESELLER").scope("PLATFORM")
                         .description("Reseller Role")
                         .build()));
 

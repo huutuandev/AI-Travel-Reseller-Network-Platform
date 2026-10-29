@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "app.features.actor-functions", havingValue = "true")
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor

@@ -14,6 +14,17 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Void>> authenticationFailure(Exception e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Invalid credentials"));
+    }
+
+    @ExceptionHandler({org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
+            org.springframework.http.converter.HttpMessageNotReadableException.class})
+    public ResponseEntity<ApiResponse<Void>> malformedRequest(Exception e) {
+        return ResponseEntity.badRequest().body(ApiResponse.error("Invalid request format"));
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException e) {
         return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));

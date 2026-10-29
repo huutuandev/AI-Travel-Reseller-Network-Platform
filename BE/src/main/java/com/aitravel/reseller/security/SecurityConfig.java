@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -58,8 +57,6 @@ public class SecurityConfig {
                         "/swagger-ui.html",
                         "/api/v1/auth/**"
                 ).permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/products", "/api/v1/products/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/merchant/{id}").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             );

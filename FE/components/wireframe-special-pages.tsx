@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, BadgeCheck, BellRing, Check, ChevronLeft, ChevronRight, CircleDollarSign, Clapperboard, Copy, Eye, FileText, Heart, Library, MapPin, PackagePlus, Pause, Play, Sparkles, Tag, Video, X } from "lucide-react"
+import { ArrowRight, BadgeCheck, BellRing, Check, ChevronLeft, ChevronRight, CircleDollarSign, Clapperboard, Copy, Eye, FileText, Heart, Library, MapPin, PackagePlus, Pause, Play, Plus, Sparkles, Tag, Trash2, Video, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -26,6 +26,73 @@ function SocialPlatformLogo({ platform, className = "size-5" }: { platform: "Tik
   if (platform === "Facebook") return <svg aria-label="Facebook" role="img" viewBox="0 0 24 24" className={className}><path fill="#1877F2" d="M24 12c0-6.627-5.373-12-12-12S0 5.373 0 12c0 5.99 4.388 10.954 10.125 11.854V15.47H7.078V12h3.047V9.356c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.234 2.686.234v2.953h-1.513c-1.491 0-1.956.925-1.956 1.874V12h3.328l-.532 3.47h-2.796v8.384C19.612 22.954 24 17.99 24 12"/></svg>
   const mark = "M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.03 2.6 1.6 4.07 1.79v4.08c-1.38-.05-2.76-.33-4.04-.88-.56-.25-1.1-.55-1.62-.89-.01 2.75.01 5.5-.02 8.24-.07 1.32-.51 2.63-1.28 3.71-1.24 1.81-3.39 2.99-5.59 3.02-1.35.08-2.69-.29-3.81-.99-1.86-1.16-2.9-3.38-2.63-5.57.21-2.07 1.58-3.99 3.48-4.84 1.08-.49 2.29-.7 3.47-.5.01 1.5-.04 3-.04 4.5-1-.32-2.18-.23-3.03.39-.62.43-1.08 1.11-1.19 1.86-.1.68.08 1.41.53 1.93.74.88 2.13 1.14 3.14.6.93-.49 1.47-1.53 1.47-2.57.05-4.41.03-8.81.03-13.22z"
   return <svg aria-label="TikTok" role="img" viewBox="0 0 24 24" className={className}><path fill="#25F4EE" d={mark} transform="translate(-.55 .3)"/><path fill="#FE2C55" d={mark} transform="translate(.45 -.2)"/><path fill="currentColor" d={mark}/></svg>
+}
+
+type SocialPlatform = "TikTok" | "Facebook"
+type SocialPostLink = { id: string; url: string }
+type SocialPostMetrics = { url: string; views: number; likes: number }
+
+function SocialPostPanel({
+  platform,
+  links,
+  metrics,
+  errors,
+  onAdd,
+  onRemove,
+  onChange,
+  onShowMetrics,
+  onUseSample,
+}: {
+  platform: SocialPlatform
+  links: SocialPostLink[]
+  metrics: Record<string, SocialPostMetrics>
+  errors: Record<string, string>
+  onAdd: () => void
+  onRemove: (id: string) => void
+  onChange: (id: string, value: string) => void
+  onShowMetrics: (id: string, url: string) => void
+  onUseSample: () => void
+}) {
+  const isTikTok = platform === "TikTok"
+  return (
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <header className={`flex items-center justify-between gap-3 px-4 py-3.5 ${isTikTok ? "bg-[#111318]" : "bg-[#1877F2]"}`}>
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white shadow-sm"><SocialPlatformLogo platform={platform} className="size-6" /></span>
+          <div className="min-w-0"><h3 className="truncate text-sm font-semibold text-white">{platform} posts</h3><p className="mt-0.5 text-[11px] text-white/75">Track campaign post performance</p></div>
+        </div>
+        <Button type="button" variant="outline" onClick={onUseSample} className="h-8 shrink-0 rounded-full border-white/35 bg-white/10 px-3 text-xs text-white hover:bg-white/20 hover:text-white">{platform} sample link</Button>
+      </header>
+      <div className="space-y-3 p-3 sm:p-4">
+        {links.map((link, index) => (
+          <div key={link.id} className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <Label htmlFor={`social-post-${link.id}`} className="text-xs font-semibold text-slate-700">Post {String(index + 1).padStart(2, "0")}</Label>
+              {links.length > 1 && <button type="button" onClick={() => onRemove(link.id)} aria-label={`Remove ${platform} post ${index + 1}`} className="grid size-8 place-items-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"><Trash2 className="size-4" /></button>}
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input id={`social-post-${link.id}`} type="url" inputMode="url" placeholder={isTikTok ? "https://www.tiktok.com/@name/video/..." : "https://www.facebook.com/..."} value={link.url} onChange={(event) => onChange(link.id, event.target.value)} className="min-w-0 flex-1 bg-white" />
+              <Button type="button" onClick={() => onShowMetrics(link.id, link.url)} disabled={!link.url.trim()} className={`h-10 shrink-0 ${isTikTok ? "bg-[#202329] hover:bg-black" : "bg-[#1877F2] hover:bg-[#1266d6]"}`}>Show metrics</Button>
+            </div>
+            {errors[link.id] && <p role="alert" className="mt-2 text-xs text-rose-700">{errors[link.id]}</p>}
+            {metrics[link.id] && (
+              <article aria-live="polite" className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div className={`flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 ${isTikTok ? "bg-[#111318]" : "bg-[#1877F2]"}`}>
+                  <div className="flex items-center gap-2"><span className="grid size-7 shrink-0 place-items-center rounded-lg bg-white shadow-sm"><SocialPlatformLogo platform={platform} className="size-[18px]" /></span><span className="text-xs font-semibold text-white">Post performance <span className="font-normal text-white/70">· Demo</span></span></div>
+                  <a href={metrics[link.id].url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[11px] font-medium text-white/90 hover:text-white hover:underline">Open post <ArrowRight className="size-3 -rotate-45" /></a>
+                </div>
+                <div className="grid grid-cols-2 divide-x divide-slate-100">
+                  <div className="px-3 py-3"><p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700"><Eye className="size-3.5" />Views</p><p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{metrics[link.id].views.toLocaleString()}</p></div>
+                  <div className="px-3 py-3"><p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-rose-600"><Heart className="size-3.5" />Likes</p><p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{metrics[link.id].likes.toLocaleString()}</p></div>
+                </div>
+              </article>
+            )}
+          </div>
+        ))}
+        <button type="button" onClick={onAdd} className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-sky-400 hover:bg-sky-50/60 hover:text-sky-800"><Plus className="size-4" />Add {platform} post link</button>
+      </div>
+    </section>
+  )
 }
 
 function CampaignCreate() {
@@ -104,10 +171,9 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
   const campaignName=selectedCampaignName??resellerCampaignCards[0].name
   const [activeImageIndex,setActiveImageIndex]=useState(0)
   const [galleryOffset,setGalleryOffset]=useState(0)
-  const [socialUrl,setSocialUrl]=useState("")
-  const [socialError,setSocialError]=useState("")
-  const [trackedPost,setTrackedPost]=useState<{url:string;platform:"TikTok"|"Facebook";views:number;likes:number}|null>(null)
-  const socialResultsRef=useRef<HTMLElement|null>(null)
+  const [socialLinks,setSocialLinks]=useState<Record<SocialPlatform,SocialPostLink[]>>({TikTok:[{id:"tiktok-post-1",url:""}],Facebook:[{id:"facebook-post-1",url:""}]})
+  const [socialErrors,setSocialErrors]=useState<Record<string,string>>({})
+  const [trackedPosts,setTrackedPosts]=useState<Record<string,SocialPostMetrics>>({})
   const { memberships, requestToJoin } = useResellerCampaignMembership()
   const campaign=resellerCampaignCards.find(item=>item.name===campaignName)??resellerCampaignCards[0]
   const participation=memberships[campaign.name]
@@ -125,23 +191,41 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
   const visibleGalleryImages=Array.from({length:4},(_,index)=>(galleryOffset+index)%galleryImages.length)
   const description=detailCopy[campaign.destination]??detailCopy["Ha Long Bay"]
   const moveGallery=(direction:number)=>{const index=(activeImageIndex+direction+galleryImages.length)%galleryImages.length;setActiveImageIndex(index);setGalleryOffset(index)}
-  function trackSocialPost(rawUrl:string){
+  function updateSocialLink(platform:SocialPlatform,id:string,url:string){
+    setSocialLinks(current=>({...current,[platform]:current[platform].map(link=>link.id===id?{...link,url}:link)}))
+    setTrackedPosts(current=>{const next={...current};delete next[id];return next})
+    setSocialErrors(current=>{const next={...current};delete next[id];return next})
+  }
+  function addSocialLink(platform:SocialPlatform){
+    setSocialLinks(current=>({...current,[platform]:[...current[platform],{id:`${platform.toLowerCase()}-${crypto.randomUUID()}`,url:""}]}))
+  }
+  function removeSocialLink(platform:SocialPlatform,id:string){
+    setSocialLinks(current=>({...current,[platform]:current[platform].filter(link=>link.id!==id)}))
+    setTrackedPosts(current=>{const next={...current};delete next[id];return next})
+    setSocialErrors(current=>{const next={...current};delete next[id];return next})
+  }
+  function fillSampleLink(platform:SocialPlatform){
+    const links=socialLinks[platform]
+    const target=links.find(link=>!link.url.trim())
+    const link=target??{id:`${platform.toLowerCase()}-${crypto.randomUUID()}`,url:""}
+    const url=platform==="TikTok"?"https://www.tiktok.com/@wayfarer.demo/video/7350000000000000001":"https://www.facebook.com/watch/?v=7350000000000000002"
+    if(!target)setSocialLinks(current=>({...current,[platform]:[...current[platform],link]}))
+    updateSocialLink(platform,link.id,url)
+  }
+  function trackSocialPost(platform:SocialPlatform,id:string,rawUrl:string){
     let parsedUrl:URL
-    try{parsedUrl=new URL(rawUrl.trim())}catch{setSocialError("Enter a valid TikTok or Facebook post link.");return}
+    try{parsedUrl=new URL(rawUrl.trim())}catch{setSocialErrors(current=>({...current,[id]:"Enter a valid post link."}));return}
     const hostname=parsedUrl.hostname.toLowerCase().replace(/^www\./,"")
-    const platform=hostname==="tiktok.com"||hostname.endsWith(".tiktok.com")?"TikTok":hostname==="facebook.com"||hostname.endsWith(".facebook.com")||hostname==="fb.watch"?"Facebook":null
-    if((parsedUrl.protocol!=="https:"&&parsedUrl.protocol!=="http:")||!platform){setSocialError("Use a public post link from TikTok or Facebook.");return}
+    const detectedPlatform=hostname==="tiktok.com"||hostname.endsWith(".tiktok.com")?"TikTok":hostname==="facebook.com"||hostname.endsWith(".facebook.com")||hostname==="fb.watch"?"Facebook":null
+    if((parsedUrl.protocol!=="https:"&&parsedUrl.protocol!=="http:")||detectedPlatform!==platform){setSocialErrors(current=>({...current,[id]:`Enter a valid ${platform} post link.`}));return}
     const normalizedUrl=parsedUrl.toString()
     let hash=0
     for(let index=0;index<normalizedUrl.length;index++)hash=(hash*31+normalizedUrl.charCodeAt(index))>>>0
     const views=1400+(hash%198601)
     const likes=Math.max(1,Math.round(views*(0.035+(hash%31)/1000)))
-    setTrackedPost({url:normalizedUrl,platform,views,likes})
-    setSocialUrl(rawUrl)
-    setSocialError("")
+    setTrackedPosts(current=>({...current,[id]:{url:normalizedUrl,views,likes}}))
+    setSocialErrors(current=>{const next={...current};delete next[id];return next})
   }
-  function addSocialPost(event:FormEvent<HTMLFormElement>){event.preventDefault();trackSocialPost(socialUrl)}
-  useEffect(()=>{if(trackedPost)socialResultsRef.current?.scrollIntoView({behavior:"smooth",block:"nearest"})},[trackedPost])
   const backToMyCampaigns=returnTo==="my-campaigns"
   return <div className="space-y-5">
     <Link href={backToMyCampaigns?"/reseller/my-campaigns":"/reseller/campaign-marketplace"} className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-teal-800 transition hover:bg-teal-50 hover:underline"><ArrowRight className="size-4 rotate-180"/>Back to {backToMyCampaigns?"My campaigns":"Campaign Marketplace"}</Link>
@@ -156,47 +240,16 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
       <Card className="overflow-hidden border-slate-200/80 shadow-sm">
         <CardHeader className="gap-3 bg-gradient-to-r from-slate-50 via-white to-blue-50/60 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>Social post performance</CardTitle>
-            <CardDescription className="mt-1">Add your TikTok or Facebook post link to preview views and likes for this campaign.</CardDescription>
+            <CardTitle>Campaign post performance</CardTitle>
+            <CardDescription className="mt-1">Add multiple TikTok and Facebook posts. Each post has its own views and likes.</CardDescription>
           </div>
-          <Badge className="w-fit border border-slate-200 bg-white text-slate-600">Frontend demo</Badge>
         </CardHeader>
-        <CardContent className="space-y-5 pt-5">
-          <form onSubmit={addSocialPost} className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <div className="min-w-0 flex-1 space-y-2">
-              <Label htmlFor="social-post-url">TikTok or Facebook post link</Label>
-              <Input id="social-post-url" type="url" inputMode="url" placeholder="https://www.tiktok.com/@name/video/..." value={socialUrl} onChange={event=>setSocialUrl(event.target.value)} required/>
-            </div>
-            <Button type="submit" className="h-10 shrink-0 bg-teal-800 hover:bg-teal-900">Show metrics</Button>
-          </form>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-xs font-medium text-slate-500">Try a demo link:</span>
-            <Button type="button" variant="outline" className="h-9 rounded-full border-slate-200 bg-white px-3 text-xs hover:border-slate-400 hover:bg-slate-50" onClick={()=>{setSocialUrl("https://www.tiktok.com/@wayfarer.demo/video/7350000000000000001");setTrackedPost(null);setSocialError("")}}><SocialPlatformLogo platform="TikTok" className="size-4"/>TikTok sample</Button>
-            <Button type="button" variant="outline" className="h-9 rounded-full border-slate-200 bg-white px-3 text-xs text-slate-700 hover:border-slate-400 hover:bg-slate-50" onClick={()=>{setSocialUrl("https://www.facebook.com/watch/?v=7350000000000000002");setTrackedPost(null);setSocialError("")}}><SocialPlatformLogo platform="Facebook" className="size-4"/>Facebook sample</Button>
+        <CardContent className="space-y-4 pt-5">
+          <div className="grid gap-4 xl:grid-cols-2">
+            <SocialPostPanel platform="TikTok" links={socialLinks.TikTok} metrics={trackedPosts} errors={socialErrors} onAdd={()=>addSocialLink("TikTok")} onRemove={(id)=>removeSocialLink("TikTok",id)} onChange={(id,value)=>updateSocialLink("TikTok",id,value)} onShowMetrics={(id,url)=>trackSocialPost("TikTok",id,url)} onUseSample={()=>fillSampleLink("TikTok")}/>
+            <SocialPostPanel platform="Facebook" links={socialLinks.Facebook} metrics={trackedPosts} errors={socialErrors} onAdd={()=>addSocialLink("Facebook")} onRemove={(id)=>removeSocialLink("Facebook",id)} onChange={(id,value)=>updateSocialLink("Facebook",id,value)} onShowMetrics={(id,url)=>trackSocialPost("Facebook",id,url)} onUseSample={()=>fillSampleLink("Facebook")}/>
           </div>
-          {socialError&&<p role="alert" className="text-sm text-rose-700">{socialError}</p>}
-          <p className="text-xs leading-5 text-slate-500">Demo metrics are generated locally. Live TikTok and Facebook analytics will require a backend integration.</p>
-          {trackedPost&&(
-            <article ref={socialResultsRef} aria-live="polite" className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.07)]">
-              <div className={`flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5 ${trackedPost.platform==="TikTok"?"border-slate-800 bg-[#111318]":"border-blue-700 bg-[#1877F2]"}`}>
-                <div className="flex items-center gap-2.5">
-                  <span className="grid size-10 place-items-center rounded-xl bg-white shadow-sm"><SocialPlatformLogo platform={trackedPost.platform} className="size-6"/></span>
-                  <div><p className="text-sm font-semibold text-white">{trackedPost.platform} post performance</p><p className="text-[11px] text-white/75">Campaign insights | Demo preview</p></div>
-                </div>
-                <a href={trackedPost.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/20">Open post <ArrowRight className="size-3.5 -rotate-45"/></a>
-              </div>
-              <div className="grid gap-3 p-3 sm:grid-cols-2 sm:p-4">
-                <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-white p-4 sm:p-5">
-                  <div className="flex items-start justify-between"><div><p className="text-xs font-semibold uppercase tracking-[.12em] text-blue-700">Video views</p><p className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{trackedPost.views.toLocaleString()}</p></div><span className="grid size-11 place-items-center rounded-xl bg-white text-blue-600 shadow-sm ring-1 ring-blue-100"><Eye className="size-5"/></span></div>
-                  <p className="mt-2 text-xs text-slate-500">Sample reach for the linked post</p>
-                </div>
-                <div className="rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50 via-white to-white p-4 sm:p-5">
-                  <div className="flex items-start justify-between"><div><p className="text-xs font-semibold uppercase tracking-[.12em] text-rose-700">Likes</p><p className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{trackedPost.likes.toLocaleString()}</p></div><span className="grid size-11 place-items-center rounded-xl bg-white text-rose-500 shadow-sm ring-1 ring-rose-100"><Heart className="size-5"/></span></div>
-                  <p className="mt-2 text-xs text-slate-500">Sample engagement for the linked post</p>
-                </div>
-              </div>
-            </article>
-          )}
+          <p className="text-xs leading-5 text-slate-500">Demo metrics are generated locally. Live views and likes require a backend or platform analytics integration.</p>
         </CardContent>
       </Card>
     )}

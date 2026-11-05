@@ -19,7 +19,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
-    locations: classpath:db/redesign
+    locations: classpath:db/migration
     default-schema: travel_v2
     schemas: travel_v2
     create-schemas: true

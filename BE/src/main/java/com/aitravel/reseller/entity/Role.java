@@ -15,8 +15,11 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true, length = 100)
     private String name;
+
+    @Column(nullable = false, length = 50)
+    private String scope;
 
     @Column(columnDefinition = "TEXT")
     private String description;

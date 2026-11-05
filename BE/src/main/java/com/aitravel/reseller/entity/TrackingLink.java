@@ -3,41 +3,42 @@ package com.aitravel.reseller.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import java.math.BigDecimal;
+
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "tracking_links")
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TrackingLink {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "campaign_application_id", nullable = false)
+    private CampaignApplication campaignApplication;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reseller_id", nullable = false)
-    private Reseller reseller;
+    private ResellerProfile reseller;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "campaign_id", nullable = false)
-    private Campaign campaign;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
-
-    @Column(name = "tracking_code", length = 100, nullable = false, unique = true)
+    @Column(name = "tracking_code", nullable = false, unique = true, length = 100)
     private String trackingCode;
 
-    @Column(name = "landing_slug", length = 150, nullable = false, unique = true)
-    private String landingSlug;
+    @Column(name = "target_url", nullable = false, columnDefinition = "TEXT")
+    private String targetUrl;
 
-    @Column(name = "commission_snapshot", precision = 5, scale = 2, nullable = false)
-    private BigDecimal commissionSnapshot;
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private String status = "ACTIVE";
 
-    @Column(name = "reseller_split_snapshot", precision = 5, scale = 2, nullable = false)
-    private BigDecimal resellerSplitSnapshot;
+    @Column(name = "click_count", nullable = false)
+    @Builder.Default
+    private Integer clickCount = 0;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

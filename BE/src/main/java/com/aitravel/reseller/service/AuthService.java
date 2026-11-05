@@ -46,6 +46,12 @@ public class AuthService {
 
     @Transactional
     public void register(RegisterRequest request) {
+        Role resellerRole = roleRepository.findByName("ROLE_RESELLER")
+                .orElseGet(() -> roleRepository.save(Role.builder()
+                        .name("ROLE_RESELLER").scope("PLATFORM")
+                        .description("Reseller Role")
+                        .build()));
+
         String email = request.getEmail();
         Optional<User> existingUserOpt = userRepository.findByEmail(email);
 
@@ -59,11 +65,11 @@ public class AuthService {
             }
             existingUser.setFullName(request.getFullName());
             existingUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+            existingUser.setRoles(Set.of(resellerRole));
+            existingUser.setStatus("INACTIVE");
             userRepository.save(existingUser);
+            generateAndSendOtp(email);
         } else {
-            Role resellerRole = roleRepository.findByName("ROLE_RESELLER")
-                    .orElseGet(() -> roleRepository.save(Role.builder().name("ROLE_RESELLER").description("Reseller Role").build()));
-
             User newUser = User.builder()
                     .email(email)
                     .passwordHash(passwordEncoder.encode(request.getPassword()))
@@ -72,9 +78,8 @@ public class AuthService {
                     .roles(Set.of(resellerRole))
                     .build();
             userRepository.save(newUser);
+            generateAndSendOtp(email);
         }
-
-        generateAndSendOtp(email);
     }
 
     @Transactional
@@ -143,31 +148,31 @@ public class AuthService {
 
     public AuthResponse refreshToken(TokenRefreshRequest request) {
         String requestRefreshToken = request.getRefreshToken();
-        
+
         // Refresh token format: {userId}:{tokenId}
         String[] parts = requestRefreshToken.split(":");
         if (parts.length != 2) {
             throw new IllegalArgumentException("Invalid refresh token format");
         }
-        
+
         String userId = parts[0];
         String tokenId = parts[1];
         String redisKey = REFRESH_TOKEN_PREFIX + userId + ":" + tokenId;
-        
+
         String email = redisService.get(redisKey);
         if (email == null) {
             throw new IllegalArgumentException("Refresh token is invalid or expired");
         }
-        
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-                
+
         if (!"ACTIVE".equals(user.getStatus())) {
             throw new IllegalStateException("Account is not active");
         }
 
         CustomUserDetails userDetails = new CustomUserDetails(user);
-        
+
         // Rotate refresh token
         redisService.delete(redisKey);
         return generateTokens(userDetails);
@@ -176,7 +181,7 @@ public class AuthService {
     private static final String RESET_OTP_PREFIX = "auth:password-reset:";
     private static final String RESET_OTP_RESEND_PREFIX = "auth:password-reset:resend:";
     private static final String RESET_TOKEN_PREFIX = "auth:password-reset:verified:";
-    
+
     private static final long RESET_OTP_TTL_MINUTES = 5;
     private static final long RESET_TOKEN_TTL_MINUTES = 10;
 
@@ -260,10 +265,10 @@ public class AuthService {
 
     private AuthResponse generateTokens(CustomUserDetails userDetails) {
         String accessToken = jwtUtil.generateAccessToken(userDetails);
-        
+
         String tokenId = UUID.randomUUID().toString();
         String refreshToken = userDetails.getId() + ":" + tokenId;
-        
+
         String redisKey = REFRESH_TOKEN_PREFIX + userDetails.getId() + ":" + tokenId;
         redisService.save(redisKey, userDetails.getEmail(), refreshTokenExpirationMs, TimeUnit.MILLISECONDS);
 

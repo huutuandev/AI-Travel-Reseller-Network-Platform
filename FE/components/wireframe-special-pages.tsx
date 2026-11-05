@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, BadgeCheck, BellRing, Check, ChevronLeft, ChevronRight, CircleDollarSign, Clapperboard, Copy, Eye, FileText, Heart, Library, MapPin, PackagePlus, Pause, Play, Sparkles, Tag, Video, X } from "lucide-react"
+import { ArrowRight, BadgeCheck, BellRing, Check, ChevronLeft, ChevronRight, CircleDollarSign, Clapperboard, Copy, Eye, FileText, Heart, Library, Link2, MapPin, PackagePlus, Pause, Play, Plus, Sparkles, Tag, Trash2, Video, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -27,6 +27,9 @@ function SocialPlatformLogo({ platform, className = "size-5" }: { platform: "Tik
   const mark = "M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.03 2.6 1.6 4.07 1.79v4.08c-1.38-.05-2.76-.33-4.04-.88-.56-.25-1.1-.55-1.62-.89-.01 2.75.01 5.5-.02 8.24-.07 1.32-.51 2.63-1.28 3.71-1.24 1.81-3.39 2.99-5.59 3.02-1.35.08-2.69-.29-3.81-.99-1.86-1.16-2.9-3.38-2.63-5.57.21-2.07 1.58-3.99 3.48-4.84 1.08-.49 2.29-.7 3.47-.5.01 1.5-.04 3-.04 4.5-1-.32-2.18-.23-3.03.39-.62.43-1.08 1.11-1.19 1.86-.1.68.08 1.41.53 1.93.74.88 2.13 1.14 3.14.6.93-.49 1.47-1.53 1.47-2.57.05-4.41.03-8.81.03-13.22z"
   return <svg aria-label="TikTok" role="img" viewBox="0 0 24 24" className={className}><path fill="#25F4EE" d={mark} transform="translate(-.55 .3)"/><path fill="#FE2C55" d={mark} transform="translate(.45 -.2)"/><path fill="currentColor" d={mark}/></svg>
 }
+
+type SocialPlatform = "TikTok" | "Facebook"
+type SocialPostEntry = { id: string; url: string; views: number | null; likes: number | null; error: string }
 
 function CampaignCreate() {
   const [feedback, setFeedback] = useState("")
@@ -104,10 +107,10 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
   const campaignName=selectedCampaignName??resellerCampaignCards[0].name
   const [activeImageIndex,setActiveImageIndex]=useState(0)
   const [galleryOffset,setGalleryOffset]=useState(0)
-  const [socialUrl,setSocialUrl]=useState("")
-  const [socialError,setSocialError]=useState("")
-  const [trackedPost,setTrackedPost]=useState<{url:string;platform:"TikTok"|"Facebook";views:number;likes:number}|null>(null)
-  const socialResultsRef=useRef<HTMLElement|null>(null)
+  const [socialEntries,setSocialEntries]=useState<Record<SocialPlatform,SocialPostEntry[]>>({
+    TikTok:[{id:"tiktok-post-1",url:"",views:null,likes:null,error:""}],
+    Facebook:[{id:"facebook-post-1",url:"",views:null,likes:null,error:""}],
+  })
   const { memberships, requestToJoin } = useResellerCampaignMembership()
   const campaign=resellerCampaignCards.find(item=>item.name===campaignName)??resellerCampaignCards[0]
   const participation=memberships[campaign.name]
@@ -125,23 +128,28 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
   const visibleGalleryImages=Array.from({length:4},(_,index)=>(galleryOffset+index)%galleryImages.length)
   const description=detailCopy[campaign.destination]??detailCopy["Ha Long Bay"]
   const moveGallery=(direction:number)=>{const index=(activeImageIndex+direction+galleryImages.length)%galleryImages.length;setActiveImageIndex(index);setGalleryOffset(index)}
-  function trackSocialPost(rawUrl:string){
+  function updateSocialEntry(platform:SocialPlatform,id:string,updates:Partial<SocialPostEntry>){
+    setSocialEntries(current=>({...current,[platform]:current[platform].map(entry=>entry.id===id?{...entry,...updates}:entry)}))
+  }
+  function showSocialMetrics(platform:SocialPlatform,id:string){
+    const entry=socialEntries[platform].find(item=>item.id===id)
+    if(!entry)return
+    const rawUrl=entry.url
     let parsedUrl:URL
-    try{parsedUrl=new URL(rawUrl.trim())}catch{setSocialError("Enter a valid TikTok or Facebook post link.");return}
+    try{parsedUrl=new URL(rawUrl.trim())}catch{updateSocialEntry(platform,id,{error:`Enter a valid ${platform} post link.`});return}
     const hostname=parsedUrl.hostname.toLowerCase().replace(/^www\./,"")
-    const platform=hostname==="tiktok.com"||hostname.endsWith(".tiktok.com")?"TikTok":hostname==="facebook.com"||hostname.endsWith(".facebook.com")||hostname==="fb.watch"?"Facebook":null
-    if((parsedUrl.protocol!=="https:"&&parsedUrl.protocol!=="http:")||!platform){setSocialError("Use a public post link from TikTok or Facebook.");return}
+    const detectedPlatform:SocialPlatform|null=hostname==="tiktok.com"||hostname.endsWith(".tiktok.com")?"TikTok":hostname==="facebook.com"||hostname.endsWith(".facebook.com")||hostname==="fb.watch"?"Facebook":null
+    if((parsedUrl.protocol!=="https:"&&parsedUrl.protocol!=="http:")||detectedPlatform!==platform){updateSocialEntry(platform,id,{error:`Paste a link from ${platform} in this field.`});return}
     const normalizedUrl=parsedUrl.toString()
     let hash=0
     for(let index=0;index<normalizedUrl.length;index++)hash=(hash*31+normalizedUrl.charCodeAt(index))>>>0
     const views=1400+(hash%198601)
     const likes=Math.max(1,Math.round(views*(0.035+(hash%31)/1000)))
-    setTrackedPost({url:normalizedUrl,platform,views,likes})
-    setSocialUrl(rawUrl)
-    setSocialError("")
+    updateSocialEntry(platform,id,{url:normalizedUrl,views,likes,error:""})
   }
-  function addSocialPost(event:FormEvent<HTMLFormElement>){event.preventDefault();trackSocialPost(socialUrl)}
-  useEffect(()=>{if(trackedPost)socialResultsRef.current?.scrollIntoView({behavior:"smooth",block:"nearest"})},[trackedPost])
+  function fillSocialSample(platform:SocialPlatform,id:string){updateSocialEntry(platform,id,{url:platform==="TikTok"?"https://www.tiktok.com/@wayfarer.demo/video/7350000000000000001":"https://www.facebook.com/watch/?v=7350000000000000002",views:null,likes:null,error:""})}
+  function addSocialEntry(platform:SocialPlatform){setSocialEntries(current=>({...current,[platform]:[...current[platform],{id:crypto.randomUUID(),url:"",views:null,likes:null,error:""}]}))}
+  function removeSocialEntry(platform:SocialPlatform,id:string){setSocialEntries(current=>({...current,[platform]:current[platform].length>1?current[platform].filter(entry=>entry.id!==id):current[platform]}))}
   const backToMyCampaigns=returnTo==="my-campaigns"
   return <div className="space-y-5">
     <Link href={backToMyCampaigns?"/reseller/my-campaigns":"/reseller/campaign-marketplace"} className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-teal-800 transition hover:bg-teal-50 hover:underline"><ArrowRight className="size-4 rotate-180"/>Back to {backToMyCampaigns?"My campaigns":"Campaign Marketplace"}</Link>
@@ -153,50 +161,55 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
       </div>
     </section>
     {participation?.status==="Active"&&(
-      <Card className="overflow-hidden border-slate-200/80 shadow-sm">
-        <CardHeader className="gap-3 bg-gradient-to-r from-slate-50 via-white to-blue-50/60 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <CardTitle>Social post performance</CardTitle>
-            <CardDescription className="mt-1">Add your TikTok or Facebook post link to preview views and likes for this campaign.</CardDescription>
+      <Card className="overflow-hidden rounded-2xl border-slate-200/80 shadow-sm">
+        <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-white via-slate-50/80 to-sky-50/70 p-5 sm:p-6">
+          <div className="flex items-start gap-3.5">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-sky-100 bg-white text-sky-700 shadow-sm"><Link2 className="size-5"/></span>
+            <div><CardTitle className="text-lg">Social post performance</CardTitle><CardDescription className="mt-1 max-w-2xl leading-5">Organize every campaign post by platform and review its engagement individually.</CardDescription></div>
           </div>
-          <Badge className="w-fit border border-slate-200 bg-white text-slate-600">Frontend demo</Badge>
         </CardHeader>
-        <CardContent className="space-y-5 pt-5">
-          <form onSubmit={addSocialPost} className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <div className="min-w-0 flex-1 space-y-2">
-              <Label htmlFor="social-post-url">TikTok or Facebook post link</Label>
-              <Input id="social-post-url" type="url" inputMode="url" placeholder="https://www.tiktok.com/@name/video/..." value={socialUrl} onChange={event=>setSocialUrl(event.target.value)} required/>
-            </div>
-            <Button type="submit" className="h-10 shrink-0 bg-teal-800 hover:bg-teal-900">Show metrics</Button>
-          </form>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-xs font-medium text-slate-500">Try a demo link:</span>
-            <Button type="button" variant="outline" className="h-9 rounded-full border-slate-200 bg-white px-3 text-xs hover:border-slate-400 hover:bg-slate-50" onClick={()=>{setSocialUrl("https://www.tiktok.com/@wayfarer.demo/video/7350000000000000001");setTrackedPost(null);setSocialError("")}}><SocialPlatformLogo platform="TikTok" className="size-4"/>TikTok sample</Button>
-            <Button type="button" variant="outline" className="h-9 rounded-full border-slate-200 bg-white px-3 text-xs text-slate-700 hover:border-slate-400 hover:bg-slate-50" onClick={()=>{setSocialUrl("https://www.facebook.com/watch/?v=7350000000000000002");setTrackedPost(null);setSocialError("")}}><SocialPlatformLogo platform="Facebook" className="size-4"/>Facebook sample</Button>
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid items-start gap-4 lg:grid-cols-2">
+            {(["TikTok","Facebook"] as const).map((platform)=>{
+              const isTikTok=platform==="TikTok"
+              const entries=socialEntries[platform]
+              const linkedCount=entries.filter(entry=>entry.url.trim()).length
+              return <section key={platform} aria-label={`${platform} campaign posts`} className={`min-w-0 rounded-2xl border p-4 sm:p-5 ${isTikTok?"border-slate-200 bg-gradient-to-br from-white to-slate-50":"border-blue-100 bg-gradient-to-br from-white to-blue-50/60"}`}>
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className={`grid size-11 shrink-0 place-items-center rounded-xl border bg-white shadow-sm ${isTikTok?"border-slate-200":"border-blue-100"}`}><SocialPlatformLogo platform={platform} className="size-6"/></span>
+                    <div className="min-w-0"><h3 className="font-semibold text-slate-900">{platform}</h3><p className="text-xs text-slate-500">{isTikTok?"Short videos & reels":"Facebook video posts"}</p></div>
+                  </div>
+                  <Badge variant="outline" className="shrink-0 rounded-full border-slate-200 bg-white px-2.5 text-slate-600">{linkedCount} {linkedCount===1?"link":"links"}</Badge>
+                </div>
+
+                <div className="space-y-3">
+                  {entries.map((entry,index)=>{
+                    const inputId=`social-${platform.toLowerCase()}-${entry.id}`
+                    return <div key={entry.id} className="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-[0_3px_14px_rgba(15,23,42,0.035)] sm:p-4">
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <Label htmlFor={inputId} className="text-xs font-semibold text-slate-700">Post {String(index+1).padStart(2,"0")} link</Label>
+                        {entries.length>1&&<Button type="button" variant="ghost" size="icon" aria-label={`Remove ${platform} link ${index+1}`} className="size-8 rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600" onClick={()=>removeSocialEntry(platform,entry.id)}><Trash2 className="size-4"/></Button>}
+                      </div>
+                      <Input id={inputId} type="url" inputMode="url" autoComplete="url" placeholder={isTikTok?"https://www.tiktok.com/@name/video/...":"https://www.facebook.com/..."} value={entry.url} onChange={event=>updateSocialEntry(platform,entry.id,{url:event.target.value,views:null,likes:null,error:""})} aria-describedby={entry.error?`${inputId}-error`:undefined} className="h-11 rounded-xl border-slate-200 bg-white focus-visible:ring-sky-500/20"/>
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                        <button type="button" onClick={()=>fillSocialSample(platform,entry.id)} className="text-xs font-semibold text-sky-700 underline decoration-sky-200 underline-offset-4 transition hover:text-sky-900">Use sample link</button>
+                        <Button type="button" className={`h-9 rounded-lg px-3.5 text-xs ${isTikTok?"bg-slate-900 hover:bg-slate-800":"bg-[#1877F2] hover:bg-[#1268d8]"}`} disabled={!entry.url.trim()} onClick={()=>showSocialMetrics(platform,entry.id)}><Eye className="mr-1.5 size-3.5"/>Show metrics</Button>
+                      </div>
+                      {entry.error&&<p id={`${inputId}-error`} role="alert" className="mt-2 text-xs font-medium text-rose-700">{entry.error}</p>}
+                      {entry.views!==null&&entry.likes!==null&&<div aria-live="polite" className="mt-4 grid gap-2.5 border-t border-slate-100 pt-3 sm:grid-cols-2">
+                        <div className="flex items-center justify-between gap-2 rounded-xl border border-sky-100 bg-gradient-to-br from-sky-50/80 to-white p-3"><div><p className="text-[10px] font-bold uppercase tracking-[.12em] text-sky-700">Views</p><p className="mt-1 text-xl font-bold tracking-tight text-slate-900">{entry.views.toLocaleString()}</p></div><span className="grid size-9 place-items-center rounded-lg bg-white text-sky-700 shadow-sm"><Eye className="size-4.5"/></span></div>
+                        <div className="flex items-center justify-between gap-2 rounded-xl border border-rose-100 bg-gradient-to-br from-rose-50/70 to-white p-3"><div><p className="text-[10px] font-bold uppercase tracking-[.12em] text-rose-700">Likes</p><p className="mt-1 text-xl font-bold tracking-tight text-slate-900">{entry.likes.toLocaleString()}</p></div><span className="grid size-9 place-items-center rounded-lg bg-white text-rose-600 shadow-sm"><Heart className="size-4.5"/></span></div>
+                        <p className="text-[10px] leading-4 text-slate-500 sm:col-span-2">Preview estimates. Live platform analytics require an authorized integration.</p>
+                      </div>}
+                    </div>
+                  })}
+                </div>
+
+                <Button type="button" variant="outline" className="mt-3 h-10 w-full rounded-xl border-dashed border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-800" onClick={()=>addSocialEntry(platform)}><Plus className="mr-1.5 size-4"/>Add another {platform} link</Button>
+              </section>
+            })}
           </div>
-          {socialError&&<p role="alert" className="text-sm text-rose-700">{socialError}</p>}
-          <p className="text-xs leading-5 text-slate-500">Demo metrics are generated locally. Live TikTok and Facebook analytics will require a backend integration.</p>
-          {trackedPost&&(
-            <article ref={socialResultsRef} aria-live="polite" className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.07)]">
-              <div className={`flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5 ${trackedPost.platform==="TikTok"?"border-slate-800 bg-[#111318]":"border-blue-700 bg-[#1877F2]"}`}>
-                <div className="flex items-center gap-2.5">
-                  <span className="grid size-10 place-items-center rounded-xl bg-white shadow-sm"><SocialPlatformLogo platform={trackedPost.platform} className="size-6"/></span>
-                  <div><p className="text-sm font-semibold text-white">{trackedPost.platform} post performance</p><p className="text-[11px] text-white/75">Campaign insights | Demo preview</p></div>
-                </div>
-                <a href={trackedPost.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/20">Open post <ArrowRight className="size-3.5 -rotate-45"/></a>
-              </div>
-              <div className="grid gap-3 p-3 sm:grid-cols-2 sm:p-4">
-                <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-white p-4 sm:p-5">
-                  <div className="flex items-start justify-between"><div><p className="text-xs font-semibold uppercase tracking-[.12em] text-blue-700">Video views</p><p className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{trackedPost.views.toLocaleString()}</p></div><span className="grid size-11 place-items-center rounded-xl bg-white text-blue-600 shadow-sm ring-1 ring-blue-100"><Eye className="size-5"/></span></div>
-                  <p className="mt-2 text-xs text-slate-500">Sample reach for the linked post</p>
-                </div>
-                <div className="rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50 via-white to-white p-4 sm:p-5">
-                  <div className="flex items-start justify-between"><div><p className="text-xs font-semibold uppercase tracking-[.12em] text-rose-700">Likes</p><p className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{trackedPost.likes.toLocaleString()}</p></div><span className="grid size-11 place-items-center rounded-xl bg-white text-rose-500 shadow-sm ring-1 ring-rose-100"><Heart className="size-5"/></span></div>
-                  <p className="mt-2 text-xs text-slate-500">Sample engagement for the linked post</p>
-                </div>
-              </div>
-            </article>
-          )}
         </CardContent>
       </Card>
     )}

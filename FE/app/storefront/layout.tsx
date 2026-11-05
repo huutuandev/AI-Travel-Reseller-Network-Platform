@@ -1,5 +1,6 @@
 import "./storefront.css"
 import type { Metadata } from "next"
+import { CustomerChatWidget } from "@/components/storefront/customer-chat-widget"
 
 export const metadata: Metadata = {
   title: "Lantern & Tide Travel | Considered journeys in Vietnam",
@@ -7,5 +8,5 @@ export const metadata: Metadata = {
 }
 
 export default function StorefrontLayout({ children }: { children: React.ReactNode }) {
-  return <div className="store-page">{children}</div>
+  return <div className="store-page">{children}<CustomerChatWidget /></div>
 }

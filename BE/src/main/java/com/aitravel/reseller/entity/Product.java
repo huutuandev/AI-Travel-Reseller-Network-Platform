@@ -35,6 +35,12 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "category_code", length = 50)
+    private String categoryCode;
+
+    @Column(name = "destination_code", length = 100)
+    private String destinationCode;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "images", columnDefinition = "JSONB", nullable = false)
     @Builder.Default
@@ -46,6 +52,10 @@ public class Product {
     @Column(name = "sale_price", precision = 12, scale = 2)
     private BigDecimal salePrice;
 
+    @Column(nullable = false, length = 3)
+    @Builder.Default
+    private String currency = "VND";
+
     @Column(name = "availability_status", nullable = false, length = 20)
     private String availabilityStatus;
 
@@ -53,10 +63,10 @@ public class Product {
     private String officialCheckoutUrl;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 }

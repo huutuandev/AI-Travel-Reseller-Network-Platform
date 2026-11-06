@@ -36,9 +36,19 @@ public class Campaign {
     @Column(name = "commission_rate", nullable = false, precision = 10, scale = 2)
     private BigDecimal commissionRate;
 
+    @Column(name = "commission_currency", length = 3)
+    private String commissionCurrency;
+
     @Column(name = "cookie_window_days", nullable = false)
     @Builder.Default
     private Integer cookieWindowDays = 30;
+
+    @Column(name = "terms_text", columnDefinition = "TEXT")
+    private String termsText;
+
+    @Column(name = "terms_version", nullable = false)
+    @Builder.Default
+    private Integer termsVersion = 1;
 
     @Column(name = "start_date")
     private Instant startDate;
@@ -50,10 +60,10 @@ public class Campaign {
     private String status;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 }

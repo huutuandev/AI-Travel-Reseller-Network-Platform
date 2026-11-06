@@ -19,7 +19,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
-    locations: classpath:db/migration
+    locations: 
+    - classpath:db/migration
+    - classpath:db/data
     default-schema: travel_v2
     schemas: travel_v2
     create-schemas: true
@@ -65,6 +67,8 @@ app:
     password: ${ADMIN_BOOTSTRAP_PASSWORD:}
   features:
     account-management: false
+  tracking:
+      base-url: https://aitravel.vn
 
 server:
   port: ${SERVER_PORT:8080} # Port của ứng dụng Spring Boot

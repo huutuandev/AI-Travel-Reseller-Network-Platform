@@ -1,5 +1,7 @@
 # AI-Travel-Reseller-Network-Platform
 
+Bản thiết kế API cho toàn bộ giao diện Reseller: [RESELLER_API_DESIGN.md](docs/RESELLER_API_DESIGN.md) — ánh xạ màn hình, endpoint, request/response, phân quyền và thay đổi database đề xuất.
+
 ## Yêu cầu
 
 - Git

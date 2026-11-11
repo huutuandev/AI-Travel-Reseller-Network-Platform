@@ -1,0 +1,17 @@
+FROM postgres:15.19-alpine3.24
+
+ARG PGVECTOR_VERSION=v0.8.7
+
+RUN set -eux; \
+    apk add --no-cache --virtual .pgvector-build-deps build-base git; \
+    test "$(pg_config --version)" = "PostgreSQL 15.19"; \
+    test -f "$(pg_config --includedir-server)/postgres.h"; \
+    git clone \
+        --depth 1 \
+        --branch "${PGVECTOR_VERSION}" \
+        https://github.com/pgvector/pgvector.git \
+        /tmp/pgvector; \
+    make -C /tmp/pgvector OPTFLAGS="" with_llvm=0; \
+    make -C /tmp/pgvector install with_llvm=0; \
+    rm -rf /tmp/pgvector; \
+    apk del .pgvector-build-deps

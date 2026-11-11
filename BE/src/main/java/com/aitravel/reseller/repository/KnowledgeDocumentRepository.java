@@ -9,7 +9,16 @@ import java.util.UUID;
 
 @Repository
 public interface KnowledgeDocumentRepository extends JpaRepository<KnowledgeDocument, UUID> {
+
     List<KnowledgeDocument> findByMerchantId(UUID merchantId);
+
     List<KnowledgeDocument> findByProductId(UUID productId);
+
     List<KnowledgeDocument> findByStatus(String status);
+
+    List<KnowledgeDocument> findByMerchantIdAndProductIdAndStatusOrderByIdAsc(
+            UUID merchantId,
+            UUID productId,
+            String status
+    );
 }

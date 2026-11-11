@@ -12,6 +12,8 @@ services:
       - ./FE:/app
       - /app/node_modules
       - /app/.next
+    env_file:
+      - .env
     environment:
       - NODE_ENV=development
     # Override CMD to run in dev mode with hot-reload
@@ -38,14 +40,18 @@ services:
       - rabbitmq
 
   postgres:
-    image: postgres:15-alpine
+    build:
+      context: .
+      dockerfile: BE/Dockerfile.postgres
+    image: ai-travel-postgres:15-alpine-pgvector0.8.7
+    pull_policy: build
     container_name: postgres_db
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: mydatabase
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped

@@ -1,33 +1,80 @@
 spring:
+  config:
+    import: "optional:file:../.env[.properties]"
   # 1. Cấu hình kết nối PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/mydatabase
-    username: root
-    password: rootpassword
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/mydatabase}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   # Cấu hình Hibernate/JPA cho PostgreSQL
   jpa:
     hibernate:
-      ddl-auto: update # Tự động tạo/cập nhật bảng. (Lưu ý: Không nên dùng 'update' trên môi trường Production)
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
+        default_schema: travel_v2
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    locations: 
+    - classpath:db/migration
+    - classpath:db/data
+    default-schema: travel_v2
+    schemas: travel_v2
+    create-schemas: true
 
   # 2. Cấu hình kết nối Redis
   data:
     redis:
-      host: localhost
-      port: 6379
-      # password: yourpassword # Bỏ comment nếu bạn có cài mật khẩu ở file docker-compose
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
 
   # 3. Cấu hình kết nối RabbitMQ
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: root
-    password: rootpassword
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+
+  # 4. Cấu hình Email SMTP (Dummy/Mailtrap cho dev)
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  # 5. Cấu hình JWT
+  security:
+    jwt:
+      secret: ${JWT_SECRET}
+      access-token-expiration: ${JWT_ACCESS_EXPIRATION} # 15 phút
+      refresh-token-expiration: ${JWT_REFRESH_EXPIRATION} # 7 ngày
+
+app:
+  bootstrap-admin:
+    enabled: ${ADMIN_BOOTSTRAP_ENABLED:false}
+    email: ${ADMIN_BOOTSTRAP_EMAIL:}
+    password: ${ADMIN_BOOTSTRAP_PASSWORD:}
+  features:
+    account-management: false
+  tracking:
+      base-url: https://aitravel.vn
+  integrations:
+    tiktok:
+      client-key: ${TIKTOK_CLIENT_KEY:}
+      client-secret: ${TIKTOK_CLIENT_SECRET:}
+      redirect-uri: ${TIKTOK_REDIRECT_URI:}
+  social-token-encryption-key: ${SOCIAL_TOKEN_ENCRYPTION_KEY:}
 
 server:
-  port: 8080 # Port của ứng dụng Spring Boot
+  port: ${SERVER_PORT:8080} # Port của ứng dụng Spring Boot

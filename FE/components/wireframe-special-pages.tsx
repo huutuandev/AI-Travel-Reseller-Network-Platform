@@ -1,0 +1,442 @@
+"use client"
+
+import { useEffect, useMemo, useState } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { ArrowRight, BadgeCheck, BellRing, Check, ChevronLeft, ChevronRight, CircleDollarSign, Clapperboard, Copy, Eye, FileText, Heart, Library, Link2, MapPin, PackagePlus, Pause, Play, Plus, Sparkles, Tag, Trash2, Video, X } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { resellerCampaignCards, publishedAiAssets, tenantTables } from "@/lib/wireframe-mocks"
+import { storefrontJourneys } from "@/lib/storefront-data"
+import { useResellerCampaignMembership } from "@/lib/reseller-campaign-membership"
+
+const inputClass = "h-10 rounded-md border border-input bg-background px-3 text-sm"
+const fieldLabelClass = "text-sm font-medium"
+
+function PageHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
+  return <div><p className="text-xs font-semibold uppercase tracking-[.15em] text-teal-800">{eyebrow}</p><h1 className="mt-1 text-3xl font-semibold tracking-tight">{title}</h1><p className="mt-1 text-sm text-slate-500">{description}</p></div>
+}
+
+function SocialPlatformLogo({ platform, className = "size-5" }: { platform: "TikTok" | "Facebook"; className?: string }) {
+  if (platform === "Facebook") return <svg aria-label="Facebook" role="img" viewBox="0 0 24 24" className={className}><path fill="#1877F2" d="M24 12c0-6.627-5.373-12-12-12S0 5.373 0 12c0 5.99 4.388 10.954 10.125 11.854V15.47H7.078V12h3.047V9.356c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.234 2.686.234v2.953h-1.513c-1.491 0-1.956.925-1.956 1.874V12h3.328l-.532 3.47h-2.796v8.384C19.612 22.954 24 17.99 24 12"/></svg>
+  const mark = "M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.03 2.6 1.6 4.07 1.79v4.08c-1.38-.05-2.76-.33-4.04-.88-.56-.25-1.1-.55-1.62-.89-.01 2.75.01 5.5-.02 8.24-.07 1.32-.51 2.63-1.28 3.71-1.24 1.81-3.39 2.99-5.59 3.02-1.35.08-2.69-.29-3.81-.99-1.86-1.16-2.9-3.38-2.63-5.57.21-2.07 1.58-3.99 3.48-4.84 1.08-.49 2.29-.7 3.47-.5.01 1.5-.04 3-.04 4.5-1-.32-2.18-.23-3.03.39-.62.43-1.08 1.11-1.19 1.86-.1.68.08 1.41.53 1.93.74.88 2.13 1.14 3.14.6.93-.49 1.47-1.53 1.47-2.57.05-4.41.03-8.81.03-13.22z"
+  return <svg aria-label="TikTok" role="img" viewBox="0 0 24 24" className={className}><path fill="#25F4EE" d={mark} transform="translate(-.55 .3)"/><path fill="#FE2C55" d={mark} transform="translate(.45 -.2)"/><path fill="currentColor" d={mark}/></svg>
+}
+
+type SocialPlatform = "TikTok" | "Facebook"
+type SocialPostEntry = { id: string; url: string; views: number | null; likes: number | null; error: string }
+
+function CampaignCreate() {
+  const [feedback, setFeedback] = useState("")
+  const [status, setStatus] = useState("Draft")
+  return <>
+    <PageHeading eyebrow="Campaign management" title="Create campaign" description="Set the offer, commission and participation terms for your partner network."/>
+    <form className="space-y-5" onSubmit={(event)=>{event.preventDefault();const submitter=(event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement|null;setFeedback(`Campaign ${(submitter?.value||status).toLowerCase()} in this preview. No information was sent or stored.`)}}>
+      <Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Campaign details</CardTitle></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2"><div className="space-y-2 sm:col-span-2"><Label className={fieldLabelClass} htmlFor="campaign-name">Campaign name *</Label><Input id="campaign-name" name="campaignName" placeholder="e.g. Ha Long Bay Weekend Escape" required/></div><div className="space-y-2 sm:col-span-2"><Label className={fieldLabelClass} htmlFor="campaign-product">Travel product *</Label><select id="campaign-product" name="product" required className={inputClass+" w-full"}><option value="">Select a product</option><option>Ha Long Bay cruise</option><option>Hoi An stay</option><option>Phu Quoc beach stay</option></select></div><div className="space-y-2 sm:col-span-2"><Label className={fieldLabelClass} htmlFor="campaign-description">Description *</Label><Textarea id="campaign-description" name="description" rows={4} placeholder="Describe the experience, highlights and intended traveler." required/></div></CardContent></Card>
+      <Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Commission &amp; schedule</CardTitle></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label className={fieldLabelClass} htmlFor="commission-type">Commission type</Label><select id="commission-type" className={inputClass+" w-full"}><option>Percentage</option><option>Fixed amount per booking</option></select></div><div className="space-y-2"><Label className={fieldLabelClass} htmlFor="commission-value">Commission value *</Label><Input id="commission-value" type="number" min="0" step="0.01" defaultValue="12" required/></div><div className="space-y-2"><Label className={fieldLabelClass} htmlFor="campaign-start">Start date *</Label><Input id="campaign-start" type="date" defaultValue="2026-10-01" required/></div><div className="space-y-2"><Label className={fieldLabelClass} htmlFor="campaign-end">End date *</Label><Input id="campaign-end" type="date" defaultValue="2026-12-31" required/></div><div className="space-y-2 sm:col-span-2"><Label className={fieldLabelClass} htmlFor="campaign-status">Initial status</Label><select id="campaign-status" value={status} onChange={(event)=>setStatus(event.target.value)} className={inputClass+" w-full sm:max-w-xs"}><option>Draft</option><option>Active</option></select></div></CardContent></Card>
+      <Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Participation terms</CardTitle><CardDescription>Set expectations for eligible bookings and campaign participation.</CardDescription></CardHeader><CardContent><div className="space-y-2"><Label className={fieldLabelClass} htmlFor="campaign-terms">Campaign terms *</Label><Textarea id="campaign-terms" name="terms" rows={5} placeholder="Eligible bookings, cancellation policy, exclusions and booking window." required/></div></CardContent></Card>
+      <div className="flex flex-wrap items-center gap-3"><Button type="submit" name="submitStatus" value="Draft" variant="outline">Save draft</Button><Button type="submit" name="submitStatus" value="Active" className="bg-teal-800 hover:bg-teal-900">Publish campaign</Button>{feedback&&<p role="status" className="text-sm text-emerald-800">{feedback}</p>}</div>
+    </form><p className="text-xs text-slate-400">Static campaign editor. Form validation is local; no offer is published or stored.</p>
+  </>
+}
+
+function CampaignDetail({ campaignName }: { campaignName?: string }) {
+  const campaignRows = tenantTables.campaigns.rows
+  const row = campaignRows.find((campaign) => campaign[0] === campaignName) ?? campaignRows[0]
+  const journey = storefrontJourneys.find((item) => item.title === row[0]) ?? storefrontJourneys[0]
+  const [active,setActive]=useState(row[5] === "Active")
+  const [feedback,setFeedback]=useState("")
+  useEffect(() => setActive(row[5] === "Active"), [row])
+  return <>
+    <div className="flex flex-wrap items-start justify-between gap-3"><div><Link href="/tenant/campaigns" className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-teal-800 hover:underline"><ArrowRight className="size-4 rotate-180"/>Back to campaigns</Link><PageHeading eyebrow="Campaign details" title={row[0]} description="Campaign offer, schedule and partner performance."/></div><Button variant="outline" onClick={()=>{setActive(!active);setFeedback(`Campaign ${active?"paused":"activated"} in this preview.`)}}>{active?<Pause className="size-4"/>:<Play className="size-4"/>}{active?"Pause campaign":"Resume campaign"}</Button></div>
+    {feedback&&<p role="status" className="text-sm text-emerald-800">{feedback} No server data was changed.</p>}
+    <div className="relative mb-5 min-h-52 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 sm:min-h-64"><Image src={journey.image} alt={journey.short} fill priority sizes="(max-width: 1024px) 100vw, 75vw" className="object-cover"/><div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-slate-950/35 to-transparent"/><div className="absolute inset-y-0 left-0 flex max-w-2xl flex-col justify-end p-5 text-white sm:p-8"><span className="mb-2 text-xs font-semibold uppercase tracking-[.16em] text-white/80">{journey.short} · Vietnam</span><p className="text-2xl font-semibold tracking-tight sm:text-3xl">{journey.feature}</p><p className="mt-2 max-w-xl text-sm leading-6 text-white/85">{journey.description}</p></div><Badge className="absolute right-4 top-4 bg-white/95 text-emerald-900">{active?"Active":"Paused"}</Badge></div>
+    <div className="grid gap-4 lg:grid-cols-3"><Card className="border-slate-200/80 shadow-sm lg:col-span-2"><CardHeader><CardTitle>Offer details</CardTitle><CardDescription>Terms and schedule shared with participating resellers.</CardDescription></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2"><Detail label="Travel product" value={row[1]}/><Detail label="Commission" value={`${row[2]} per confirmed booking`}/><Detail label="Campaign starts" value={row[3]}/><Detail label="Campaign ends" value={row[4]}/><Detail label="Status" value={active?"Active":"Paused"}/><Detail label="Experience" value={`${journey.nights.toLowerCase()} · ${journey.type.toLowerCase()}`}/><div className="sm:col-span-2"><Detail label="Campaign description" value={journey.description}/></div></CardContent></Card><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Participation terms</CardTitle><CardDescription>Partner guidance</CardDescription></CardHeader><CardContent className="space-y-3 text-sm leading-6 text-slate-600"><p>Commission applies to completed bookings attributed to an active partner tracking link.</p><p>Cancelled bookings are not eligible. Partner content must accurately describe the experience and its inclusions.</p><Badge className={active?"bg-emerald-50 text-emerald-800":"bg-slate-100 text-slate-700"}>{active?"Active campaign":"Paused campaign"}</Badge></CardContent></Card></div>
+    <div className="grid gap-4 sm:grid-cols-3">{[{label:"Partner clicks",value:journey.key==="halong"?"6,208":journey.key==="hoian"?"4,916":"3,102"},{label:"Attributed bookings",value:journey.key==="halong"?"188":journey.key==="hoian"?"142":"97"},{label:"Conversion rate",value:journey.key==="halong"?"3.03%":journey.key==="hoian"?"2.89%":"3.13%"}].map(item=><Card key={item.label} className="border-slate-200/80 shadow-sm"><CardHeader className="pb-2"><CardDescription>{item.label}</CardDescription><CardTitle className="text-2xl">{item.value}</CardTitle></CardHeader></Card>)}</div>
+    <Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Participating resellers</CardTitle><CardDescription>Sample partner activity for this campaign.</CardDescription></CardHeader><CardContent><SimpleTable columns={["Reseller","Clicks","Conversions","Commission","Status"]} rows={[["Mia Nguyen","2,840","74","$2,612","Active"],["Coastline Journeys","1,920","58","$1,942","Active"],["Alex Kim","1,448","56","$1,784","Active"]]}/></CardContent></Card>
+  </>
+}
+
+function Detail({label,value}:{label:string;value:string}) { return <div><p className="text-xs text-slate-500">{label}</p><p className="mt-1 text-sm font-medium">{value}</p></div> }
+function SimpleTable({columns,rows}:{columns:string[];rows:string[][]}) { return <div className="overflow-x-auto"><table className="w-full min-w-[600px] text-left text-sm"><thead><tr className="border-b text-xs text-slate-500">{columns.map(column=><th key={column} className="pb-3 font-medium">{column}</th>)}</tr></thead><tbody>{rows.map((row,index)=><tr key={index} className="border-b last:border-0">{row.map((cell,col)=><td key={col} className="py-3 text-slate-700">{col===row.length-1&&["Active","Pending","Approved","Rejected"].includes(cell)?<Badge className={cell==="Active"||cell==="Approved"?"bg-emerald-50 text-emerald-800":"bg-amber-50 text-amber-900"}>{cell}</Badge>:cell}</td>)}</tr>)}</tbody></table></div> }
+
+function TenantAiContent() {
+  const [output,setOutput]=useState("")
+  const [feedback,setFeedback]=useState("")
+  const [product,setProduct]=useState("Ha Long Bay cruise")
+  const [campaign,setCampaign]=useState("Ha Long Bay Weekend Escape")
+  const [contentType,setContentType]=useState("Social media caption")
+  const [language,setLanguage]=useState("English")
+  const [tone,setTone]=useState("Warm and inspiring")
+  const [contentItems,setContentItems]=useState<{copy:string;status:"Draft"|"Published"}[]>([])
+  function generate() { const copy=language==="Vietnamese"?"Thức dậy giữa làn nước xanh ngọc và những núi đá vôi kỳ vĩ của vịnh Hạ Long.":`Drift through emerald waters and wake up beside the limestone peaks of Ha Long Bay. Discover ${product.toLowerCase()} with ${campaign}.`; setOutput(`${copy}\n\n${tone} · ${contentType}`);setFeedback("Sample content generated locally. Review it before publishing.") }
+  async function copy() { try { await navigator.clipboard.writeText(output);setFeedback("Content copied to clipboard.") } catch { setFeedback("Clipboard access is unavailable in this browser context.") } }
+  return <><PageHeading eyebrow="AI-assisted marketing" title="AI Content" description="Start with a product and campaign you manage. Edit the copy before saving or publishing."/><div className="grid gap-4 xl:grid-cols-2"><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Content brief</CardTitle><CardDescription>Use the selected product, language and tone to draft sample copy.</CardDescription></CardHeader><CardContent className="space-y-4"><Pick label="Travel product" value={product} setValue={setProduct} options={["Ha Long Bay cruise","Hoi An stay","Phu Quoc beach stay"]}/><Pick label="Campaign" value={campaign} setValue={setCampaign} options={["Ha Long Bay Weekend Escape","Hoi An Lantern Season","Phu Quoc Island Escape"]}/><Pick label="Content type" value={contentType} setValue={setContentType} options={["Social media caption","Promotional description","Hashtag suggestions","Call to action","Video script"]}/><Pick label="Language" value={language} setValue={setLanguage} options={["English","Vietnamese"]}/><Pick label="Tone" value={tone} setValue={setTone} options={["Warm and inspiring","Premium and refined","Playful and adventurous"]}/><Button onClick={generate} className="w-full bg-teal-800 hover:bg-teal-900"><Sparkles className="size-4"/>Generate Content</Button></CardContent></Card>
+    <Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Content preview</CardTitle><CardDescription>Generated text remains editable in this browser.</CardDescription></CardHeader><CardContent className="space-y-3"><Label htmlFor="tenant-ai-output">Generated copy</Label><Textarea id="tenant-ai-output" value={output} onChange={event=>setOutput(event.target.value)} placeholder="Your generated sample will appear here." rows={10}/><div className="flex flex-wrap gap-2"><Button variant="outline" disabled={!output} onClick={copy}>{feedback.startsWith("Content copied")?<Check className="size-4"/>:<Copy className="size-4"/>}Copy</Button><Button variant="outline" disabled={!output} onClick={()=>{setContentItems(items=>[{copy:output,status:"Draft"},...items]);setFeedback("Draft saved in this page preview only.")}}>Save draft</Button><Button disabled={!output} className="bg-teal-800 hover:bg-teal-900" onClick={()=>{setContentItems(items=>[{copy:output,status:"Published"},...items]);setFeedback("Published to the sample reseller library in this preview only.")}}>Publish to resellers</Button></div>{feedback&&<p role="status" className="text-sm text-emerald-800">{feedback}</p>}</CardContent></Card></div><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Campaign content</CardTitle><CardDescription>Drafts and published assets from this browser.</CardDescription></CardHeader><CardContent className="space-y-3">{contentItems.length===0?<p className="text-sm text-slate-500">Your generated drafts will appear here during this preview.</p>:contentItems.map((item,index)=><div key={`${item.status}-${index}`} className="flex items-start justify-between gap-3 rounded-lg border p-3"><p className="text-sm leading-6 text-slate-700">{item.copy}</p><Badge className={item.status==="Published"?"bg-emerald-50 text-emerald-800":"bg-slate-100 text-slate-700"}>{item.status}</Badge></div>)}</CardContent></Card></>
+}
+
+function Pick({label,value,setValue,options}:{label:string;value:string;setValue:(value:string)=>void;options:string[]}) { return <div className="space-y-2"><Label>{label}</Label><select aria-label={label} className={inputClass+" w-full"} value={value} onChange={event=>setValue(event.target.value)}>{options.map(option=><option key={option}>{option}</option>)}</select></div> }
+
+function TenantSettings() {
+  const [business,setBusiness]=useState("Lantern & Tide Travel")
+  const [primary,setPrimary]=useState("#164c52")
+  const [secondary,setSecondary]=useState("#b84932")
+  const [feedback,setFeedback]=useState("")
+  return <><PageHeading eyebrow="Tenant workspace" title="Brand settings" description="Configure the white-label identity and partner-facing email preview."/><form onSubmit={event=>{event.preventDefault();setFeedback("Brand settings preview updated in this session only.")}} className="space-y-5"><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>White label identity</CardTitle><CardDescription>Sample storefront branding for your reseller network.</CardDescription></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="business-name">Business name</Label><Input id="business-name" value={business} onChange={event=>setBusiness(event.target.value)}/></div><div className="space-y-2"><Label htmlFor="brand-logo">Logo preview</Label><Input id="brand-logo" type="file" accept="image/*"/><span className="text-xs text-slate-500">Local preview only; file is not uploaded.</span></div><div className="space-y-2"><Label htmlFor="primary-color">Primary color</Label><Input id="primary-color" type="color" value={primary} onChange={event=>setPrimary(event.target.value)} className="h-10 w-full p-1"/></div><div className="space-y-2"><Label htmlFor="secondary-color">Secondary color</Label><Input id="secondary-color" type="color" value={secondary} onChange={event=>setSecondary(event.target.value)} className="h-10 w-full p-1"/></div><div className="space-y-2"><Label htmlFor="subdomain-preview">Subdomain preview</Label><Input id="subdomain-preview" defaultValue="lantern-tide.aitravel.example"/></div><div className="space-y-2"><Label htmlFor="custom-domain">Custom domain</Label><Input id="custom-domain" placeholder="partners.yourdomain.com"/><span className="text-xs text-slate-500">Custom domain routing is not enabled in this preview.</span></div></CardContent></Card><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Partner email preview</CardTitle></CardHeader><CardContent><div className="rounded-xl border bg-white p-5"><div className="mb-5 h-2 w-28 rounded" style={{backgroundColor:primary}}/><h3 className="text-lg font-semibold">A new journey is ready to share</h3><p className="mt-2 text-sm leading-6 text-slate-600">Explore a campaign from {business} and share it with the travelers who trust your recommendations.</p><span className="mt-4 inline-flex rounded-md px-4 py-2 text-sm font-medium text-white" style={{backgroundColor:secondary}}>Explore campaign</span></div></CardContent></Card><div className="flex items-center gap-3"><Button type="submit" className="bg-teal-800 hover:bg-teal-900">Save changes</Button>{feedback&&<p role="status" className="text-sm text-emerald-800">{feedback}</p>}</div></form></>
+}
+
+function Marketplace() {
+  const [query,setQuery]=useState("")
+  const [category,setCategory]=useState("All categories")
+  const [destination,setDestination]=useState("All destinations")
+  const [commission,setCommission]=useState("Any commission")
+  const [participationFilter,setParticipationFilter]=useState("All participation")
+  const [feedback,setFeedback]=useState("")
+  const { memberships, requestToJoin } = useResellerCampaignMembership()
+  const items=useMemo(()=>resellerCampaignCards.filter(item=>`${item.name} ${item.product} ${item.destination}`.toLowerCase().includes(query.toLowerCase())&&(category==="All categories"||item.category===category)&&(destination==="All destinations"||item.destination===destination)&&(commission==="Any commission"||(commission==="10%+"&&Number.parseFloat(item.commission)>=10))&&(participationFilter==="All participation"||participationFilter==="Active"&&memberships[item.name]?.status==="Active"||participationFilter==="Pending approval"&&memberships[item.name]?.status==="Pending"||participationFilter==="Not joined"&&!memberships[item.name])),[category,commission,destination,memberships,participationFilter,query])
+  function join(name:string){requestToJoin(name);setFeedback(`${name}: join request sent. You can follow its status in My campaigns.`)}
+  return <><PageHeading eyebrow="Reseller Portal" title="Campaign marketplace" description="Browse all travel campaigns and manage participation from their details."/><Card className="border-slate-200/80 shadow-sm"><CardContent className="grid gap-3 pt-5 md:grid-cols-2 xl:grid-cols-5"><div className="space-y-2"><Label htmlFor="campaign-search">Search</Label><Input id="campaign-search" type="search" className={inputClass+" w-full"} placeholder="Search destinations" value={query} onChange={event=>setQuery(event.target.value)} /></div><Pick label="Category" value={category} setValue={setCategory} options={["All categories","Tours & cruises","Hotels","Packages"]}/><Pick label="Destination" value={destination} setValue={setDestination} options={["All destinations","Ha Long Bay","Hoi An","Phu Quoc"]}/><Pick label="Commission" value={commission} setValue={setCommission} options={["Any commission","10%+"]}/><Pick label="Participation status" value={participationFilter} setValue={setParticipationFilter} options={["All participation","Active","Pending approval","Not joined"]}/></CardContent></Card>{feedback&&<p role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">{feedback} <Link href="/reseller/my-campaigns" className="font-semibold underline">View My campaigns</Link></p>}<div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{items.map(item=>{const participation=memberships[item.name];const membershipLabel=participation?.status==="Active"?"Active":participation?.status==="Pending"?"Pending approval":"Not joined";return <Card key={item.name} className="group overflow-hidden rounded-2xl border-slate-200/80 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"><div className="relative h-48 overflow-hidden bg-slate-100"><Image src={item.image} alt={`${item.destination}, Vietnam`} fill sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105"/><div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#14271e]/65 via-transparent to-black/5"/><span className="absolute bottom-3 left-4 text-xs font-semibold text-white drop-shadow">{item.destination}, Vietnam</span></div><CardHeader><div className="flex items-start justify-between gap-3"><div><CardTitle className="text-lg">{item.name}</CardTitle><CardDescription className="mt-1">{item.product} · {item.destination}</CardDescription></div><Badge className={participation?.status==="Pending"?"bg-amber-50 text-amber-900":participation?.status==="Active"?"bg-blue-50 text-blue-700":"bg-emerald-50 text-emerald-800"}>{membershipLabel}</Badge></div></CardHeader><CardContent><div className="flex items-center justify-between text-sm"><span className="text-slate-500">Commission</span><strong>{item.commission}</strong></div><p className="mt-2 text-xs text-slate-500">Campaign dates: {item.dates}</p><Link href={`/reseller/campaign-detail?campaign=${encodeURIComponent(item.name)}&from=campaign-marketplace`} className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-teal-800">View details <ArrowRight className="size-4"/></Link>{participation?.status==="Active"?<Link href={`/reseller/campaign-detail?campaign=${encodeURIComponent(item.name)}&from=campaign-marketplace`} className="mt-3 inline-flex h-10 min-h-10 w-full items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700">Manage campaign</Link>:participation?.status==="Pending"?<Button className="mt-3 h-10 min-h-10 w-full border-amber-300 bg-amber-50 text-amber-900 opacity-100 hover:bg-amber-50" variant="outline" disabled>Pending approval</Button>:<Button className="mt-3 h-10 min-h-10 w-full bg-emerald-700 hover:bg-emerald-800" onClick={()=>join(item.name)}>Request to join</Button>}</CardContent></Card>})}</div>{items.length===0&&<p className="py-8 text-center text-sm text-slate-500">No campaigns match these filters.</p>}</>
+}
+
+function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }: { campaignName?: string; returnTo?: string }) {
+  const campaignName=selectedCampaignName??resellerCampaignCards[0].name
+  const [activeImageIndex,setActiveImageIndex]=useState(0)
+  const [galleryOffset,setGalleryOffset]=useState(0)
+  const [socialEntries,setSocialEntries]=useState<Record<SocialPlatform,SocialPostEntry[]>>({
+    TikTok:[{id:"tiktok-post-1",url:"",views:null,likes:null,error:""}],
+    Facebook:[{id:"facebook-post-1",url:"",views:null,likes:null,error:""}],
+  })
+  const { memberships, requestToJoin } = useResellerCampaignMembership()
+  const campaign=resellerCampaignCards.find(item=>item.name===campaignName)??resellerCampaignCards[0]
+  const participation=memberships[campaign.name]
+  const detailCopy:Record<string,{subtitle:string;description:string;expectations:string}>={
+    "Ha Long Bay":{subtitle:"A slower way to see the bay",description:"A two-night cruise through the limestone karsts of Ha Long Bay, with quiet mornings on the water and time to explore hidden coves.",expectations:"A comfortable overnight cruise, meals on board and time to take in the limestone landscape at an unhurried pace."},
+    "Hoi An":{subtitle:"A riverside stay close to the old town",description:"Three nights beside the Thu Bon River, with lantern-lit evenings, local dining and time to explore Hoi An at your own pace.",expectations:"A boutique riverside stay, easy access to the old town and unhurried evenings among Hoi An's lantern-lit streets."},
+    "Phu Quoc":{subtitle:"A quiet island escape by the sea",description:"Four nights on Vietnam's southern coast, with clear water, long afternoons and room to discover the island slowly.",expectations:"A relaxed beach stay, time along the coast and an easy base for exploring Phu Quoc's island landscapes."},
+  }
+  const photosByDestination:Record<string,{src:string;alt:string;caption:string}[]>={
+    "Ha Long Bay":[{src:campaign.image,alt:"Ha Long Bay cover photo",caption:"CAMPAIGN COVER"},{src:"/images/halong-gallery-01.jpg",alt:"Aerial view of Ha Long Bay",caption:"AERIAL BAY"},{src:"/images/halong-gallery-02.jpg",alt:"Limestone cliffs in Ha Long Bay",caption:"LIMESTONE CLIFFS"},{src:"/images/halong-gallery-03.jpg",alt:"Cruise boat among Ha Long Bay islands",caption:"CRUISE THE BAY"},{src:"/images/halong-gallery-04.jpg",alt:"Cruise boats on Ha Long Bay",caption:"EMERALD WATER"}],
+    "Hoi An":[{src:campaign.image,alt:"Hoi An cover photo",caption:"CAMPAIGN COVER"},{src:"/images/hoian-gallery-01.jpg",alt:"Lanterns by the Hoi An riverside",caption:"RIVERSIDE LANTERNS"},{src:"/images/hoian-gallery-02.jpg",alt:"Lantern boats on the Hoi An river",caption:"LANTERN BOATS"},{src:"/images/hoian-gallery-03.jpg",alt:"Thu Bon River at sunset",caption:"THU BON AT DUSK"},{src:"/images/hoian-gallery-04.jpg",alt:"Hoi An ancient town at night",caption:"ANCIENT TOWN"}],
+    "Phu Quoc":[{src:campaign.image,alt:"Phu Quoc cover photo",caption:"CAMPAIGN COVER"},{src:"/images/phuquoc-gallery-01.jpg",alt:"Sunset over Phu Quoc sea",caption:"ISLAND SUNSET"},{src:"/images/phuquoc-gallery-02.jpg",alt:"Golden hour in Phu Quoc",caption:"GOLDEN HOUR"},{src:"/images/phuquoc-gallery-03.jpg",alt:"Waves on a Phu Quoc beach",caption:"TROPICAL SHORE"},{src:"/images/phuquoc-gallery-04.jpg",alt:"Coastal village in Phu Quoc",caption:"ISLAND LIFE"}],
+  }
+  const galleryImages=photosByDestination[campaign.destination]??photosByDestination["Ha Long Bay"]
+  const visibleGalleryImages=Array.from({length:4},(_,index)=>(galleryOffset+index)%galleryImages.length)
+  const description=detailCopy[campaign.destination]??detailCopy["Ha Long Bay"]
+  const moveGallery=(direction:number)=>{const index=(activeImageIndex+direction+galleryImages.length)%galleryImages.length;setActiveImageIndex(index);setGalleryOffset(index)}
+  function updateSocialEntry(platform:SocialPlatform,id:string,updates:Partial<SocialPostEntry>){
+    setSocialEntries(current=>({...current,[platform]:current[platform].map(entry=>entry.id===id?{...entry,...updates}:entry)}))
+  }
+  function showSocialMetrics(platform:SocialPlatform,id:string){
+    const entry=socialEntries[platform].find(item=>item.id===id)
+    if(!entry)return
+    const rawUrl=entry.url
+    let parsedUrl:URL
+    try{parsedUrl=new URL(rawUrl.trim())}catch{updateSocialEntry(platform,id,{error:`Enter a valid ${platform} post link.`});return}
+    const hostname=parsedUrl.hostname.toLowerCase().replace(/^www\./,"")
+    const detectedPlatform:SocialPlatform|null=hostname==="tiktok.com"||hostname.endsWith(".tiktok.com")?"TikTok":hostname==="facebook.com"||hostname.endsWith(".facebook.com")||hostname==="fb.watch"?"Facebook":null
+    if((parsedUrl.protocol!=="https:"&&parsedUrl.protocol!=="http:")||detectedPlatform!==platform){updateSocialEntry(platform,id,{error:`Paste a link from ${platform} in this field.`});return}
+    const normalizedUrl=parsedUrl.toString()
+    let hash=0
+    for(let index=0;index<normalizedUrl.length;index++)hash=(hash*31+normalizedUrl.charCodeAt(index))>>>0
+    const views=1400+(hash%198601)
+    const likes=Math.max(1,Math.round(views*(0.035+(hash%31)/1000)))
+    updateSocialEntry(platform,id,{url:normalizedUrl,views,likes,error:""})
+  }
+  function fillSocialSample(platform:SocialPlatform,id:string){updateSocialEntry(platform,id,{url:platform==="TikTok"?"https://www.tiktok.com/@wayfarer.demo/video/7350000000000000001":"https://www.facebook.com/watch/?v=7350000000000000002",views:null,likes:null,error:""})}
+  function addSocialEntry(platform:SocialPlatform){setSocialEntries(current=>({...current,[platform]:[...current[platform],{id:crypto.randomUUID(),url:"",views:null,likes:null,error:""}]}))}
+  function removeSocialEntry(platform:SocialPlatform,id:string){setSocialEntries(current=>({...current,[platform]:current[platform].length>1?current[platform].filter(entry=>entry.id!==id):current[platform]}))}
+  const backToMyCampaigns=returnTo==="my-campaigns"
+  return <div className="space-y-5">
+    <Link href={backToMyCampaigns?"/reseller/my-campaigns":"/reseller/campaign-marketplace"} className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-teal-800 transition hover:bg-teal-50 hover:underline"><ArrowRight className="size-4 rotate-180"/>Back to {backToMyCampaigns?"My campaigns":"Campaign Marketplace"}</Link>
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex flex-wrap items-end justify-between gap-5 p-6 sm:p-8"><div className="max-w-3xl"><p className="text-xs font-semibold uppercase tracking-[.15em] text-teal-800">{campaign.destination} · Vietnam</p><h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">{campaign.name}</h1><div className="mt-3"><Badge className={participation?.status==="Active"?"bg-emerald-50 text-emerald-800":participation?.status==="Pending"?"bg-amber-50 text-amber-900":"bg-slate-100 text-slate-700"}>{participation?.status??"Not joined"}</Badge>{participation&&<span className="ml-2 text-xs text-slate-500">{participation.status==="Active"?"Joined":"Requested"} {participation.joinedAt}</span>}</div><p className="mt-2 text-lg text-slate-600">{description.subtitle}</p><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">{description.description}</p></div><div className="rounded-xl border border-emerald-100 bg-emerald-50/70 px-5 py-3"><span className="block text-[10px] font-semibold uppercase tracking-[.12em] text-emerald-800">Commission</span><strong className="mt-0.5 block text-2xl font-semibold text-emerald-950">{campaign.commission}</strong><span className="text-xs text-emerald-800/75">per eligible booking</span></div></div>
+      <div className="grid gap-4 border-t border-slate-100 bg-[#f8faf8] p-4 sm:p-6 lg:grid-cols-[minmax(0,1.55fr)_minmax(270px,.85fr)]">
+        <div className="relative min-h-[290px] overflow-hidden rounded-xl bg-slate-200 sm:min-h-[370px]"><Image key={galleryImages[activeImageIndex].src} src={galleryImages[activeImageIndex].src} alt={galleryImages[activeImageIndex].alt} fill priority sizes="(max-width: 1023px) 100vw, 62vw" className="object-cover"/><div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#10251c]/65 via-transparent to-black/10"/><span className="absolute bottom-4 left-4 rounded-full border border-white/30 bg-[#14291f]/45 px-3 py-1.5 text-[10px] font-semibold tracking-[.1em] text-white backdrop-blur">{galleryImages[activeImageIndex].caption}</span><span className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-semibold text-slate-700 shadow-sm">{String(activeImageIndex+1).padStart(2,"0")} / {String(galleryImages.length).padStart(2,"0")}</span></div>
+        <div className="flex min-w-0 flex-col gap-3"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[.12em] text-slate-700">Campaign photos</p><p className="mt-1 text-xs text-slate-500">Select a photo to view it larger.</p></div><div className="flex gap-1.5"><Button type="button" variant="outline" size="icon" aria-label="Previous campaign photo" onClick={()=>moveGallery(-1)} className="size-9 rounded-lg border-slate-200 bg-white"><ChevronLeft className="size-4"/></Button><Button type="button" variant="outline" size="icon" aria-label="Next campaign photo" onClick={()=>moveGallery(1)} className="size-9 rounded-lg border-slate-200 bg-white"><ChevronRight className="size-4"/></Button></div></div><div className="grid flex-1 grid-cols-2 grid-rows-2 gap-2.5">{visibleGalleryImages.map(index=>{const photo=galleryImages[index];return <button type="button" key={photo.src} onClick={()=>setActiveImageIndex(index)} aria-label={`View ${photo.caption.toLowerCase()} photo`} aria-pressed={activeImageIndex===index} className={`group/photo relative min-h-[90px] overflow-hidden rounded-xl border bg-white text-left transition ${activeImageIndex===index?"border-emerald-700 ring-2 ring-emerald-700/20":"border-slate-200 hover:border-emerald-300"}`}><Image src={photo.src} alt="" fill sizes="(max-width: 1023px) 45vw, 20vw" className="object-cover transition duration-300 group-hover/photo:scale-105"/><span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent px-2.5 pb-2 pt-5 text-[9px] font-semibold tracking-wide text-white">{photo.caption}</span></button>})}</div></div>
+      </div>
+    </section>
+    {participation?.status==="Active"&&(
+      <Card className="overflow-hidden rounded-2xl border-slate-200/80 shadow-sm">
+        <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-white via-slate-50/80 to-sky-50/70 p-5 sm:p-6">
+          <div className="flex items-start gap-3.5">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-sky-100 bg-white text-sky-700 shadow-sm"><Link2 className="size-5"/></span>
+            <div><CardTitle className="text-lg">Social post performance</CardTitle><CardDescription className="mt-1 max-w-2xl leading-5">Organize every campaign post by platform and review its engagement individually.</CardDescription></div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid items-start gap-4 lg:grid-cols-2">
+            {(["TikTok","Facebook"] as const).map((platform)=>{
+              const isTikTok=platform==="TikTok"
+              const entries=socialEntries[platform]
+              const linkedCount=entries.filter(entry=>entry.url.trim()).length
+              return <section key={platform} aria-label={`${platform} campaign posts`} className={`min-w-0 rounded-2xl border p-4 sm:p-5 ${isTikTok?"border-slate-200 bg-gradient-to-br from-white to-slate-50":"border-blue-100 bg-gradient-to-br from-white to-blue-50/60"}`}>
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className={`grid size-11 shrink-0 place-items-center rounded-xl border bg-white shadow-sm ${isTikTok?"border-slate-200":"border-blue-100"}`}><SocialPlatformLogo platform={platform} className="size-6"/></span>
+                    <div className="min-w-0"><h3 className="font-semibold text-slate-900">{platform}</h3><p className="text-xs text-slate-500">{isTikTok?"Short videos & reels":"Facebook video posts"}</p></div>
+                  </div>
+                  <Badge variant="outline" className="shrink-0 rounded-full border-slate-200 bg-white px-2.5 text-slate-600">{linkedCount} {linkedCount===1?"link":"links"}</Badge>
+                </div>
+
+                <div className="space-y-3">
+                  {entries.map((entry,index)=>{
+                    const inputId=`social-${platform.toLowerCase()}-${entry.id}`
+                    return <div key={entry.id} className="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-[0_3px_14px_rgba(15,23,42,0.035)] sm:p-4">
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <Label htmlFor={inputId} className="text-xs font-semibold text-slate-700">Post {String(index+1).padStart(2,"0")} link</Label>
+                        {entries.length>1&&<Button type="button" variant="ghost" size="icon" aria-label={`Remove ${platform} link ${index+1}`} className="size-8 rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600" onClick={()=>removeSocialEntry(platform,entry.id)}><Trash2 className="size-4"/></Button>}
+                      </div>
+                      <Input id={inputId} type="url" inputMode="url" autoComplete="url" placeholder={isTikTok?"https://www.tiktok.com/@name/video/...":"https://www.facebook.com/..."} value={entry.url} onChange={event=>updateSocialEntry(platform,entry.id,{url:event.target.value,views:null,likes:null,error:""})} aria-describedby={entry.error?`${inputId}-error`:undefined} className="h-11 rounded-xl border-slate-200 bg-white focus-visible:ring-sky-500/20"/>
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                        <button type="button" onClick={()=>fillSocialSample(platform,entry.id)} className="text-xs font-semibold text-sky-700 underline decoration-sky-200 underline-offset-4 transition hover:text-sky-900">Use sample link</button>
+                        <Button type="button" className={`h-9 rounded-lg px-3.5 text-xs ${isTikTok?"bg-slate-900 hover:bg-slate-800":"bg-[#1877F2] hover:bg-[#1268d8]"}`} disabled={!entry.url.trim()} onClick={()=>showSocialMetrics(platform,entry.id)}><Eye className="mr-1.5 size-3.5"/>Show metrics</Button>
+                      </div>
+                      {entry.error&&<p id={`${inputId}-error`} role="alert" className="mt-2 text-xs font-medium text-rose-700">{entry.error}</p>}
+                      {entry.views!==null&&entry.likes!==null&&<div aria-live="polite" className="mt-4 grid gap-2.5 border-t border-slate-100 pt-3 sm:grid-cols-2">
+                        <div className="flex items-center justify-between gap-2 rounded-xl border border-sky-100 bg-gradient-to-br from-sky-50/80 to-white p-3"><div><p className="text-[10px] font-bold uppercase tracking-[.12em] text-sky-700">Views</p><p className="mt-1 text-xl font-bold tracking-tight text-slate-900">{entry.views.toLocaleString()}</p></div><span className="grid size-9 place-items-center rounded-lg bg-white text-sky-700 shadow-sm"><Eye className="size-4.5"/></span></div>
+                        <div className="flex items-center justify-between gap-2 rounded-xl border border-rose-100 bg-gradient-to-br from-rose-50/70 to-white p-3"><div><p className="text-[10px] font-bold uppercase tracking-[.12em] text-rose-700">Likes</p><p className="mt-1 text-xl font-bold tracking-tight text-slate-900">{entry.likes.toLocaleString()}</p></div><span className="grid size-9 place-items-center rounded-lg bg-white text-rose-600 shadow-sm"><Heart className="size-4.5"/></span></div>
+                        <p className="text-[10px] leading-4 text-slate-500 sm:col-span-2">Preview estimates. Live platform analytics require an authorized integration.</p>
+                      </div>}
+                    </div>
+                  })}
+                </div>
+
+                <Button type="button" variant="outline" className="mt-3 h-10 w-full rounded-xl border-dashed border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-800" onClick={()=>addSocialEntry(platform)}><Plus className="mr-1.5 size-4"/>Add another {platform} link</Button>
+              </section>
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    )}
+    <div className="grid gap-4 lg:grid-cols-[1fr_0.8fr]"><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Offer details</CardTitle></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2"><Detail label="Travel product" value={campaign.product}/><Detail label="Travel dates" value={campaign.dates}/><Detail label="Commission" value={`${campaign.commission} per confirmed booking`}/><Detail label="Category" value={campaign.category}/><div className="sm:col-span-2"><Detail label="What travelers can expect" value={description.expectations}/></div></CardContent></Card><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>{participation?.status==="Active"?"Your campaign":"Participation terms"}</CardTitle><CardDescription>{participation?.status==="Active"?"Manage your promotion and performance.":participation?.status==="Pending"?"Your participation request is awaiting review.":"Before you request to join"}</CardDescription></CardHeader><CardContent className="space-y-3 text-sm leading-6 text-slate-600"><p>Commissions apply to completed bookings attributed to your active referral link.</p><p>Use accurate product details in your recommendations. Cancelled bookings are not eligible.</p>{participation?.status==="Active"?<div className="flex flex-col gap-2 pt-2"><Link href="/reseller/tracking-links" className="inline-flex min-h-10 items-center justify-center rounded-md bg-teal-800 px-4 text-sm font-medium text-white hover:bg-teal-900">Manage tracking links <ArrowRight className="ml-2 size-4"/></Link><Link href={`/reseller/campaign-content?campaign=${encodeURIComponent(campaign.name)}`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-teal-900 hover:bg-slate-50">Get content <ArrowRight className="ml-2 size-4"/></Link><Link href="/reseller/analytics" className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-teal-900 hover:bg-slate-50">View stats <ArrowRight className="ml-2 size-4"/></Link></div>:participation?.status==="Pending"?<div className="rounded-xl border border-amber-200 bg-amber-50 p-4"><p className="font-semibold text-amber-950">Pending approval</p><p className="mt-1 text-xs leading-5 text-amber-900/80">Your request was sent on {participation.joinedAt}. You cannot submit another request while it is under review.</p></div>:<Button className="mt-2 w-full bg-teal-800 hover:bg-teal-900" onClick={()=>requestToJoin(campaign.name)}>Apply to join campaign</Button>}</CardContent></Card></div>
+  </div>
+}
+
+function ResellerProfile() {
+  const [saved,setSaved]=useState(false)
+  const [name,setName]=useState("Jordan Lee")
+  return <><PageHeading eyebrow="Reseller Portal" title="Profile & settings" description="Manage the account information and partner notification preferences shown in your portal."/><form className="space-y-5" onSubmit={event=>{event.preventDefault();setSaved(true)}}><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>{name||"Jordan Lee"}</CardTitle><CardDescription>Account information</CardDescription></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="profile-name">Full name</Label><Input id="profile-name" value={name} onChange={event=>setName(event.target.value)}/></div><div className="space-y-2"><Label htmlFor="profile-email">Email address</Label><Input id="profile-email" type="email" defaultValue="jordan@partner.example"/></div><div className="space-y-2"><Label htmlFor="profile-phone">Phone</Label><Input id="profile-phone" defaultValue="+84 90 555 0182"/></div><div className="space-y-2"><Label htmlFor="profile-website">Website / social profile</Label><Input id="profile-website" defaultValue="instagram.com/jordantravels"/></div><div className="space-y-2 sm:col-span-2"><Label htmlFor="profile-about">About you</Label><Textarea id="profile-about" rows={4} defaultValue="I share thoughtful trips and local discoveries with a community of curious travelers."/></div></CardContent></Card><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Account preferences</CardTitle><CardDescription>Manage illustrative account notifications.</CardDescription></CardHeader><CardContent className="space-y-3">{["Campaign updates","Commission summaries","Product announcements"].map((item,index)=><label key={item} className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 p-3 text-sm"><span>{item}</span><input type="checkbox" defaultChecked={index!==2} className="size-4 accent-teal-800"/></label>)}</CardContent></Card><div className="flex items-center gap-3"><Button type="submit" className="bg-teal-800 hover:bg-teal-900">Save changes</Button>{saved&&<p role="status" className="text-sm text-emerald-800">Profile changes saved in this preview only.</p>}</div></form></>
+}
+
+function Field({label,children}:{label:string;children:React.ReactNode}) { return <div className="space-y-2"><Label>{label}</Label>{children}</div> }
+
+export function TenantSpecialPage({ slug, campaignName }: { slug: string; campaignName?: string }) {
+  if(slug==="products")return <TenantProductsPage/>
+  if(slug==="campaign-create")return <CampaignCreate/>
+  if(slug==="campaign-detail")return <CampaignDetail campaignName={campaignName}/>
+  if(slug==="ai-content")return <TenantAiContent/>
+  if(slug==="settings")return <TenantSettings/>
+  return <PageHeading eyebrow="Tenant workspace" title="Page not found" description="Choose a page from the tenant workspace navigation."/>
+}
+
+type ProductRecord = { id:number; name:string; category:string; destination:string; description:string; price:string; currency:string; status:string }
+const initialProducts:ProductRecord[] = [
+  {id:1,name:"Ha Long Bay · 2 night cruise",category:"Tours & cruises",destination:"Ha Long Bay, Vietnam",description:"A two-night cruise through the limestone karsts of Ha Long Bay.",price:"289",currency:"USD",status:"Active"},
+  {id:2,name:"Hoi An · Lantern Town Stay",category:"Hotels",destination:"Hoi An, Vietnam",description:"A thoughtful riverside stay near Hoi An's lantern-lit old town.",price:"146",currency:"USD",status:"Active"},
+  {id:3,name:"Da Nang · Coast & Cuisine",category:"Packages",destination:"Da Nang, Vietnam",description:"A coastal escape with local food and time by the sea.",price:"420",currency:"USD",status:"Active"},
+]
+
+export function TenantProductsPage() {
+  const [products,setProducts]=useState(initialProducts)
+  const [query,setQuery]=useState("")
+  const [category,setCategory]=useState("All categories")
+  const [dialog,setDialog]=useState<"create"|"edit"|"view"|null>(null)
+  const [activeId,setActiveId]=useState<number|null>(null)
+  const [form,setForm]=useState({name:"",category:"",destination:"",description:"",price:"",currency:"USD",status:"Active"})
+  const source=tenantTables.products
+  const filtered=products.filter(item=>`${item.name} ${item.category} ${item.destination}`.toLowerCase().includes(query.toLowerCase())&&(category==="All categories"||item.category===category))
+  const activeProduct=products.find(item=>item.id===activeId)
+  function startCreate(){setActiveId(null);setForm({name:"",category:"",destination:"",description:"",price:"",currency:"USD",status:"Active"});setDialog("create")}
+  function startRecord(product:ProductRecord,mode:"edit"|"view"){setActiveId(product.id);setForm({name:product.name,category:product.category,destination:product.destination,description:product.description,price:product.price,currency:product.currency,status:product.status});setDialog(mode)}
+  function save(event:React.FormEvent<HTMLFormElement>){event.preventDefault();const next:ProductRecord={id:activeId??Date.now(),...form};setProducts(current=>activeId?current.map(product=>product.id===activeId?next:product):[next,...current]);setDialog(null)}
+  const currencyLabel=(currency:string,price:string)=>currency==="USD"?`$${price}`:currency==="EUR"?`${price}`:currency==="GBP"?`£${price}`:`?${Number(price).toLocaleString("en-US")}`
+  return <><div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[.15em] text-teal-800">Tenant workspace</p><h1 className="mt-1 text-3xl font-semibold tracking-tight">{source.title}</h1><p className="mt-1 text-sm text-slate-500">Illustrative travel partner workspace · Sample data</p></div><Button onClick={startCreate} className="bg-teal-800 hover:bg-teal-900">Add product</Button></div><Card className="border-slate-200/80 shadow-sm"><CardContent className="space-y-4 pt-5"><div className="flex flex-col gap-3 sm:flex-row"><Input type="search" aria-label="Search products" placeholder="Search products" value={query} onChange={event=>setQuery(event.target.value)} className="sm:max-w-md"/><select aria-label="Filter by category" className={inputClass} value={category} onChange={event=>setCategory(event.target.value)}><option>All categories</option><option>Hotels</option><option>Tours &amp; cruises</option><option>Packages</option></select></div><div className="overflow-x-auto"><table className="w-full min-w-[700px] text-left text-sm"><thead><tr className="border-b text-xs text-slate-500">{source.columns.map(label=><th key={label} className="pb-3 font-medium">{label}</th>)}</tr></thead><tbody>{filtered.map(product=><tr key={product.id} className="border-b last:border-0"><td className="py-3.5 font-medium">{product.name}</td><td className="py-3.5 text-slate-600">{product.category}</td><td className="py-3.5 text-slate-600">{currencyLabel(product.currency,product.price)}</td><td className="py-3.5"><Badge className={product.status==="Active"?"bg-emerald-50 text-emerald-800":"bg-slate-100 text-slate-700"}>{product.status}</Badge></td><td className="py-3.5"><Button size="sm" variant="link" className="px-1" onClick={()=>startRecord(product,"view")}>View</Button><Button size="sm" variant="link" className="px-1 text-teal-800" onClick={()=>startRecord(product,"edit")}>Edit</Button></td></tr>)}</tbody></table>{filtered.length===0&&<p className="py-8 text-center text-sm text-slate-500">No products match your search.</p>}</div></CardContent></Card><p className="text-xs text-slate-400">Illustrative sample data · No live account, email or tracking functions</p>
+    {dialog&&<div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#14291f]/55 p-3 backdrop-blur-md sm:p-6" onMouseDown={event=>{if(event.target===event.currentTarget)setDialog(null)}}>
+      <Card role="dialog" aria-modal="true" aria-labelledby="product-dialog-title" className="my-auto w-full max-w-5xl overflow-hidden rounded-[26px] border border-white/80 bg-white p-0 shadow-[0_32px_100px_-28px_rgba(17,44,29,0.55)]">
+        <CardHeader className="border-b border-slate-200 bg-white px-6 py-5 sm:px-8 sm:py-6">
+          <div className="flex items-start justify-between gap-5">
+            <div className="flex items-start gap-4">
+              <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-[#dce8d8] bg-[#f1f6ee] text-[#4c7353]"><PackagePlus className="size-5" strokeWidth={1.8}/></span>
+              <div>
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-[#68816b]">Product catalogue</p>
+                <CardTitle id="product-dialog-title" className="text-[23px] font-semibold tracking-tight text-slate-900 sm:text-[26px]">{dialog==="create"?"Add product":dialog==="edit"?"Edit product":"Product details"}</CardTitle>
+                <CardDescription className="mt-1.5 max-w-xl text-[13px] leading-5 text-slate-500">Add the product details and pricing that reseller partners need to promote your offer.</CardDescription>
+              </div>
+            </div>
+            <Button size="icon" variant="ghost" onClick={()=>setDialog(null)} aria-label="Close product form" className="size-9 shrink-0 rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"><X className="size-4"/></Button>
+          </div>
+        </CardHeader>
+
+        {dialog==="view"&&activeProduct?<CardContent className="grid gap-5 p-6 sm:grid-cols-2 sm:p-9">{[["Product name",activeProduct.name],["Category",activeProduct.category],["Destination",activeProduct.destination],["Retail price",currencyLabel(activeProduct.currency,activeProduct.price)],["Currency",activeProduct.currency],["Status",activeProduct.status],["Description",activeProduct.description]].map(([label,value])=><div key={label} className="rounded-2xl border border-slate-100 bg-gradient-to-br from-white to-[#f7faf6] p-4"><p className="mb-1 text-[10px] font-bold uppercase tracking-[.12em] text-slate-400">{label}</p><p className="text-sm font-medium leading-6 text-slate-800">{value}</p></div>)}<div className="flex gap-2 pt-1 sm:col-span-2"><Button onClick={()=>startRecord(activeProduct,"edit")} className="h-11 rounded-xl bg-[#426c4d] px-5 font-semibold shadow-md shadow-emerald-950/10 hover:bg-[#345b40]">Edit product</Button><Button variant="outline" onClick={()=>setDialog(null)} className="h-11 rounded-xl px-5">Close</Button></div></CardContent>:<form onSubmit={save}>
+          <div className="grid lg:grid-cols-[minmax(0,1fr)_290px]">
+            <div className="space-y-7 p-6 sm:p-8">
+              <section className="space-y-4">
+                <div className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-xl bg-[#edf5e9] text-[#557957]"><Tag className="size-4"/></span><div><h3 className="text-sm font-semibold text-slate-800">Product essentials</h3><p className="text-xs text-slate-500">Start with a clear name and destination.</p></div></div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Product name *"><Input required maxLength={100} autoComplete="off" placeholder="e.g. Ha Long Bay escape" value={form.name} onChange={event=>setForm(current=>({...current,name:event.target.value}))} className="h-12 rounded-xl border-slate-200 bg-white px-4 text-sm shadow-sm transition placeholder:text-slate-400 focus-visible:border-[#789979] focus-visible:ring-4 focus-visible:ring-[#e6efe2]"/></Field>
+                  <Field label="Category *"><select required className={inputClass+" h-12 w-full rounded-xl border-slate-200 bg-white px-4 text-sm shadow-sm transition focus:border-[#789979] focus:outline-none focus:ring-4 focus:ring-[#e6efe2]"} value={form.category} onChange={event=>setForm(current=>({...current,category:event.target.value}))}><option value="">Select category</option><option>Hotels</option><option>Tours &amp; cruises</option><option>Packages</option></select></Field>
+                  <div className="sm:col-span-2"><Field label="Destination *"><div className="relative"><MapPin className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#789979]"/><Input required maxLength={100} placeholder="e.g. Ha Long Bay, Vietnam" value={form.destination} onChange={event=>setForm(current=>({...current,destination:event.target.value}))} className="h-12 rounded-xl border-slate-200 bg-white pl-11 pr-4 text-sm shadow-sm transition placeholder:text-slate-400 focus-visible:border-[#789979] focus-visible:ring-4 focus-visible:ring-[#e6efe2]"/></div></Field></div>
+                  <div className="sm:col-span-2"><Field label="Description *"><Textarea required maxLength={500} rows={3} placeholder="Describe what is included and what makes this experience special." value={form.description} onChange={event=>setForm(current=>({...current,description:event.target.value}))} className="min-h-28 rounded-xl border-slate-200 bg-white px-4 py-3 text-sm leading-6 shadow-sm transition placeholder:text-slate-400 focus-visible:border-[#789979] focus-visible:ring-4 focus-visible:ring-[#e6efe2]"/></Field></div>
+                </div>
+              </section>
+
+              <section className="space-y-4 border-t border-slate-100 pt-6">
+                <div className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-xl bg-[#fff5df] text-[#a57931]"><CircleDollarSign className="size-4"/></span><div><h3 className="text-sm font-semibold text-slate-800">Pricing &amp; visibility</h3><p className="text-xs text-slate-500">Set your retail price and listing status.</p></div></div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Retail price *"><Input required type="number" min="0.01" step="0.01" placeholder="0.00" value={form.price} onChange={event=>setForm(current=>({...current,price:event.target.value}))} className="h-12 rounded-xl border-slate-200 bg-white px-4 text-sm shadow-sm transition placeholder:text-slate-400 focus-visible:border-[#789979] focus-visible:ring-4 focus-visible:ring-[#e6efe2]"/></Field>
+                  <Field label="Currency *"><select className={inputClass+" h-12 w-full rounded-xl border-slate-200 bg-white px-4 text-sm shadow-sm transition focus:border-[#789979] focus:outline-none focus:ring-4 focus:ring-[#e6efe2]"} value={form.currency} onChange={event=>setForm(current=>({...current,currency:event.target.value}))}><option value="USD">USD  US Dollar</option><option value="VND">VND  Vietnamese Dong</option><option value="EUR">EUR  Euro</option><option value="GBP">GBP  British Pound</option></select></Field>
+                  <Field label="Status *"><select className={inputClass+" h-12 w-full rounded-xl border-slate-200 bg-white px-4 text-sm shadow-sm transition focus:border-[#789979] focus:outline-none focus:ring-4 focus:ring-[#e6efe2]"} value={form.status} onChange={event=>setForm(current=>({...current,status:event.target.value}))}><option>Active</option><option>Draft</option></select></Field>
+                </div>
+              </section>
+            </div>
+
+            <aside className="border-t border-slate-200 bg-[#f8faf7] p-6 sm:p-8 lg:border-l lg:border-t-0 lg:p-6">
+              <div className="mb-3 flex items-center gap-2 text-xs font-semibold text-slate-700"><Eye className="size-4 text-[#648366]"/> Partner listing preview</div>
+              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="mb-4 flex items-center justify-between gap-3"><span className="rounded-md bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600">{form.category||"Category"}</span><span className={`rounded-md px-2.5 py-1 text-[10px] font-semibold ${form.status==="Active"?"bg-emerald-50 text-emerald-800":"bg-amber-50 text-amber-800"}`}>{form.status}</span></div>
+                <h3 className="text-[17px] font-semibold leading-6 text-slate-900">{form.name||"Product name"}</h3>
+                <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500"><MapPin className="size-3.5 text-slate-400"/>{form.destination||"Destination"}</p>
+                <p className="mt-4 min-h-[72px] border-t border-slate-100 pt-3 text-xs leading-5 text-slate-600">{form.description||"The product description will appear here for your reseller partners."}</p>
+                <div className="mt-4 flex items-end justify-between gap-3 border-t border-slate-100 pt-4"><span className="text-[11px] text-slate-500">Retail price</span><strong className="text-xl font-semibold tracking-tight text-slate-900">{currencyLabel(form.currency,form.price||"0")}</strong></div>
+              </div>
+              <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4"><div className="flex items-start gap-2.5"><BadgeCheck className="mt-0.5 size-4 shrink-0 text-[#648366]"/><p className="text-[11px] leading-5 text-slate-500">This summary updates as you edit the product information.</p></div></div>
+            </aside>
+          </div>
+          <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-white px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8"><p className="text-xs text-slate-400">Required fields are marked with <span className="font-semibold text-slate-600">*</span></p><div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={()=>setDialog(null)} className="h-10 rounded-lg border-slate-200 px-4">Cancel</Button><Button type="submit" className="h-10 rounded-lg bg-[#416a4b] px-4 font-medium text-white shadow-sm transition hover:bg-[#355a3e]">{dialog==="create"?"Add product":"Save changes"}<ArrowRight className="ml-2 size-4"/></Button></div></div>
+        </form>}
+      </Card>
+    </div>}
+  </>
+}
+
+export function ResellerSpecialPage({ slug, campaignName, returnTo }: { slug: string; campaignName?: string; returnTo?: string }) {
+  if(slug==="campaign-marketplace")return <Marketplace/>
+  if(slug==="campaign-detail")return <ResellerCampaignDetail key={campaignName??resellerCampaignCards[0].name} campaignName={campaignName} returnTo={returnTo}/>
+  if(slug==="campaign-content"||slug==="campaign-videos")return <ResellerCampaignVideos key={campaignName??storefrontJourneys[0].title} campaignName={campaignName}/>
+  if(slug==="profile-settings")return <ResellerProfile/>
+  if(slug==="ai-content")return <ResellerAiLibrary/>
+  return <PageHeading eyebrow="Reseller Portal" title="Page not found" description="Choose a page from the reseller navigation."/>
+}
+
+function ResellerCampaignVideos({ campaignName }: { campaignName?: string }) {
+  const journey = storefrontJourneys.find((item) => item.title === campaignName) ?? storefrontJourneys[0]
+  const videoOptions = [
+    { id: "highlights", title: `${journey.short} highlights`, duration: "15 sec", format: "Vertical · 9:16", scene: `Open with a sweeping view of ${journey.short}, then introduce the trip's standout moments.` },
+    { id: "experience", title: "The experience", duration: "30 sec", format: "Vertical · 9:16", scene: `Show travelers enjoying the experience: ${journey.description}` },
+    { id: "story", title: "A slower way to travel", duration: "60 sec", format: "Landscape · 16:9", scene: `Tell a calm travel story around ${journey.short}, its local atmosphere, and ${journey.duration.toLowerCase()}.` },
+  ]
+  const [selectedVideoId, setSelectedVideoId] = useState(videoOptions[0].id)
+  const [assetTab, setAssetTab] = useState<"all" | "content" | "videos">("all")
+  const [copied, setCopied] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const selectedVideo = videoOptions.find((video) => video.id === selectedVideoId) ?? videoOptions[0]
+  const videoBrief = `Create a ${selectedVideo.duration} ${selectedVideo.format.toLowerCase()} travel promo video for ${journey.title}. ${selectedVideo.scene} Use cinematic travel footage, warm natural light, and end with a clear invitation to explore the campaign.`
+
+  async function copyBrief() {
+    try {
+      await navigator.clipboard.writeText(videoBrief)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1800)
+    } catch {
+      setCopied(false)
+    }
+  }
+
+  const tabs = [{ id: "all" as const, label: "All Assets" }, { id: "content" as const, label: "Content" }, { id: "videos" as const, label: "Videos" }]
+
+  return <>
+    <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <Link href="/reseller/my-campaigns" className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-teal-800 hover:underline"><ArrowRight className="size-4 rotate-180"/>Back to my campaigns</Link>
+        <PageHeading eyebrow="Campaign assets" title="Content Library" description={`Discover and download marketing assets for ${journey.title}.`}/>
+      </div>
+      <Badge className="bg-emerald-50 text-emerald-800">{journey.title === campaignName ? "Campaign selected" : "Sample campaign"}</Badge>
+    </div>
+
+    <Card className="overflow-hidden rounded-2xl border-slate-200/80 bg-white shadow-sm">
+      <CardHeader className="pb-4">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-teal-50 text-teal-800"><Library className="size-5"/></span>
+          <div><CardTitle>Content Library</CardTitle><CardDescription className="mt-1">Discover and download campaign marketing assets</CardDescription></div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div role="tablist" aria-label="Campaign asset type" className="grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1">
+          {tabs.map(tab=><button key={tab.id} type="button" role="tab" aria-selected={assetTab===tab.id} onClick={()=>setAssetTab(tab.id)} className={`min-h-11 rounded-lg px-3 text-sm font-medium transition ${assetTab===tab.id?"bg-white text-teal-900 shadow-sm":"text-slate-600 hover:text-slate-900"}`}>{tab.label}</button>)}
+        </div>
+
+        {assetTab==="all"&&<div className="grid gap-4 sm:grid-cols-2">
+          <button type="button" onClick={()=>setAssetTab("content")} className="group rounded-2xl border border-slate-200 bg-white p-5 text-left transition hover:border-teal-300 hover:bg-teal-50/40 hover:shadow-sm">
+            <span className="grid size-10 place-items-center rounded-xl bg-sky-50 text-sky-700"><FileText className="size-5"/></span>
+            <span className="mt-3 block text-base font-semibold text-slate-900">Social Content</span><span className="mt-1 block text-sm text-slate-500">Captions, post copy, hashtags</span>
+            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-teal-800">Browse content <ArrowRight className="size-4 transition group-hover:translate-x-0.5"/></span>
+          </button>
+          <button type="button" onClick={()=>setAssetTab("videos")} className="group rounded-2xl border border-slate-200 bg-white p-5 text-left transition hover:border-teal-300 hover:bg-teal-50/40 hover:shadow-sm">
+            <span className="grid size-10 place-items-center rounded-xl bg-violet-50 text-violet-700"><Clapperboard className="size-5"/></span>
+            <span className="mt-3 block text-base font-semibold text-slate-900">Marketing Videos</span><span className="mt-1 block text-sm text-slate-500">Campaign videos, reels, shorts</span>
+            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-teal-800">Browse videos <ArrowRight className="size-4 transition group-hover:translate-x-0.5"/></span>
+          </button>
+        </div>}
+
+        {(assetTab==="all"||assetTab==="content")&&<section className="space-y-4 border-t border-slate-100 pt-6">
+          <div className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-lg bg-sky-50 text-sky-700"><FileText className="size-4"/></span><div><h2 className="font-semibold text-slate-900">Social Content</h2><p className="text-sm text-slate-500">Captions, post copy, hashtags</p></div></div>
+          <ResellerAiLibrary key={journey.key} embedded campaignName={journey.title}/>
+        </section>}
+
+        {(assetTab==="all"||assetTab==="videos")&&<section className="space-y-4 border-t border-slate-100 pt-6">
+          <div className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-lg bg-violet-50 text-violet-700"><Clapperboard className="size-4"/></span><div><h2 className="font-semibold text-slate-900">Marketing Videos</h2><p className="text-sm text-slate-500">Campaign videos, reels, shorts</p></div></div>
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,.85fr)]">
+            <Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Available video concepts</CardTitle><CardDescription>{journey.title} · choose one to view its brief</CardDescription></CardHeader><CardContent className="space-y-3">
+              {videoOptions.map((video, index) => <button key={video.id} type="button" aria-pressed={selectedVideoId === video.id} onClick={() => { setSelectedVideoId(video.id); setCopied(false); setSaved(false) }} className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition ${selectedVideoId === video.id ? "border-teal-700 bg-teal-50/70 ring-2 ring-teal-700/10" : "border-slate-200 hover:border-teal-300 hover:bg-slate-50"}`}>
+                <span className="relative grid size-20 shrink-0 place-items-center overflow-hidden rounded-lg bg-slate-900"><Image src={journey.image} alt="" fill sizes="80px" className={`object-cover ${index === 1 ? "object-center" : index === 2 ? "object-bottom" : "object-top"}`}/><span className="absolute inset-0 grid place-items-center bg-slate-950/35 text-white"><Video className="size-5"/></span><span className="absolute bottom-1 right-1 rounded bg-black/70 px-1 py-0.5 text-[9px] font-semibold text-white">{video.duration}</span></span>
+                <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-slate-900">{video.title}</span><span className="mt-1 block text-xs text-slate-500">{video.format}</span><span className="mt-2 inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">Concept preview</span></span>
+                <span className={`grid size-5 shrink-0 place-items-center rounded-full border ${selectedVideoId === video.id ? "border-teal-700 bg-teal-700 text-white" : "border-slate-300 text-transparent"}`}><Check className="size-3"/></span>
+              </button>)}
+              <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-950">These are selectable video concepts with campaign artwork and briefs. No playable or downloadable video files have been published for this campaign yet.</p>
+            </CardContent></Card>
+            <Card className="overflow-hidden border-slate-200/80 shadow-sm">
+              <div className="relative aspect-video bg-slate-900"><Image src={journey.image} alt={`${journey.short} campaign artwork`} fill sizes="(max-width: 1280px) 100vw, 45vw" className="object-cover opacity-80"/><div className="absolute inset-0 grid place-items-center bg-slate-950/25"><span className="grid size-14 place-items-center rounded-full bg-white/95 text-teal-800 shadow-lg"><Video className="size-6"/></span></div><Badge className="absolute bottom-3 left-3 bg-white/95 text-slate-800">Concept preview · {selectedVideo.duration}</Badge></div>
+              <CardHeader className="pb-3"><CardTitle>{selectedVideo.title}</CardTitle><CardDescription>{journey.title} · {selectedVideo.format}</CardDescription></CardHeader>
+              <CardContent className="space-y-4"><div className="space-y-2"><Label htmlFor="campaign-video-brief">Selected video brief</Label><Textarea id="campaign-video-brief" readOnly value={videoBrief} rows={5} className="resize-none bg-slate-50 text-sm leading-6"/></div><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={copyBrief}>{copied?<Check className="size-4"/>:<Copy className="size-4"/>}{copied?"Copied":"Copy video brief"}</Button><Button className="bg-teal-800 hover:bg-teal-900" onClick={()=>setSaved(true)}>{saved?<Check className="size-4"/>:<Video className="size-4"/>}{saved?"Brief saved":"Save selected brief"}</Button></div></CardContent>
+            </Card>
+          </div>
+        </section>}
+      </CardContent>
+    </Card>
+  </>
+}
+
+function ResellerAiLibrary({ embedded = false, campaignName }: { embedded?: boolean; campaignName?: string }) {
+  const [query,setQuery]=useState("")
+  const [campaign,setCampaign]=useState(campaignName??"All campaigns")
+  const products=Array.from(new Set(publishedAiAssets.filter(asset=>!campaignName||asset.campaign===campaignName).map(asset=>asset.product)))
+  const [product,setProduct]=useState(campaignName?products[0]??"All products":"All products")
+  const [type,setType]=useState("All content types")
+  const [language,setLanguage]=useState("All languages")
+  const [feedback,setFeedback]=useState("")
+  const [copiedAsset,setCopiedAsset]=useState("")
+  const entries=useMemo(()=>publishedAiAssets.filter(asset=>(!campaignName||asset.campaign===campaignName)&&`${asset.copy} ${asset.campaign} ${asset.product} ${asset.type}`.toLowerCase().includes(query.toLowerCase())&&(campaignName||campaign==="All campaigns"||asset.campaign===campaign)&&(product==="All products"||asset.product===product)&&(type==="All content types"||asset.type===type)&&(language==="All languages"||asset.language===language)),[campaign,campaignName,language,product,query,type])
+  async function copy(value:string,key:string){try{await navigator.clipboard.writeText(value);setFeedback("");setCopiedAsset(key);window.setTimeout(()=>setCopiedAsset(current=>current===key?"":current),1600)}catch{setFeedback("Clipboard access is unavailable in this browser context.")}}
+  return <>{!embedded&&<PageHeading eyebrow="Reseller Portal" title="AI Content Library" description="Browse and copy campaign assets published by your travel partners."/>}<div id={embedded?"campaign-content":undefined}><Card className="border-slate-200/80 shadow-sm"><CardContent className="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-5">{!campaignName&&<Pick label="Campaign" value={campaign} setValue={setCampaign} options={["All campaigns",...publishedAiAssets.map(item=>item.campaign)]}/>}<Pick label="Product" value={product} setValue={setProduct} options={campaignName?products:["All products",...products]}/><Pick label="Content type" value={type} setValue={setType} options={["All content types","Social caption","Promotional description","Hashtag suggestions"]}/><Pick label="Language" value={language} setValue={setLanguage} options={["All languages","English","Vietnamese"]}/><div className="space-y-2"><Label htmlFor="published-search">Search</Label><Input id="published-search" type="search" aria-label="Search published copy" placeholder="Search published copy" value={query} onChange={event=>setQuery(event.target.value)}/></div></CardContent></Card><div className="mt-5 grid gap-5 lg:grid-cols-2">{entries.map(asset=><Card key={`${asset.campaign}-${asset.type}`} className="border-slate-200/80 shadow-sm"><CardHeader><div className="flex items-start justify-between gap-2"><div><CardTitle className="text-base">{asset.type}</CardTitle><CardDescription className="mt-1">{asset.campaign} · {asset.product}</CardDescription></div><Badge variant="outline">{asset.language}</Badge></div></CardHeader><CardContent><p className="rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-700">{asset.copy}</p><div className="mt-3 flex items-center justify-between text-xs text-slate-500"><span>{asset.tone}</span><Button size="sm" variant="outline" onClick={()=>copy(asset.copy,`${asset.campaign}-${asset.type}`)}>{copiedAsset===`${asset.campaign}-${asset.type}`?<Check className="size-3.5"/>:<Copy className="size-3.5"/>}{copiedAsset===`${asset.campaign}-${asset.type}`?"Copied":"Copy"}</Button></div></CardContent></Card>)}</div>{feedback&&<p role="status" className="text-sm text-red-700">{feedback}</p>}{entries.length===0&&<p className="mt-5 rounded-xl border border-slate-200 bg-white px-5 py-8 text-center text-sm text-slate-500">No published copy matches this campaign and the current filters.</p>}</div></>
+}
+
+export function AccountSpecialPage({ page }: { page:string }) { return page==="profile"?<SharedProfile/>:page==="notifications"?<SharedNotifications/>:<PageHeading eyebrow="Account" title="Page not found" description="Choose a profile or notifications page."/> }
+
+function SharedProfile() {
+  const [saved,setSaved]=useState(false)
+  return <><PageHeading eyebrow="Account" title="Your profile" description="Update your profile information and account preferences."/><form className="space-y-5" onSubmit={event=>{event.preventDefault();setSaved(true)}}><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Jordan Lee</CardTitle><CardDescription>Profile information</CardDescription></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2"><Field label="Full name"><Input defaultValue="Jordan Lee"/></Field><Field label="Email address"><Input type="email" defaultValue="jordan@partner.example"/></Field><Field label="Phone"><Input defaultValue="+84 90 555 0182"/></Field><Field label="Website / social profile"><Input defaultValue="instagram.com/jordantravels"/></Field><div className="space-y-2 sm:col-span-2"><Label>About you</Label><Textarea rows={4} defaultValue="I share thoughtful trips and local discoveries with a community of curious travelers."/></div></CardContent></Card><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Account preferences</CardTitle><CardDescription>Manage illustrative account notifications.</CardDescription></CardHeader><CardContent className="space-y-3">{["Campaign updates","Commission summaries","Product announcements"].map((item,index)=><label key={item} className="flex items-center justify-between rounded-lg border border-slate-100 p-3 text-sm">{item}<input type="checkbox" defaultChecked={index!==2} className="size-4 accent-teal-800"/></label>)}</CardContent></Card><div className="flex items-center gap-3"><Button type="submit" className="bg-teal-800 hover:bg-teal-900">Save changes</Button>{saved&&<p role="status" className="text-sm text-emerald-800">Profile changes saved in this preview only.</p>}</div></form></>
+}
+
+function SharedNotifications() {
+  const [items,setItems]=useState([{title:"New booking attributed",category:"Booking update",text:"A Ha Long Bay booking matched your partner network.",details:"A traveler completed a booking through your Ha Long Bay partner referral. The booking has been attributed to your network and is awaiting the usual review before commission is finalized.",time:"12 minutes ago",unread:true},{title:"Campaign application received",category:"Partner activity",text:"Coastline Journeys applied to Hoi An Lantern Season.",details:"Coastline Journeys has requested to join the Hoi An Lantern Season campaign. The tenant campaign manager can review the partner application and decide whether to approve it.",time:"Yesterday",unread:true},{title:"Commission approved",category:"Commission update",text:"A $42 commission is ready for payout.",details:"A commission of $42 for a completed booking has been approved. It is now included in the amount ready for payout.",time:"13 Oct 2026",unread:false},{title:"New campaign available",category:"Campaign update",text:"Phu Quoc Island Escape is open to partners.",details:"The Phu Quoc Island Escape campaign is available for partners to review. Open Campaign Marketplace to see its travel details and commission terms.",time:"12 Oct 2026",unread:false}])
+  const [filter,setFilter]=useState("All notifications")
+  const [selectedItem,setSelectedItem]=useState<(typeof items)[number]|null>(null)
+  const visible=items.filter(item=>filter==="All notifications"||(filter==="Unread"&&item.unread)||(filter==="Read"&&!item.unread))
+  return <><div className="flex flex-wrap items-end justify-between gap-3"><PageHeading eyebrow="Account" title="Notifications" description="Recent booking, campaign and commission updates."/><Button variant="outline" onClick={()=>setItems(current=>current.map(item=>({...item,unread:false})))}>Mark all as read</Button></div><div className="mb-4"><select className={inputClass} aria-label="Filter notifications" value={filter} onChange={event=>setFilter(event.target.value)}><option>All notifications</option><option>Unread</option><option>Read</option></select></div><div className="space-y-3">{visible.map(item=><Card key={item.title} className="border-slate-200/80 shadow-sm"><CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start"><span className={`mt-1 size-2.5 shrink-0 rounded-full ${item.unread?"bg-teal-700":"bg-slate-200"}`}/><div className="min-w-0 flex-1"><p className="font-semibold">{item.title}</p><p className="mt-1 text-sm text-slate-600">{item.text}</p><p className="mt-2 text-xs text-slate-400">{item.time}</p></div><div className="flex shrink-0 items-center gap-1 self-end sm:self-auto"><Button size="sm" variant="outline" className="gap-1.5" onClick={()=>setSelectedItem(item)}><Eye className="size-3.5"/>View details</Button>{item.unread&&<Button size="sm" variant="ghost" onClick={()=>setItems(current=>current.map(row=>row.title===item.title?{...row,unread:false}:row))}>Mark read</Button>}</div></CardContent></Card>)}</div>{visible.length===0&&<p className="py-8 text-center text-sm text-slate-500">No notifications in this view.</p>}<Dialog open={selectedItem!==null} onOpenChange={(open)=>{if(!open)setSelectedItem(null)}}><DialogContent className="gap-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl sm:max-w-xl"><DialogHeader className="relative overflow-hidden border-b border-emerald-100 bg-[linear-gradient(125deg,#f2f8f2_0%,#f8fbf8_58%,#fff8e9_100%)] px-6 pb-5 pt-6"><div aria-hidden="true" className="absolute -right-8 -top-12 size-40 rounded-full bg-emerald-100/50 blur-2xl"/><div className="relative flex items-start gap-4"><span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white text-emerald-800 shadow-sm ring-1 ring-emerald-100"><BellRing className="size-5"/></span><div className="min-w-0 flex-1 pt-0.5"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="text-[10px] font-bold uppercase tracking-[.16em] text-emerald-800">{selectedItem?.category}</span><span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${selectedItem?.unread?"bg-amber-100 text-amber-900":"bg-white/80 text-slate-500 ring-1 ring-slate-200"}`}>{selectedItem?.unread?"Unread":"Read"}</span></div><DialogTitle className="pr-8 text-xl font-semibold leading-7 tracking-tight text-slate-900">{selectedItem?.title}</DialogTitle><DialogDescription className="mt-1.5 text-xs text-slate-500">Received {selectedItem?.time}</DialogDescription></div></div></DialogHeader><div className="px-6 py-5"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-slate-400">Summary</p><p className="mt-2 text-sm font-semibold leading-6 text-slate-800">{selectedItem?.text}</p><div className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/80 p-4"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-slate-400">What happened</p><p className="mt-2 text-sm leading-6 text-slate-600">{selectedItem?.details}</p></div><div className="mt-4 flex items-center gap-2 text-xs text-slate-500"><span className="size-1.5 rounded-full bg-emerald-600"/>Workspace notification</div></div><DialogFooter className="mx-0 mb-0 border-t border-slate-100 bg-white px-6 py-4"><DialogClose render={<Button variant="outline" className="h-9 rounded-lg px-4"/>}>Close details</DialogClose></DialogFooter></DialogContent></Dialog></>
+}
+

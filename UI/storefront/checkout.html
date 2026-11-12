@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Prepare a sample journey request with Lantern & Tide Travel.">
+  <title>Plan your journey | Lantern & Tide Travel</title>
+  <link rel="stylesheet" href="storefront.css">
+  <script defer src="storefront.js"></script>
+</head>
+<body class="store-page checkout-page">
+  <header class="checkout-nav"><a class="store-brand" href="index.html" aria-label="Lantern and Tide Travel home"><span class="brand-seal">L<span>&</span>T</span><span class="brand-name">LANTERN <i>&</i> TIDE<small>TRAVEL, THOUGHTFULLY</small></span></a><div class="checkout-steps"><span class="step-current"><i>01</i> YOUR DETAILS</span><b></b><span><i>02</i> CONFIRMATION</span></div><a class="secure-note" href="product-detail.html" data-back-product><span aria-hidden="true">&larr;</span> Back to your journey</a></header>
+  <main class="checkout-wrap">
+    <div class="checkout-head"><span class="overline">A GOOD JOURNEY STARTS HERE</span><h1>Let's make a plan.</h1><p>A few details help our local partner prepare for your stay.</p></div>
+    <div class="checkout-grid">
+      <form class="checkout-form" data-booking-form>
+        <section class="checkout-section"><div class="checkout-section-title"><span>01</span><div><h2>Your details</h2><p>Who should the travel partner contact?</p></div></div><div class="form-grid"><label>First name<input name="firstName" autocomplete="given-name" placeholder="e.g. Alex" required></label><label>Last name<input name="lastName" autocomplete="family-name" placeholder="e.g. Morgan" required></label><label class="full-width">Email address<input type="email" name="email" autocomplete="email" placeholder="you@example.com" required></label><label class="full-width">Phone number<input type="tel" name="phone" autocomplete="tel" placeholder="Include your country code" required></label></div></section>
+        <section class="checkout-section"><div class="checkout-section-title"><span>02</span><div><h2>Your journey</h2><p>Choose a preferred date and party size.</p></div></div><div class="form-grid"><label>Preferred travel date<input type="date" name="travelDate" required min="2026-10-15"></label><label>Number of guests<select name="guests"><option>1 guest</option><option selected>2 guests</option><option>3 guests</option><option>4 guests</option></select></label><label class="full-width">A note for your host <span class="optional-label">OPTIONAL</span><textarea name="notes" rows="3" placeholder="Dietary needs, a special occasion, or something you'd love to experience"></textarea></label></div></section>
+        <div class="payment-note"><span class="payment-lock" aria-hidden="true">i</span><p><strong>No payment details required</strong><span>This is a UI prototype. It does not process payment or send a real reservation request.</span></p></div>
+        <button class="store-button checkout-submit" type="submit">Confirm sample request <b aria-hidden="true">&rarr;</b></button><p class="checkout-feedback" data-booking-feedback role="status"></p>
+      </form>
+      <aside class="booking-summary"><div class="summary-image"><img data-summary-image src="../assets/images/halong-bay.svg" alt=""><span class="summary-image-label">YOUR SELECTED JOURNEY</span></div><div class="summary-content"><span class="overline">A LANTERN & TIDE JOURNEY</span><h2 data-summary-title>Ha Long Bay Weekend Escape</h2><p class="summary-destination" data-summary-location>Ha Long Bay, Vietnam</p><div class="summary-meta"><span>CURATED EXPERIENCE</span><span>LOCAL HOST</span></div><div class="summary-line"><span>Guests</span><strong data-summary-guests>2 guests</strong></div><div class="summary-line"><span>Sample rate per guest</span><strong data-summary-price>$420</strong></div><div class="summary-line summary-total"><span>Illustrative total</span><strong data-summary-total>$840</strong></div><small>Sample pricing only. Availability and final trip details would be confirmed by the travel partner.</small></div></aside>
+    </div>
+    <section class="confirmation" data-confirmation hidden><span class="confirmation-mark" aria-hidden="true">&#10003;</span><span class="overline">SAMPLE REQUEST PREPARED</span><h2>Thank you, <span data-confirmation-name>traveller</span>.</h2><p>Your request for <strong data-confirmation-product></strong> is confirmed in this prototype. No payment was taken and no travel reservation was created.</p><a class="store-button" href="index.html">Return to Lantern & Tide <b aria-hidden="true">&rarr;</b></a><span class="confirmation-reference">A SAMPLE JOURNEY BY LANTERN & TIDE TRAVEL</span></section>
+  </main>
+  <footer class="store-footer"><a class="store-brand" href="index.html"><span class="brand-seal">L<span>&</span>T</span><span class="brand-name">LANTERN <i>&</i> TIDE<small>TRAVEL, THOUGHTFULLY</small></span></a><div class="footer-legal"><span>YOUR DETAILS STAY IN THIS DEMO</span><small>Sample tenant storefront · Prototype only</small></div></footer>
+</body>
+</html>

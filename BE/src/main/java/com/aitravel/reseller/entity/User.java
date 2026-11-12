@@ -1,11 +1,14 @@
 package com.aitravel.reseller.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "users")
@@ -15,28 +18,38 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
+    @JsonIgnore
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name = "full_name", length = 100)
+    @Column(name = "full_name", nullable = false, length = 255)
     private String fullName;
 
-    @Column(length = 20)
+    @Column(length = 50)
     private String phone;
 
-    @Column(length = 20)
-    private String role; // ADMIN, MERCHANT, RESELLER
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @Builder.Default
+    private Set<Role> roles = new HashSet<>();
 
-    @Column(length = 20)
+    @Column(length = 30)
     @Builder.Default
     private String status = "ACTIVE";
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
+
+    @Column(name = "email_verified_at")
+    private Instant emailVerifiedAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")

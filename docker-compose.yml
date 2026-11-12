@@ -30,8 +30,13 @@ services:
       - .env
     environment:
       - DB_URL=jdbc:postgresql://postgres_db:5432/mydatabase
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_db:5432/mydatabase
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - REDIS_HOST=redis_cache
+      - SPRING_DATA_REDIS_HOST=redis_cache
       - RABBITMQ_HOST=rabbitmq_broker
+      - SPRING_RABBITMQ_HOST=rabbitmq_broker
     depends_on:
       - postgres
       - redis

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -23,6 +24,16 @@ public class GlobalExceptionHandler {
             org.springframework.http.converter.HttpMessageNotReadableException.class })
     public ResponseEntity<ApiResponse<Void>> malformedRequest(Exception e) {
         return ResponseEntity.badRequest().body(ApiResponse.error("Invalid request format"));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> methodNotSupported(HttpRequestMethodNotSupportedException e) {
+        String[] supportedMethods = e.getSupportedMethods();
+        String message = supportedMethods == null
+                ? "Method not allowed"
+                : "Method not allowed. Supported methods: " + String.join(", ", supportedMethods);
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(ApiResponse.error(message));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

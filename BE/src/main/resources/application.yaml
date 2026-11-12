@@ -69,6 +69,12 @@ app:
     account-management: false
   tracking:
       base-url: https://aitravel.vn
+  integrations:
+    tiktok:
+      client-key: ${TIKTOK_CLIENT_KEY:}
+      client-secret: ${TIKTOK_CLIENT_SECRET:}
+      redirect-uri: ${TIKTOK_REDIRECT_URI:}
+  social-token-encryption-key: ${SOCIAL_TOKEN_ENCRYPTION_KEY:}
 
 server:
   port: ${SERVER_PORT:8080} # Port của ứng dụng Spring Boot

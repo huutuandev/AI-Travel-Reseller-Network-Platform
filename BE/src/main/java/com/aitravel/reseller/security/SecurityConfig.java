@@ -55,6 +55,8 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/api/v1/auth/**")
                         .permitAll()
+                        .requestMatchers("/api/v1/reseller/social-accounts/tiktok/callback")
+                        .permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated());
 

@@ -20,6 +20,10 @@ public class RedisService {
         return redisTemplate.opsForValue().get(key);
     }
 
+    public String getAndDelete(String key) {
+        return redisTemplate.opsForValue().getAndDelete(key);
+    }
+
     public void delete(String key) {
         redisTemplate.delete(key);
     }

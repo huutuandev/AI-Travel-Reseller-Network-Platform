@@ -30,6 +30,12 @@ public class ResellerCampaignPost {
     @Column(name = "post_url", nullable = false, columnDefinition = "TEXT")
     private String postUrl;
 
+    @Column(nullable = false, length = 30)
+    private String platform;
+
+    @Column(name = "external_video_id", length = 255)
+    private String externalVideoId;
+
     @Column(columnDefinition = "TEXT")
     private String caption;
 
@@ -40,6 +46,19 @@ public class ResellerCampaignPost {
     @Column(name = "likes_count", nullable = false)
     @Builder.Default
     private Long likesCount = 0L;
+
+    @Column(name = "metrics_source", length = 30)
+    private String metricsSource;
+
+    @Column(name = "metrics_status", nullable = false, length = 20)
+    @Builder.Default
+    private String metricsStatus = "PENDING";
+
+    @Column(name = "metrics_fetched_at")
+    private Instant metricsFetchedAt;
+
+    @Column(name = "metrics_error", columnDefinition = "TEXT")
+    private String metricsError;
 
     @Column(name = "comments_count", nullable = false)
     @Builder.Default

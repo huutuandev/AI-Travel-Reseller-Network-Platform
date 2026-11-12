@@ -3,50 +3,43 @@ package com.aitravel.reseller.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.type.SqlTypes;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "commissions")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class Commission {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id", nullable = false, unique = true)
-    private Booking booking;
+    @JoinColumn(name = "order_id", nullable = false, unique = true)
+    private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reseller_id", nullable = false)
-    private ResellerProfile reseller;
+    private Reseller reseller;
 
-    @Column(nullable = false, precision = 12, scale = 2)
-    private BigDecimal amount;
+    @Column(name = "gross_commission", precision = 12, scale = 2)
+    private BigDecimal grossCommission;
 
-    @JdbcTypeCode(SqlTypes.CHAR)
-    @Column(nullable = false, length = 3, columnDefinition = "CHAR(3)")
-    @Builder.Default
-    private String currency = "VND";
+    @Column(name = "reseller_amount", precision = 12, scale = 2)
+    private BigDecimal resellerAmount;
 
-    @Column(nullable = false, length = 20)
+    @Column(name = "platform_amount", precision = 12, scale = 2)
+    private BigDecimal platformAmount;
+
+    @Column(length = 20)
     @Builder.Default
     private String status = "PENDING";
+
+    @Column(name = "eligible_at")
+    private Instant eligibleAt;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private Instant updatedAt;
 }

@@ -1,4 +1,4 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeft, ArrowUpRight, MousePointerClick, ShoppingBag, UserRound, Users } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,8 +11,8 @@ const resellerPerformance: Record<string, { clicks: string; conversions: string;
   "Sam Rivera": { clicks: "486", conversions: "8", campaigns: ["Ha Long Bay Weekend Escape"] },
 }
 
-export default async function TenantResellerDetailPage({ searchParams }: { searchParams: Promise<{ reseller?: string }> }) {
-  const { reseller: resellerName } = await searchParams
+export default async function TenantResellerDetailPage({ searchParams }: { searchParams: Promise<{ reseller?: string; tab?: string }> }) {
+  const { reseller: resellerName, tab: sourceTab } = await searchParams
   const resellerRow = tenantTables.resellers.rows.find((row) => row[0].split(" Â· ")[0] === resellerName)
   if (!resellerRow) notFound()
 
@@ -23,7 +23,7 @@ export default async function TenantResellerDetailPage({ searchParams }: { searc
   return <div className="space-y-6">
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <Link href="/tenant/resellers" className="inline-flex items-center gap-1 text-sm font-medium text-teal-800 hover:underline"><ArrowLeft className="size-4"/>Back to resellers</Link>
+        <Link href={`/tenant/resellers?tab=${sourceTab === "score" || sourceTab === "commission" || sourceTab === "management" ? sourceTab : "management"}`} className="inline-flex items-center gap-1 text-sm font-medium text-teal-800 hover:underline"><ArrowLeft className="size-4"/>Back to resellers</Link>
         <p className="mt-4 text-xs font-semibold uppercase tracking-[.15em] text-teal-800">Tenant workspace · Partner profile</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{name}</h1>
         <p className="mt-1 text-sm text-slate-500">Reseller account details and campaign activity.</p>

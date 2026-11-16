@@ -28,11 +28,13 @@ public class ResellerCampaignController {
 
     @GetMapping
     @Operation(summary = "Get all campaigns")
-    public ApiResponse<List<CampaignResponse>> getAllCampaigns() {
+    public ApiResponse<List<CampaignResponse>> getAllCampaigns(
+            @RequestParam(required = false) String commissionType,
+            @RequestParam(required = false) java.math.BigDecimal minCommissionPercent) {
 
         return ApiResponse.success(
                 "Campaigns retrieved successfully",
-                service.getAllCampaigns());
+                service.getAllCampaigns(commissionType, minCommissionPercent));
     }
 
     @GetMapping("/{campaignId}")

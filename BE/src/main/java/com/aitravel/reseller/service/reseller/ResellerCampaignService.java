@@ -24,6 +24,23 @@ public class ResellerCampaignService {
         return repository.findAllCampaigns();
     }
 
+    public List<CampaignResponse> getAllCampaigns(String commissionType, java.math.BigDecimal minCommissionPercent) {
+        if (commissionType != null && !"PERCENTAGE".equals(commissionType)
+                && !"FIXED_AMOUNT".equals(commissionType)) {
+            throw new IllegalArgumentException("commissionType must be PERCENTAGE or FIXED_AMOUNT");
+        }
+        if (minCommissionPercent != null) {
+            if (minCommissionPercent.signum() < 0
+                    || minCommissionPercent.compareTo(java.math.BigDecimal.valueOf(100)) > 0) {
+                throw new IllegalArgumentException("minCommissionPercent must be between 0 and 100");
+            }
+            if ("FIXED_AMOUNT".equals(commissionType)) {
+                throw new IllegalArgumentException("minCommissionPercent cannot be used with FIXED_AMOUNT");
+            }
+        }
+        return repository.findAllCampaigns(commissionType, minCommissionPercent);
+    }
+
     // Lấy chi tiết chiến dịch
     public CampaignResponse getCampaignDetail(UUID campaignId) {
 

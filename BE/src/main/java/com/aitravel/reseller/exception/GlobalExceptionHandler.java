@@ -74,6 +74,13 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("Resource not found: " + e.getResourcePath()));
     }
 
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResponseStatus(
+            org.springframework.web.server.ResponseStatusException e) {
+        return ResponseEntity.status(e.getStatusCode())
+                .body(ApiResponse.error(e.getReason() == null ? "Request failed" : e.getReason()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception e) {
         log.error("Unhandled exception occurred", e);

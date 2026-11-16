@@ -31,10 +31,24 @@ public class ResellerCampaignRepository {
             """;
 
     public List<CampaignResponse> findAllCampaigns() {
+        return findAllCampaigns(null, null);
+    }
 
-        String sql = SELECT_CAMPAIGN + " ORDER BY created_at DESC";
+    public List<CampaignResponse> findAllCampaigns(String commissionType, java.math.BigDecimal minCommissionPercent) {
 
-        return jdbc.query(sql, (rs, rowNum) -> new CampaignResponse(
+        String sql = SELECT_CAMPAIGN + " WHERE 1 = 1";
+        Map<String, Object> params = new java.util.HashMap<>();
+        if (commissionType != null) {
+            sql += " AND commission_type = :commissionType";
+            params.put("commissionType", commissionType);
+        }
+        if (minCommissionPercent != null) {
+            sql += " AND commission_type = 'PERCENTAGE' AND commission_rate >= :minCommissionPercent";
+            params.put("minCommissionPercent", minCommissionPercent);
+        }
+        sql += " ORDER BY created_at DESC";
+
+        return jdbc.query(sql, params, (rs, rowNum) -> new CampaignResponse(
                 rs.getObject("id", UUID.class),
                 rs.getString("title"),
                 rs.getString("description"),

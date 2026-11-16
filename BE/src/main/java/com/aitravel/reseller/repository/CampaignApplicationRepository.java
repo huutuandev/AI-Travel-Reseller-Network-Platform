@@ -14,4 +14,5 @@ public interface CampaignApplicationRepository extends JpaRepository<CampaignApp
     List<CampaignApplication> findByResellerId(UUID resellerId);
     Optional<CampaignApplication> findByIdAndResellerId(UUID id, UUID resellerId);
     Optional<CampaignApplication> findByCampaignIdAndResellerId(UUID campaignId, UUID resellerId);
+    boolean existsByCampaign_Id(UUID campaignId);
 }

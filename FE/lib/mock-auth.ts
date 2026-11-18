@@ -11,7 +11,7 @@ export type MockUser = {
   status: "active"
 }
 
-export type DemoSession = Omit<MockUser, "password">
+export type DemoSession = Omit<MockUser, "password"> & { authMode?: "backend" }
 
 // Development-only credentials. Replace this adapter with the real auth service when available.
 export const MOCK_USERS: MockUser[] = [
@@ -49,7 +49,14 @@ export function getDemoSession(): DemoSession | null {
     const value = window.localStorage.getItem(SESSION_KEY)
     if (!value) return null
     const session = JSON.parse(value) as DemoSession
-    return MOCK_USERS.some((user) => user.id === session.id && user.role === session.role) ? session : null
+    const isDemoUser = MOCK_USERS.some((user) => user.id === session.id && user.role === session.role)
+    const isBackendReseller = session.authMode === "backend"
+      && session.role === "reseller"
+      && typeof session.id === "string"
+      && typeof session.email === "string"
+      && typeof session.name === "string"
+      && session.status === "active"
+    return isDemoUser || isBackendReseller ? session : null
   } catch {
     return null
   }
@@ -67,6 +74,7 @@ export function saveDemoSession(session: DemoSession): void {
 
 export function clearDemoSession(): void {
   window.localStorage.removeItem(SESSION_KEY)
+  window.sessionStorage.removeItem("wayfarer-backend-access-token")
   window.dispatchEvent(new Event(SESSION_EVENT))
 }
 

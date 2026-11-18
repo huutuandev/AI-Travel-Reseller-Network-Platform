@@ -14,6 +14,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { resellerCampaignCards, publishedAiAssets, tenantTables } from "@/lib/wireframe-mocks"
 import { storefrontJourneys } from "@/lib/storefront-data"
 import { useResellerCampaignMembership } from "@/lib/reseller-campaign-membership"
+import { getBackendAccessToken } from "@/lib/backend-api"
 
 const inputClass = "h-10 rounded-md border border-input bg-background px-3 text-sm"
 const fieldLabelClass = "text-sm font-medium"
@@ -97,7 +98,7 @@ function Marketplace() {
   const [commission,setCommission]=useState("Any commission")
   const [participationFilter,setParticipationFilter]=useState("All participation")
   const [feedback,setFeedback]=useState("")
-  const { memberships, requestToJoin } = useResellerCampaignMembership()
+const { memberships, requestToJoin } = useResellerCampaignMembership()
   const items=useMemo(()=>resellerCampaignCards.filter(item=>`${item.name} ${item.product} ${item.destination}`.toLowerCase().includes(query.toLowerCase())&&(category==="All categories"||item.category===category)&&(destination==="All destinations"||item.destination===destination)&&(commission==="Any commission"||(commission==="10%+"&&Number.parseFloat(item.commission)>=10))&&(participationFilter==="All participation"||participationFilter==="Active"&&memberships[item.name]?.status==="Active"||participationFilter==="Pending approval"&&memberships[item.name]?.status==="Pending"||participationFilter==="Not joined"&&!memberships[item.name])),[category,commission,destination,memberships,participationFilter,query])
   function join(name:string){requestToJoin(name);setFeedback(`${name}: join request sent. You can follow its status in My campaigns.`)}
   return <><PageHeading eyebrow="Reseller Portal" title="Campaign marketplace" description="Browse all travel campaigns and manage participation from their details."/><Card className="border-slate-200/80 shadow-sm"><CardContent className="grid gap-3 pt-5 md:grid-cols-2 xl:grid-cols-5"><div className="space-y-2"><Label htmlFor="campaign-search">Search</Label><Input id="campaign-search" type="search" className={inputClass+" w-full"} placeholder="Search destinations" value={query} onChange={event=>setQuery(event.target.value)} /></div><Pick label="Category" value={category} setValue={setCategory} options={["All categories","Tours & cruises","Hotels","Packages"]}/><Pick label="Destination" value={destination} setValue={setDestination} options={["All destinations","Ha Long Bay","Hoi An","Phu Quoc"]}/><Pick label="Commission" value={commission} setValue={setCommission} options={["Any commission","10%+"]}/><Pick label="Participation status" value={participationFilter} setValue={setParticipationFilter} options={["All participation","Active","Pending approval","Not joined"]}/></CardContent></Card>{feedback&&<p role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">{feedback} <Link href="/reseller/my-campaigns" className="font-semibold underline">View My campaigns</Link></p>}<div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{items.map(item=>{const participation=memberships[item.name];const membershipLabel=participation?.status==="Active"?"Active":participation?.status==="Pending"?"Pending approval":"Not joined";return <Card key={item.name} className="group overflow-hidden rounded-2xl border-slate-200/80 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"><div className="relative h-48 overflow-hidden bg-slate-100"><Image src={item.image} alt={`${item.destination}, Vietnam`} fill sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105"/><div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#14271e]/65 via-transparent to-black/5"/><span className="absolute bottom-3 left-4 text-xs font-semibold text-white drop-shadow">{item.destination}, Vietnam</span></div><CardHeader><div className="flex items-start justify-between gap-3"><div><CardTitle className="text-lg">{item.name}</CardTitle><CardDescription className="mt-1">{item.product} · {item.destination}</CardDescription></div><Badge className={participation?.status==="Pending"?"bg-amber-50 text-amber-900":participation?.status==="Active"?"bg-blue-50 text-blue-700":"bg-emerald-50 text-emerald-800"}>{membershipLabel}</Badge></div></CardHeader><CardContent><div className="flex items-center justify-between text-sm"><span className="text-slate-500">Commission</span><strong>{item.commission}</strong></div><p className="mt-2 text-xs text-slate-500">Campaign dates: {item.dates}</p><Link href={`/reseller/campaign-detail?campaign=${encodeURIComponent(item.name)}&from=campaign-marketplace`} className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-teal-800">View details <ArrowRight className="size-4"/></Link>{participation?.status==="Active"?<Link href={`/reseller/campaign-detail?campaign=${encodeURIComponent(item.name)}&from=campaign-marketplace`} className="mt-3 inline-flex h-10 min-h-10 w-full items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700">Manage campaign</Link>:participation?.status==="Pending"?<Button className="mt-3 h-10 min-h-10 w-full border-amber-300 bg-amber-50 text-amber-900 opacity-100 hover:bg-amber-50" variant="outline" disabled>Pending approval</Button>:<Button className="mt-3 h-10 min-h-10 w-full bg-emerald-700 hover:bg-emerald-800" onClick={()=>join(item.name)}>Request to join</Button>}</CardContent></Card>})}</div>{items.length===0&&<p className="py-8 text-center text-sm text-slate-500">No campaigns match these filters.</p>}</>
@@ -111,6 +112,9 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
     TikTok:[{id:"tiktok-post-1",url:"",views:null,likes:null,error:""}],
     Facebook:[{id:"facebook-post-1",url:"",views:null,likes:null,error:""}],
   })
+  const [isConnectingTikTok,setIsConnectingTikTok]=useState(false)
+  const [isLoadingTikTokMetrics,setIsLoadingTikTokMetrics]=useState(false)
+  const [tiktokConnectMessage,setTikTokConnectMessage]=useState("")
   const { memberships, requestToJoin } = useResellerCampaignMembership()
   const campaign=resellerCampaignCards.find(item=>item.name===campaignName)??resellerCampaignCards[0]
   const participation=memberships[campaign.name]
@@ -131,7 +135,7 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
   function updateSocialEntry(platform:SocialPlatform,id:string,updates:Partial<SocialPostEntry>){
     setSocialEntries(current=>({...current,[platform]:current[platform].map(entry=>entry.id===id?{...entry,...updates}:entry)}))
   }
-  function showSocialMetrics(platform:SocialPlatform,id:string){
+  function showSocialMetricsPreview(platform:SocialPlatform,id:string){
     const entry=socialEntries[platform].find(item=>item.id===id)
     if(!entry)return
     const rawUrl=entry.url
@@ -146,6 +150,88 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
     const views=1400+(hash%198601)
     const likes=Math.max(1,Math.round(views*(0.035+(hash%31)/1000)))
     updateSocialEntry(platform,id,{url:normalizedUrl,views,likes,error:""})
+  }
+  async function connectTikTok(){
+    const accessToken=getBackendAccessToken()
+    if(!accessToken){
+      setTikTokConnectMessage("Sign in with a real reseller account first. Local demo accounts cannot authorize TikTok.")
+      return
+    }
+    setIsConnectingTikTok(true)
+    setTikTokConnectMessage("")
+    try{
+      const response=await fetch("/api/backend/reseller/tiktok/oauth-url",{headers:{Authorization:"Bearer "+accessToken},cache:"no-store"})
+      const result=await response.json().catch(()=>null) as {success?:boolean;message?:string;data?:{authorizationUrl?:string}}|null
+      if(!response.ok||!result||!result.success||!result.data||!result.data.authorizationUrl){
+        setTikTokConnectMessage((result&&result.message)||"Could not start TikTok authorization. Check the BE TikTok app configuration.")
+        setIsConnectingTikTok(false)
+        return
+      }
+      window.location.assign(result.data.authorizationUrl)
+    }catch{
+      setTikTokConnectMessage("Could not reach the backend to start TikTok authorization.")
+      setIsConnectingTikTok(false)
+    }
+  }
+  async function showSocialMetrics(platform:SocialPlatform,id:string){
+    const entry=socialEntries[platform].find(item=>item.id===id)
+    if(!entry)return
+    const rawUrl=entry.url
+    let parsedUrl:URL
+    try{parsedUrl=new URL(rawUrl.trim())}catch{updateSocialEntry(platform,id,{error:"Enter a valid "+platform+" post link."});return}
+    const hostname=parsedUrl.hostname.toLowerCase().replace(/^www\./,"")
+    const detectedPlatform:SocialPlatform|null=hostname==="tiktok.com"||hostname.endsWith(".tiktok.com")?"TikTok":hostname==="facebook.com"||hostname.endsWith(".facebook.com")||hostname==="fb.watch"?"Facebook":null
+    if((parsedUrl.protocol!=="https:"&&parsedUrl.protocol!=="http:")||detectedPlatform!==platform){updateSocialEntry(platform,id,{error:"Paste a link from "+platform+" in this field."});return}
+    const normalizedUrl=parsedUrl.toString()
+
+    if(platform==="Facebook"){
+      showSocialMetricsPreview(platform,id)
+      return
+    }
+
+    const videoId=parsedUrl.pathname.match(/\/video\/(\d+)/)?.[1]
+    if(!videoId){
+      updateSocialEntry(platform,id,{url:normalizedUrl,error:"Use a full TikTok video URL that includes /video/ and its numeric video ID."})
+      return
+    }
+    const accessToken=getBackendAccessToken()
+    if(!accessToken){
+      updateSocialEntry(platform,id,{url:normalizedUrl,error:"Sign in with a real reseller account and connect TikTok to view live metrics."})
+      return
+    }
+
+    updateSocialEntry(platform,id,{url:normalizedUrl,views:null,likes:null,error:""})
+    setIsLoadingTikTokMetrics(true)
+    try{
+      const response=await fetch("/api/backend/reseller/tiktok/videos?videoId="+encodeURIComponent(videoId),{
+        headers:{Authorization:"Bearer "+accessToken},
+        cache:"no-store",
+      })
+      const result=await response.json().catch(()=>null) as {
+        success?:boolean
+        message?:string
+        data?:{videos?:Array<{id:string;viewCount:number|null;likeCount:number|null}>}
+      }|null
+      const video=result&&result.data&&result.data.videos
+        ?result.data.videos.find(item=>item.id===videoId)
+        :undefined
+      if(!response.ok||!result||!result.success||!video){
+        const message=response.status===401
+          ?"Your backend session is not valid. Sign in again with your reseller account."
+          :(result&&result.message)||"This video was not found among videos available to the connected TikTok account."
+        updateSocialEntry(platform,id,{error:message})
+        return
+      }
+      if(typeof video.viewCount!=="number"||typeof video.likeCount!=="number"){
+        updateSocialEntry(platform,id,{error:"TikTok did not return view and like counts for this video."})
+        return
+      }
+      updateSocialEntry(platform,id,{views:video.viewCount,likes:video.likeCount,error:""})
+    }catch{
+      updateSocialEntry(platform,id,{error:"Could not reach the TikTok video API. Check that the backend is running."})
+    }finally{
+      setIsLoadingTikTokMetrics(false)
+    }
   }
   function fillSocialSample(platform:SocialPlatform,id:string){updateSocialEntry(platform,id,{url:platform==="TikTok"?"https://www.tiktok.com/@wayfarer.demo/video/7350000000000000001":"https://www.facebook.com/watch/?v=7350000000000000002",views:null,likes:null,error:""})}
   function addSocialEntry(platform:SocialPlatform){setSocialEntries(current=>({...current,[platform]:[...current[platform],{id:crypto.randomUUID(),url:"",views:null,likes:null,error:""}]}))}
@@ -165,7 +251,7 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
         <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-white via-slate-50/80 to-sky-50/70 p-5 sm:p-6">
           <div className="flex items-start gap-3.5">
             <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-sky-100 bg-white text-sky-700 shadow-sm"><Link2 className="size-5"/></span>
-            <div><CardTitle className="text-lg">Social post performance</CardTitle><CardDescription className="mt-1 max-w-2xl leading-5">Organize every campaign post by platform and review its engagement individually.</CardDescription></div>
+            <div><CardTitle className="text-lg">Social post performance</CardTitle><CardDescription className="mt-1 max-w-2xl leading-5">TikTok metrics come from the connected account. Facebook values remain illustrative until its BE integration is available.</CardDescription></div>
           </div>
         </CardHeader>
         <CardContent className="p-4 sm:p-6">
@@ -180,9 +266,10 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
                     <span className={`grid size-11 shrink-0 place-items-center rounded-xl border bg-white shadow-sm ${isTikTok?"border-slate-200":"border-blue-100"}`}><SocialPlatformLogo platform={platform} className="size-6"/></span>
                     <div className="min-w-0"><h3 className="font-semibold text-slate-900">{platform}</h3><p className="text-xs text-slate-500">{isTikTok?"Short videos & reels":"Facebook video posts"}</p></div>
                   </div>
-                  <Badge variant="outline" className="shrink-0 rounded-full border-slate-200 bg-white px-2.5 text-slate-600">{linkedCount} {linkedCount===1?"link":"links"}</Badge>
+                  <div className="flex shrink-0 items-center gap-2"><Badge variant="outline" className="rounded-full border-slate-200 bg-white px-2.5 text-slate-600">{linkedCount} {linkedCount===1?"link":"links"}</Badge>{isTikTok&&<Button type="button" variant="outline" size="sm" className="h-8 rounded-lg border-slate-300 px-2.5 text-xs" disabled={isConnectingTikTok} onClick={connectTikTok}><Link2 className="mr-1.5 size-3.5"/>{isConnectingTikTok?"Connecting...":"Connect TikTok"}</Button>}</div>
                 </div>
 
+                {isTikTok&&tiktokConnectMessage&&<p role="status" className="mb-3 rounded-lg border border-sky-100 bg-sky-50 px-3 py-2 text-xs leading-5 text-sky-900">{tiktokConnectMessage}</p>}
                 <div className="space-y-3">
                   {entries.map((entry,index)=>{
                     const inputId=`social-${platform.toLowerCase()}-${entry.id}`
@@ -193,14 +280,14 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
                       </div>
                       <Input id={inputId} type="url" inputMode="url" autoComplete="url" placeholder={isTikTok?"https://www.tiktok.com/@name/video/...":"https://www.facebook.com/..."} value={entry.url} onChange={event=>updateSocialEntry(platform,entry.id,{url:event.target.value,views:null,likes:null,error:""})} aria-describedby={entry.error?`${inputId}-error`:undefined} className="h-11 rounded-xl border-slate-200 bg-white focus-visible:ring-sky-500/20"/>
                       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                        <button type="button" onClick={()=>fillSocialSample(platform,entry.id)} className="text-xs font-semibold text-sky-700 underline decoration-sky-200 underline-offset-4 transition hover:text-sky-900">Use sample link</button>
-                        <Button type="button" className={`h-9 rounded-lg px-3.5 text-xs ${isTikTok?"bg-slate-900 hover:bg-slate-800":"bg-[#1877F2] hover:bg-[#1268d8]"}`} disabled={!entry.url.trim()} onClick={()=>showSocialMetrics(platform,entry.id)}><Eye className="mr-1.5 size-3.5"/>Show metrics</Button>
+                        {isTikTok?<span className="text-xs text-slate-500">Use a video from the connected account.</span>:<button type="button" onClick={()=>fillSocialSample(platform,entry.id)} className="text-xs font-semibold text-sky-700 underline decoration-sky-200 underline-offset-4 transition hover:text-sky-900">Use sample link</button>}
+                        <Button type="button" className={`h-9 rounded-lg px-3.5 text-xs ${isTikTok?"bg-slate-900 hover:bg-slate-800":"bg-[#1877F2] hover:bg-[#1268d8]"}`} disabled={!entry.url.trim()||(isTikTok&&isLoadingTikTokMetrics)} onClick={()=>showSocialMetrics(platform,entry.id)}><Eye className="mr-1.5 size-3.5"/>{isTikTok&&isLoadingTikTokMetrics?"Loading...":"Show metrics"}</Button>
                       </div>
                       {entry.error&&<p id={`${inputId}-error`} role="alert" className="mt-2 text-xs font-medium text-rose-700">{entry.error}</p>}
                       {entry.views!==null&&entry.likes!==null&&<div aria-live="polite" className="mt-4 grid gap-2.5 border-t border-slate-100 pt-3 sm:grid-cols-2">
                         <div className="flex items-center justify-between gap-2 rounded-xl border border-sky-100 bg-gradient-to-br from-sky-50/80 to-white p-3"><div><p className="text-[10px] font-bold uppercase tracking-[.12em] text-sky-700">Views</p><p className="mt-1 text-xl font-bold tracking-tight text-slate-900">{entry.views.toLocaleString()}</p></div><span className="grid size-9 place-items-center rounded-lg bg-white text-sky-700 shadow-sm"><Eye className="size-4.5"/></span></div>
                         <div className="flex items-center justify-between gap-2 rounded-xl border border-rose-100 bg-gradient-to-br from-rose-50/70 to-white p-3"><div><p className="text-[10px] font-bold uppercase tracking-[.12em] text-rose-700">Likes</p><p className="mt-1 text-xl font-bold tracking-tight text-slate-900">{entry.likes.toLocaleString()}</p></div><span className="grid size-9 place-items-center rounded-lg bg-white text-rose-600 shadow-sm"><Heart className="size-4.5"/></span></div>
-                        <p className="text-[10px] leading-4 text-slate-500 sm:col-span-2">Preview estimates. Live platform analytics require an authorized integration.</p>
+                        <p className="text-[10px] leading-4 text-slate-500 sm:col-span-2">{isTikTok?"Live metrics returned by TikTok for the connected account.":"Illustrative Facebook preview values; these are not live platform metrics."}</p>
                       </div>}
                     </div>
                   })}
@@ -439,4 +526,3 @@ function SharedNotifications() {
   const visible=items.filter(item=>filter==="All notifications"||(filter==="Unread"&&item.unread)||(filter==="Read"&&!item.unread))
   return <><div className="flex flex-wrap items-end justify-between gap-3"><PageHeading eyebrow="Account" title="Notifications" description="Recent booking, campaign and commission updates."/><Button variant="outline" onClick={()=>setItems(current=>current.map(item=>({...item,unread:false})))}>Mark all as read</Button></div><div className="mb-4"><select className={inputClass} aria-label="Filter notifications" value={filter} onChange={event=>setFilter(event.target.value)}><option>All notifications</option><option>Unread</option><option>Read</option></select></div><div className="space-y-3">{visible.map(item=><Card key={item.title} className="border-slate-200/80 shadow-sm"><CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start"><span className={`mt-1 size-2.5 shrink-0 rounded-full ${item.unread?"bg-teal-700":"bg-slate-200"}`}/><div className="min-w-0 flex-1"><p className="font-semibold">{item.title}</p><p className="mt-1 text-sm text-slate-600">{item.text}</p><p className="mt-2 text-xs text-slate-400">{item.time}</p></div><div className="flex shrink-0 items-center gap-1 self-end sm:self-auto"><Button size="sm" variant="outline" className="gap-1.5" onClick={()=>setSelectedItem(item)}><Eye className="size-3.5"/>View details</Button>{item.unread&&<Button size="sm" variant="ghost" onClick={()=>setItems(current=>current.map(row=>row.title===item.title?{...row,unread:false}:row))}>Mark read</Button>}</div></CardContent></Card>)}</div>{visible.length===0&&<p className="py-8 text-center text-sm text-slate-500">No notifications in this view.</p>}<Dialog open={selectedItem!==null} onOpenChange={(open)=>{if(!open)setSelectedItem(null)}}><DialogContent className="gap-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl sm:max-w-xl"><DialogHeader className="relative overflow-hidden border-b border-emerald-100 bg-[linear-gradient(125deg,#f2f8f2_0%,#f8fbf8_58%,#fff8e9_100%)] px-6 pb-5 pt-6"><div aria-hidden="true" className="absolute -right-8 -top-12 size-40 rounded-full bg-emerald-100/50 blur-2xl"/><div className="relative flex items-start gap-4"><span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white text-emerald-800 shadow-sm ring-1 ring-emerald-100"><BellRing className="size-5"/></span><div className="min-w-0 flex-1 pt-0.5"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="text-[10px] font-bold uppercase tracking-[.16em] text-emerald-800">{selectedItem?.category}</span><span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${selectedItem?.unread?"bg-amber-100 text-amber-900":"bg-white/80 text-slate-500 ring-1 ring-slate-200"}`}>{selectedItem?.unread?"Unread":"Read"}</span></div><DialogTitle className="pr-8 text-xl font-semibold leading-7 tracking-tight text-slate-900">{selectedItem?.title}</DialogTitle><DialogDescription className="mt-1.5 text-xs text-slate-500">Received {selectedItem?.time}</DialogDescription></div></div></DialogHeader><div className="px-6 py-5"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-slate-400">Summary</p><p className="mt-2 text-sm font-semibold leading-6 text-slate-800">{selectedItem?.text}</p><div className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/80 p-4"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-slate-400">What happened</p><p className="mt-2 text-sm leading-6 text-slate-600">{selectedItem?.details}</p></div><div className="mt-4 flex items-center gap-2 text-xs text-slate-500"><span className="size-1.5 rounded-full bg-emerald-600"/>Workspace notification</div></div><DialogFooter className="mx-0 mb-0 border-t border-slate-100 bg-white px-6 py-4"><DialogClose render={<Button variant="outline" className="h-9 rounded-lg px-4"/>}>Close details</DialogClose></DialogFooter></DialogContent></Dialog></>
 }
-

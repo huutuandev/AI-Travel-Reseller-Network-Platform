@@ -19,6 +19,7 @@ WORKDIR /app
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV BACKEND_API_URL=http://backend:8080
 
 # Copy necessary files for running the application
 COPY --from=builder /app/public ./public

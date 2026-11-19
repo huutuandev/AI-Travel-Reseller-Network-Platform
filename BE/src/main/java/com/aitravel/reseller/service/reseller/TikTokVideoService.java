@@ -47,14 +47,20 @@ public class TikTokVideoService {
 
     @Transactional(readOnly = true)
     public TikTokVideoListResponse listVideos(UUID socialAccountId, int maxCount, Long cursor) {
-        if (maxCount < 1 || maxCount > 20) {
-            throw new IllegalArgumentException("maxCount must be between 1 and 20");
-        }
-
         ResellerProfile reseller = currentActiveReseller();
         SocialAccountOAuthCredential credential = credentials
                 .findOwnedCredential(socialAccountId, reseller.getId(), PROVIDER)
                 .orElseThrow(() -> new ResourceNotFoundException("Linked TikTok account was not found"));
+
+        return listVideosForConnectedAccount(credential, maxCount, cursor);
+    }
+
+    /** Read a previously linked TikTok account, including when requested by an admin ranking. */
+    public TikTokVideoListResponse listVideosForConnectedAccount(
+            SocialAccountOAuthCredential credential, int maxCount, Long cursor) {
+        if (maxCount < 1 || maxCount > 20) {
+            throw new IllegalArgumentException("maxCount must be between 1 and 20");
+        }
 
         if (!"ACTIVE".equals(credential.getSocialAccount().getStatus())) {
             throw new IllegalStateException("The linked TikTok account is not active");
@@ -108,7 +114,7 @@ public class TikTokVideoService {
             }
 
             return TikTokVideoListResponse.builder()
-                    .socialAccountId(socialAccountId)
+                    .socialAccountId(credential.getSocialAccount().getId())
                     .videos(videos)
                     .cursor(data.hasNonNull("cursor") ? data.path("cursor").asLong() : null)
                     .hasMore(data.path("has_more").asBoolean(false))

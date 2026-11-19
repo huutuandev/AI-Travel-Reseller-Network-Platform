@@ -31,4 +31,12 @@ public interface SocialAccountOAuthCredentialRepository
     List<SocialAccountOAuthCredential> findActiveOwnedCredentials(
             @Param("resellerId") UUID resellerId,
             @Param("provider") String provider);
+
+    @Query("select credential from SocialAccountOAuthCredential credential " +
+            "join fetch credential.socialAccount account " +
+            "join fetch account.reseller reseller " +
+            "join fetch reseller.user " +
+            "where account.status = 'ACTIVE' and reseller.status = 'ACTIVE' " +
+            "and credential.provider = :provider")
+    List<SocialAccountOAuthCredential> findActiveForRanking(@Param("provider") String provider);
 }

@@ -26,19 +26,17 @@ public class ResellerTrackingLinkRepository {
                     c.title AS campaign,
                     tl.tracking_code,
                     tl.created_at,
-                    COALESCE(cl.clicks, 0) AS clicks,
+                    COALESCE(tl.click_count, 0) AS clicks,
                     COALESCE(cv.conversions, 0) AS conversions
                 FROM travel_v2.tracking_links tl
+                JOIN travel_v2.campaign_applications a
+                    ON a.id = tl.campaign_application_id
                 JOIN travel_v2.campaigns c
-                    ON c.id = tl.campaign_id
-                LEFT JOIN (
-                    SELECT tracking_link_id, COUNT(*) AS clicks
-                    FROM travel_v2.tracking_clicks
-                    GROUP BY tracking_link_id
-                ) cl ON cl.tracking_link_id = tl.id
+                    ON c.id = a.campaign_id
                 LEFT JOIN (
                     SELECT tracking_link_id, COUNT(*) AS conversions
-                    FROM travel_v2.conversions
+                    FROM travel_v2.bookings
+                    WHERE booking_status NOT IN ('CANCELLED', 'REFUNDED')
                     GROUP BY tracking_link_id
                 ) cv ON cv.tracking_link_id = tl.id
                 WHERE tl.reseller_id = :resellerId

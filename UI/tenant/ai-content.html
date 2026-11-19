@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Create, review and publish campaign content for travel partners.">
+  <title>AI Content - Wayfarer Network</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <script defer src="../shared/scripts.js"></script>
+  <script defer src="ai-content.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">W</span> Wayfarer <span class="muted">Network</span></a>
+      <div class="nav-label">Tenant Admin</div>
+      <nav class="nav">
+        <a href="dashboard.html">Overview</a><a href="products.html">Products</a><a href="campaigns.html">Campaigns</a><a href="resellers.html">Resellers</a><a href="conversion-review.html">Conversions</a><a class="active" href="ai-content.html">AI Content</a><a href="ai-content-review.html">Content review</a><a href="tracking-attribution.html">Tracking</a><a href="commissions.html">Commissions</a><a href="settings.html">Brand settings</a>
+      </nav>
+      <div class="sidebar-foot">Tenant workspace · Sample data</div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div><button class="mobile-menu secondary" data-menu aria-label="Toggle navigation">Menu</button> <span class="crumb">Tenant Admin / AI Content</span></div><div class="top-actions"><a class="top-notice" href="ai-content-review.html" aria-label="Open content review">Review queue</a></div></header>
+      <div class="content">
+        <div class="page-heading"><div><div class="eyebrow">CAMPAIGN MARKETING</div><h1>AI Content</h1><p>Create campaign-ready copy for your reseller network. Generation is simulated with local sample content.</p></div><span class="badge active">Tenant managed</span></div>
+        <div class="grid ai-tenant-grid">
+          <section class="panel">
+            <div class="panel-head"><div><h2>Content brief</h2><div class="panel-sub">Start with a product and campaign you manage</div></div></div>
+            <form data-tenant-content-form>
+              <div class="form-grid">
+                <label>Travel product<select id="tenant-ai-product" required><option value="">Select a product</option><option value="halong">Ha Long Bay cruise</option><option value="hoian">Hoi An stay</option><option value="phuquoc">Phu Quoc beach stay</option></select></label>
+                <label>Campaign<select id="tenant-ai-campaign" required><option value="">Select a campaign</option><option value="halong">Ha Long Bay Weekend Escape</option><option value="hoian">Hoi An Lantern Season</option><option value="phuquoc">Phu Quoc Island Escape</option></select></label>
+                <label>Content type<select id="tenant-ai-type"><option value="caption">Social media caption</option><option value="description">Promotional description</option><option value="hashtags">Hashtag suggestions</option><option value="cta">Call to action</option><option value="video">Video script</option></select></label>
+                <label>Language<select id="tenant-ai-language"><option value="English">English</option><option value="Vietnamese">Vietnamese</option></select></label>
+                <label>Tone<select id="tenant-ai-tone"><option>Warm and inspiring</option><option>Premium and refined</option><option>Playful and adventurous</option></select></label>
+              </div>
+              <div class="tenant-ai-empty" data-tenant-ai-empty>Select a product and its campaign to prepare a content brief.</div>
+              <p class="tenant-ai-error" data-tenant-ai-error role="alert" hidden></p>
+              <div class="form-actions"><button class="button" type="submit" data-ai-action="generate">Generate Content</button></div>
+              <p class="demo-note">Illustrative mock generation only. No AI service or backend is connected.</p>
+            </form>
+          </section>
+          <section class="panel" aria-live="polite">
+            <div class="panel-head"><div><h2>Content preview</h2><div class="panel-sub">Edit the copy before saving or publishing</div></div><span class="badge" data-tenant-ai-status>Not generated</span></div>
+            <label class="ai-editor-label" for="tenant-ai-output">Generated copy</label>
+            <textarea id="tenant-ai-output" class="ai-editor" rows="10" placeholder="Your generated sample will appear here." disabled></textarea>
+            <p class="ai-feedback" data-tenant-ai-feedback aria-live="polite">Choose a product and campaign to begin.</p>
+            <div class="form-actions ai-actions"><button class="button secondary" type="button" data-ai-action="copy" disabled>Copy</button><button class="button secondary" type="button" data-ai-action="save" disabled>Save draft</button><button class="button" type="button" data-ai-action="publish" disabled>Publish to resellers</button></div>
+          </section>
+        </div>
+        <section class="panel ai-history"><div class="panel-head"><div><h2>Campaign content</h2><div class="panel-sub">Drafts and published assets from this browser</div></div><span class="badge" data-ai-history-count>0 items</span></div><div data-ai-history><div class="ai-empty-state"><strong>No content saved yet</strong><span>Generate a sample, then save it as a draft or publish it for resellers.</span></div></div></section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

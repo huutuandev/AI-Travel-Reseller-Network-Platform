@@ -3,50 +3,67 @@ package com.aitravel.reseller.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
 @Table(name = "campaigns")
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Campaign {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "merchant_id", nullable = false)
-    private Merchant merchant;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    private String name;
-
-    @Column(name = "start_date")
-    private LocalDate startDate;
-
-    @Column(name = "end_date")
-    private LocalDate endDate;
-
-    @Column(name = "commission_rate", precision = 5, scale = 2)
-    private BigDecimal commissionRate;
-
-    @Column(name = "reseller_split_rate", precision = 5, scale = 2)
-    @Builder.Default
-    private BigDecimal resellerSplitRate = new BigDecimal("60.00");
+    @Column(nullable = false, length = 255)
+    private String title;
 
     @Column(columnDefinition = "TEXT")
-    private String guidelines;
+    private String description;
 
-    @Column(length = 20)
+    @Column(name = "commission_type", nullable = false, length = 20)
+    private String commissionType;
+
+    @Column(name = "commission_rate", nullable = false, precision = 10, scale = 2)
+    private BigDecimal commissionRate;
+
+    @Column(name = "commission_currency", length = 3)
+    private String commissionCurrency;
+
+    @Column(name = "cookie_window_days", nullable = false)
     @Builder.Default
-    private String status = "ACTIVE";
+    private Integer cookieWindowDays = 30;
+
+    @Column(name = "terms_text", columnDefinition = "TEXT")
+    private String termsText;
+
+    @Column(name = "terms_version", nullable = false)
+    @Builder.Default
+    private Integer termsVersion = 1;
+
+    @Column(name = "start_date")
+    private Instant startDate;
+
+    @Column(name = "end_date")
+    private Instant endDate;
+
+    @Column(nullable = false, length = 20)
+    private String status;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 }

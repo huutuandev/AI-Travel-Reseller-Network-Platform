@@ -6,7 +6,7 @@
         "Expected":  "401/403",
         "Actual":  401,
         "Result":  "PASS",
-        "Duration":  "159ms"
+        "Duration":  "129ms"
     },
     {
         "Category":  "Security",
@@ -15,7 +15,7 @@
         "Expected":  "401/403",
         "Actual":  401,
         "Result":  "PASS",
-        "Duration":  "14ms"
+        "Duration":  "36ms"
     },
     {
         "Category":  "Security",
@@ -24,7 +24,7 @@
         "Expected":  "403",
         "Actual":  403,
         "Result":  "PASS",
-        "Duration":  "26ms"
+        "Duration":  "55ms"
     },
     {
         "Category":  "Security",
@@ -33,7 +33,7 @@
         "Expected":  "403",
         "Actual":  403,
         "Result":  "PASS",
-        "Duration":  "31ms"
+        "Duration":  "69ms"
     },
     {
         "Category":  "Security",
@@ -42,7 +42,25 @@
         "Expected":  "200/400",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "66ms"
+        "Duration":  "126ms"
+    },
+    {
+        "Category":  "Security",
+        "Code":  "SEC-06",
+        "Name":  "SRS: Phân quyền RBAC - Reseller gọi API Xếp hạng Commission của Merchant -\u003e 403",
+        "Expected":  "403",
+        "Actual":  403,
+        "Result":  "PASS",
+        "Duration":  "58ms"
+    },
+    {
+        "Category":  "Security",
+        "Code":  "SEC-07",
+        "Name":  "SRS: Phân quyền RBAC - Reseller gọi API Xếp hạng Score của Merchant -\u003e 403",
+        "Expected":  "403",
+        "Actual":  403,
+        "Result":  "PASS",
+        "Duration":  "58ms"
     },
     {
         "Category":  "Validation",
@@ -51,7 +69,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "19ms"
+        "Duration":  "65ms"
     },
     {
         "Category":  "Validation",
@@ -60,7 +78,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "13ms"
+        "Duration":  "72ms"
     },
     {
         "Category":  "Validation",
@@ -69,7 +87,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "11ms"
+        "Duration":  "62ms"
     },
     {
         "Category":  "Validation",
@@ -78,97 +96,133 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "12ms"
+        "Duration":  "43ms"
     },
     {
         "Category":  "Validation",
         "Code":  "VAL-05",
-        "Name":  "SRS: Xung đột tham số FIXED_AMOUNT và minCommissionPercent",
+        "Name":  "SRS: Xung đột tham số FIXED_AMOUNT và minCommissionPercent -\u003e 400",
         "Expected":  "400",
-        "Actual":  200,
-        "Result":  "FAIL",
-        "Duration":  "59ms"
+        "Actual":  400,
+        "Result":  "PASS",
+        "Duration":  "88ms"
     },
     {
-        "Category":  "SRS-Business",
+        "Category":  "Validation",
+        "Code":  "VAL-06",
+        "Name":  "SRS: Sai commissionType không thuộc PERCENTAGE hoặc FIXED_AMOUNT -\u003e 400",
+        "Expected":  "400",
+        "Actual":  400,
+        "Result":  "PASS",
+        "Duration":  "65ms"
+    },
+    {
+        "Category":  "Validation",
+        "Code":  "VAL-07",
+        "Name":  "SRS: minCommissionPercent vượt ngoài khoảng 0-100 (ví dụ 150) -\u003e 400",
+        "Expected":  "400",
+        "Actual":  400,
+        "Result":  "PASS",
+        "Duration":  "68ms"
+    },
+    {
+        "Category":  "Marketplace",
         "Code":  "SRS-01",
         "Name":  "SRS: Lấy danh sách Campaign Marketplace (chỉ ACTIVE \u0026 AVAILABLE)",
         "Expected":  "200",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "52ms"
+        "Duration":  "97ms"
     },
     {
-        "Category":  "SRS-Business",
+        "Category":  "Marketplace",
         "Code":  "SRS-02",
         "Name":  "SRS: Xem chi tiết Campaign hợp lệ theo ID",
         "Expected":  "200/404",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "53ms"
+        "Duration":  "145ms"
     },
     {
-        "Category":  "SRS-EdgeCase",
+        "Category":  "Marketplace",
         "Code":  "EDG-01",
-        "Name":  "SRS: UUID hợp lệ nhưng không tồn tại trong hệ thống",
+        "Name":  "SRS: UUID hợp lệ nhưng không tồn tại trong hệ thống -\u003e 404",
         "Expected":  "404",
         "Actual":  404,
         "Result":  "PASS",
-        "Duration":  "20ms"
+        "Duration":  "152ms"
     },
     {
-        "Category":  "SRS-Business",
+        "Category":  "Applications",
         "Code":  "SRS-03",
         "Name":  "SRS: Reseller gửi đơn tham gia chiến dịch (Apply to Campaign)",
         "Expected":  "200/201/409/400",
         "Actual":  500,
         "Result":  "FAIL",
-        "Duration":  "38ms"
+        "Duration":  "323ms"
     },
     {
-        "Category":  "SRS-EdgeCase",
+        "Category":  "Applications",
         "Code":  "EDG-02",
         "Name":  "SRS: Chặn đăng ký trùng chiến dịch (Duplicate Apply -\u003e 409 Conflict)",
         "Expected":  "409/400",
         "Actual":  500,
         "Result":  "FAIL",
-        "Duration":  "37ms"
+        "Duration":  "99ms"
     },
     {
-        "Category":  "SRS-EdgeCase",
+        "Category":  "Applications",
         "Code":  "EDG-03",
         "Name":  "SRS: Apply vào Campaign không tồn tại / không khả dụng -\u003e 400/404",
         "Expected":  "400/404",
-        "Actual":  500,
-        "Result":  "FAIL",
-        "Duration":  "33ms"
+        "Actual":  400,
+        "Result":  "PASS",
+        "Duration":  "86ms"
     },
     {
-        "Category":  "SRS-Business",
+        "Category":  "Applications",
         "Code":  "SRS-04",
         "Name":  "SRS: Lấy danh sách các chiến dịch đã đăng ký (My Applications)",
         "Expected":  "200",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "52ms"
+        "Duration":  "148ms"
     },
     {
-        "Category":  "SRS-Business",
+        "Category":  "Operations",
         "Code":  "SRS-05",
-        "Name":  "SRS: Lấy danh sách Tracking Links của Reseller",
+        "Name":  "SRS: Lấy danh sách Tracking Links của Reseller (Đã fix SQL)",
         "Expected":  "200",
-        "Actual":  500,
-        "Result":  "FAIL",
-        "Duration":  "33ms"
+        "Actual":  200,
+        "Result":  "PASS",
+        "Duration":  "130ms"
     },
     {
-        "Category":  "SRS-Business",
+        "Category":  "Operations",
         "Code":  "SRS-06",
-        "Name":  "SRS: Lấy danh sách Commissions (Hoa hồng) của Reseller",
+        "Name":  "SRS: Lấy danh sách Commissions (Hoa hồng) của Reseller (Đã fix SQL)",
         "Expected":  "200",
-        "Actual":  500,
-        "Result":  "FAIL",
-        "Duration":  "41ms"
+        "Actual":  200,
+        "Result":  "PASS",
+        "Duration":  "129ms"
+    },
+    {
+        "Category":  "Dashboard",
+        "Code":  "DSH-01",
+        "Name":  "SRS: Lấy thông tin tổng quan Reseller Dashboard (Tính năng mới) -\u003e 200",
+        "Expected":  "200",
+        "Actual":  200,
+        "Result":  "PASS",
+        "Duration":  "245ms"
+    },
+    {
+        "Category":  "Dashboard",
+        "Code":  "DSH-02",
+        "Name":  "RBAC: Admin cố gọi API Dashboard của Reseller -\u003e 403 Forbidden",
+        "Expected":  "403",
+        "Actual":  403,
+        "Result":  "PASS",
+        "Duration":  "67ms"
     },
     {
         "Category":  "TikTok-Sec",
@@ -177,7 +231,7 @@
         "Expected":  "403",
         "Actual":  403,
         "Result":  "PASS",
-        "Duration":  "18ms"
+        "Duration":  "66ms"
     },
     {
         "Category":  "TikTok-Sec",
@@ -186,7 +240,7 @@
         "Expected":  "403",
         "Actual":  403,
         "Result":  "PASS",
-        "Duration":  "48ms"
+        "Duration":  "106ms"
     },
     {
         "Category":  "TikTok-SRS",
@@ -195,7 +249,7 @@
         "Expected":  "200/400/409/503",
         "Actual":  409,
         "Result":  "PASS",
-        "Duration":  "21ms"
+        "Duration":  "70ms"
     },
     {
         "Category":  "TikTok-Edge",
@@ -204,7 +258,7 @@
         "Expected":  "400/401/403",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "12ms"
+        "Duration":  "63ms"
     },
     {
         "Category":  "TikTok-Val",
@@ -213,7 +267,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "20ms"
+        "Duration":  "109ms"
     },
     {
         "Category":  "TikTok-Val",
@@ -222,7 +276,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "28ms"
+        "Duration":  "68ms"
     },
     {
         "Category":  "TikTok-Edge",
@@ -231,7 +285,7 @@
         "Expected":  "200/400/404",
         "Actual":  404,
         "Result":  "PASS",
-        "Duration":  "32ms"
+        "Duration":  "138ms"
     },
     {
         "Category":  "TikTok-Val",
@@ -240,7 +294,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "18ms"
+        "Duration":  "98ms"
     },
     {
         "Category":  "TikTok-Edge",
@@ -249,6 +303,33 @@
         "Expected":  "403/404",
         "Actual":  404,
         "Result":  "PASS",
-        "Duration":  "29ms"
+        "Duration":  "91ms"
+    },
+    {
+        "Category":  "Merchant-Rank",
+        "Code":  "RNK-01",
+        "Name":  "SRS: Merchant xem bảng xếp hạng Reseller theo Commission -\u003e 200",
+        "Expected":  "200",
+        "Actual":  200,
+        "Result":  "PASS",
+        "Duration":  "127ms"
+    },
+    {
+        "Category":  "Merchant-Rank",
+        "Code":  "RNK-02",
+        "Name":  "SRS: Merchant xem bảng xếp hạng Reseller theo Score TikTok -\u003e 200",
+        "Expected":  "200",
+        "Actual":  200,
+        "Result":  "PASS",
+        "Duration":  "107ms"
+    },
+    {
+        "Category":  "Merchant-Rank",
+        "Code":  "RNK-03",
+        "Name":  "Edge Case: Lọc Commission Ranking với currency không hỗ trợ (USD) -\u003e 200/400",
+        "Expected":  "200/400",
+        "Actual":  200,
+        "Result":  "PASS",
+        "Duration":  "102ms"
     }
 ]

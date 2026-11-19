@@ -53,7 +53,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/api/v1/auth/**")
+                                "/api/v1/auth/**",
+                                "/api/v1/merchant/onboarding/**")
                         .permitAll()
                         .requestMatchers("/api/v1/reseller/social-accounts/tiktok/callback")
                         .permitAll()

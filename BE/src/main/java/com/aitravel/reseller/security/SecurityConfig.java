@@ -57,6 +57,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/v1/reseller/social-accounts/tiktok/callback")
                         .permitAll()
+                        .requestMatchers("/api/v1/merchant/**").hasRole("MERCHANT")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated());
 

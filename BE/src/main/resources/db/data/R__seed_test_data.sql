@@ -311,3 +311,213 @@ VALUES
     'PENDING_REVIEW'
 )
 ON CONFLICT (id) DO NOTHING;
+
+-- Dữ liệu mẫu cho luồng Campaign Application -> Tracking Link -> Booking.
+-- Dùng cùng dữ liệu gốc đã có trong R__seed_test_data.sql.
+
+SET LOCAL search_path TO travel_v2, public;
+
+-- Customer mẫu. Tài khoản bị vô hiệu hóa và không được gán role;
+-- chỉ dùng để hiển thị thông tin customer trong Booking API.
+INSERT INTO travel_v2.users (
+    id,
+    email,
+    password_hash,
+    full_name,
+    phone,
+    status
+)
+VALUES (
+    '60000000-0000-4000-8000-000000000001',
+    'booking.customer@example.test',
+    '!DISABLED:booking-test-fixture-v1',
+    'Booking Test Customer',
+    '0905000099',
+    'DISABLED'
+)
+ON CONFLICT DO NOTHING;
+
+
+-- Đăng ký reseller vào campaign.
+-- V15 tự kiểm tra và chụp commission rate từ campaign.
+INSERT INTO travel_v2.campaign_applications (
+    id,
+    campaign_id,
+    reseller_id,
+    status,
+    commission_type_snapshot,
+    commission_rate_snapshot,
+    applied_at,
+    reviewed_at
+)
+VALUES
+(
+    '61000000-0000-4000-8000-000000000001',
+    '50000000-0000-0000-0000-000000000001',
+    '30000000-0000-0000-0000-000000000001',
+    'APPROVED',
+    'PERCENTAGE',
+    15,
+    NOW() - INTERVAL '10 days',
+    NOW() - INTERVAL '9 days'
+),
+(
+    '61000000-0000-4000-8000-000000000002',
+    '50000000-0000-0000-0000-000000000001',
+    '30000000-0000-0000-0000-000000000002',
+    'APPROVED',
+    'PERCENTAGE',
+    15,
+    NOW() - INTERVAL '8 days',
+    NOW() - INTERVAL '7 days'
+),
+(
+    '61000000-0000-4000-8000-000000000003',
+    '50000000-0000-0000-0000-000000000002',
+    '30000000-0000-0000-0000-000000000003',
+    'APPROVED',
+    'PERCENTAGE',
+    12,
+    NOW() - INTERVAL '6 days',
+    NOW() - INTERVAL '5 days'
+),
+(
+    '61000000-0000-4000-8000-000000000004',
+    '50000000-0000-0000-0000-000000000003',
+    '30000000-0000-0000-0000-000000000001',
+    'APPROVED',
+    'PERCENTAGE',
+    10,
+    NOW() - INTERVAL '4 days',
+    NOW() - INTERVAL '3 days'
+)
+ON CONFLICT (campaign_id, reseller_id) DO NOTHING;
+
+
+-- Tạo tracking link cho các campaign application mẫu.
+-- Reseller trên link phải trùng với reseller của application.
+INSERT INTO travel_v2.tracking_links (
+    id,
+    campaign_application_id,
+    reseller_id,
+    tracking_code,
+    target_url,
+    status,
+    click_count
+)
+VALUES
+(
+    '71000000-0000-4000-8000-000000000001',
+    '61000000-0000-4000-8000-000000000001',
+    '30000000-0000-0000-0000-000000000001',
+    'TEST-BA-RESELLER-1',
+    'https://example.com/checkout/ba-na-hills',
+    'ACTIVE',
+    125
+),
+(
+    '71000000-0000-4000-8000-000000000002',
+    '61000000-0000-4000-8000-000000000002',
+    '30000000-0000-0000-0000-000000000002',
+    'TEST-BA-RESELLER-2',
+    'https://example.com/checkout/ba-na-hills',
+    'ACTIVE',
+    80
+),
+(
+    '71000000-0000-4000-8000-000000000003',
+    '61000000-0000-4000-8000-000000000003',
+    '30000000-0000-0000-0000-000000000003',
+    'TEST-HOIAN-RESELLER-3',
+    'https://example.com/checkout/hoi-an',
+    'ACTIVE',
+    54
+),
+(
+    '71000000-0000-4000-8000-000000000004',
+    '61000000-0000-4000-8000-000000000004',
+    '30000000-0000-0000-0000-000000000001',
+    'TEST-HUE-RESELLER-1',
+    'https://example.com/checkout/hue',
+    'ACTIVE',
+    32
+)
+ON CONFLICT DO NOTHING;
+
+
+-- Booking liên kết đúng merchant, product và tracking link.
+-- V15 kiểm tra các liên kết này trước khi insert.
+INSERT INTO travel_v2.bookings (
+    id,
+    merchant_id,
+    customer_id,
+    product_id,
+    tracking_link_id,
+    total_amount,
+    currency,
+    booking_status,
+    created_at,
+    updated_at
+)
+VALUES
+(
+    '9f000000-0000-4000-8000-000000000001',
+    '20000000-0000-0000-0000-000000000001',
+    '60000000-0000-4000-8000-000000000001',
+    '40000000-0000-0000-0000-000000000001',
+    '71000000-0000-4000-8000-000000000001',
+    900000,
+    'VND',
+    'PENDING',
+    NOW() - INTERVAL '5 days',
+    NOW() - INTERVAL '5 days'
+),
+(
+    '9f000000-0000-4000-8000-000000000002',
+    '20000000-0000-0000-0000-000000000001',
+    '60000000-0000-4000-8000-000000000001',
+    '40000000-0000-0000-0000-000000000001',
+    '71000000-0000-4000-8000-000000000002',
+    1250000,
+    'VND',
+    'CONFIRMED',
+    NOW() - INTERVAL '4 days',
+    NOW() - INTERVAL '4 days'
+),
+(
+    '9f000000-0000-4000-8000-000000000003',
+    '20000000-0000-0000-0000-000000000001',
+    '60000000-0000-4000-8000-000000000001',
+    '40000000-0000-0000-0000-000000000002',
+    '71000000-0000-4000-8000-000000000003',
+    650000,
+    'VND',
+    'CANCELLED',
+    NOW() - INTERVAL '3 days',
+    NOW() - INTERVAL '3 days'
+),
+(
+    '9f000000-0000-4000-8000-000000000004',
+    '20000000-0000-0000-0000-000000000001',
+    '60000000-0000-4000-8000-000000000001',
+    '40000000-0000-0000-0000-000000000003',
+    '71000000-0000-4000-8000-000000000004',
+    1800000,
+    'VND',
+    'COMPLETED',
+    NOW() - INTERVAL '2 days',
+    NOW() - INTERVAL '2 days'
+),
+(
+    '9f000000-0000-4000-8000-000000000005',
+    '20000000-0000-0000-0000-000000000001',
+    '60000000-0000-4000-8000-000000000001',
+    '40000000-0000-0000-0000-000000000001',
+    '71000000-0000-4000-8000-000000000001',
+    750000,
+    'VND',
+    'REFUNDED',
+    NOW() - INTERVAL '1 day',
+    NOW() - INTERVAL '1 day'
+)
+ON CONFLICT (id) DO NOTHING;

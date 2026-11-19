@@ -56,9 +56,25 @@ public class ResellerApplicationRepository {
             UUID resellerId) {
         String sql = """
                 INSERT INTO travel_v2.campaign_applications
-                    (id, campaign_id, reseller_id, status, applied_at)
-                VALUES
-                    (:id, :campaignId, :resellerId, 'PENDING', :appliedAt)
+                    (
+                        id,
+                        campaign_id,
+                        reseller_id,
+                        status,
+                        commission_type_snapshot,
+                        commission_rate_snapshot,
+                        applied_at
+                    )
+                SELECT
+                    :id,
+                    c.id,
+                    :resellerId,
+                    'PENDING',
+                    c.commission_type,
+                    c.commission_rate,
+                    CURRENT_TIMESTAMP
+                FROM travel_v2.campaigns c
+                WHERE c.id = :campaignId
                 ON CONFLICT (campaign_id, reseller_id) DO NOTHING
                 RETURNING id, campaign_id, status, applied_at
                 """;

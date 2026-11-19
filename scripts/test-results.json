@@ -1,0 +1,254 @@
+﻿[
+    {
+        "Category":  "Security",
+        "Code":  "SEC-01",
+        "Name":  "SRS: Chặn truy cập không xác thực (No Token)",
+        "Expected":  "401/403",
+        "Actual":  401,
+        "Result":  "PASS",
+        "Duration":  "159ms"
+    },
+    {
+        "Category":  "Security",
+        "Code":  "SEC-02",
+        "Name":  "SRS: Chặn truy cập với Token giả mạo/sai chữ ký",
+        "Expected":  "401/403",
+        "Actual":  401,
+        "Result":  "PASS",
+        "Duration":  "14ms"
+    },
+    {
+        "Category":  "Security",
+        "Code":  "SEC-03",
+        "Name":  "SRS: Phân quyền RBAC - Reseller cố gọi API Admin",
+        "Expected":  "403",
+        "Actual":  403,
+        "Result":  "PASS",
+        "Duration":  "26ms"
+    },
+    {
+        "Category":  "Security",
+        "Code":  "SEC-04",
+        "Name":  "SRS: Phân quyền RBAC - Admin cố gọi API Reseller",
+        "Expected":  "403",
+        "Actual":  403,
+        "Result":  "PASS",
+        "Duration":  "31ms"
+    },
+    {
+        "Category":  "Security",
+        "Code":  "SEC-05",
+        "Name":  "SRS: Bảo vệ SQL Injection trong query tìm kiếm \u0027q\u0027",
+        "Expected":  "200/400",
+        "Actual":  200,
+        "Result":  "PASS",
+        "Duration":  "66ms"
+    },
+    {
+        "Category":  "Validation",
+        "Code":  "VAL-01",
+        "Name":  "SRS: Path Variable sai định dạng UUID (/campaigns/not-a-uuid)",
+        "Expected":  "400",
+        "Actual":  400,
+        "Result":  "PASS",
+        "Duration":  "19ms"
+    },
+    {
+        "Category":  "Validation",
+        "Code":  "VAL-02",
+        "Name":  "SRS: Body rỗng khi Login ({})",
+        "Expected":  "400",
+        "Actual":  400,
+        "Result":  "PASS",
+        "Duration":  "13ms"
+    },
+    {
+        "Category":  "Validation",
+        "Code":  "VAL-03",
+        "Name":  "SRS: Email sai định dạng khi Login",
+        "Expected":  "400",
+        "Actual":  400,
+        "Result":  "PASS",
+        "Duration":  "11ms"
+    },
+    {
+        "Category":  "Validation",
+        "Code":  "VAL-04",
+        "Name":  "SRS: Mật khẩu rỗng khi Login",
+        "Expected":  "400",
+        "Actual":  400,
+        "Result":  "PASS",
+        "Duration":  "12ms"
+    },
+    {
+        "Category":  "Validation",
+        "Code":  "VAL-05",
+        "Name":  "SRS: Xung đột tham số FIXED_AMOUNT và minCommissionPercent",
+        "Expected":  "400",
+        "Actual":  200,
+        "Result":  "FAIL",
+        "Duration":  "59ms"
+    },
+    {
+        "Category":  "SRS-Business",
+        "Code":  "SRS-01",
+        "Name":  "SRS: Lấy danh sách Campaign Marketplace (chỉ ACTIVE \u0026 AVAILABLE)",
+        "Expected":  "200",
+        "Actual":  200,
+        "Result":  "PASS",
+        "Duration":  "52ms"
+    },
+    {
+        "Category":  "SRS-Business",
+        "Code":  "SRS-02",
+        "Name":  "SRS: Xem chi tiết Campaign hợp lệ theo ID",
+        "Expected":  "200/404",
+        "Actual":  200,
+        "Result":  "PASS",
+        "Duration":  "53ms"
+    },
+    {
+        "Category":  "SRS-EdgeCase",
+        "Code":  "EDG-01",
+        "Name":  "SRS: UUID hợp lệ nhưng không tồn tại trong hệ thống",
+        "Expected":  "404",
+        "Actual":  404,
+        "Result":  "PASS",
+        "Duration":  "20ms"
+    },
+    {
+        "Category":  "SRS-Business",
+        "Code":  "SRS-03",
+        "Name":  "SRS: Reseller gửi đơn tham gia chiến dịch (Apply to Campaign)",
+        "Expected":  "200/201/409/400",
+        "Actual":  500,
+        "Result":  "FAIL",
+        "Duration":  "38ms"
+    },
+    {
+        "Category":  "SRS-EdgeCase",
+        "Code":  "EDG-02",
+        "Name":  "SRS: Chặn đăng ký trùng chiến dịch (Duplicate Apply -\u003e 409 Conflict)",
+        "Expected":  "409/400",
+        "Actual":  500,
+        "Result":  "FAIL",
+        "Duration":  "37ms"
+    },
+    {
+        "Category":  "SRS-EdgeCase",
+        "Code":  "EDG-03",
+        "Name":  "SRS: Apply vào Campaign không tồn tại / không khả dụng -\u003e 400/404",
+        "Expected":  "400/404",
+        "Actual":  500,
+        "Result":  "FAIL",
+        "Duration":  "33ms"
+    },
+    {
+        "Category":  "SRS-Business",
+        "Code":  "SRS-04",
+        "Name":  "SRS: Lấy danh sách các chiến dịch đã đăng ký (My Applications)",
+        "Expected":  "200",
+        "Actual":  200,
+        "Result":  "PASS",
+        "Duration":  "52ms"
+    },
+    {
+        "Category":  "SRS-Business",
+        "Code":  "SRS-05",
+        "Name":  "SRS: Lấy danh sách Tracking Links của Reseller",
+        "Expected":  "200",
+        "Actual":  500,
+        "Result":  "FAIL",
+        "Duration":  "33ms"
+    },
+    {
+        "Category":  "SRS-Business",
+        "Code":  "SRS-06",
+        "Name":  "SRS: Lấy danh sách Commissions (Hoa hồng) của Reseller",
+        "Expected":  "200",
+        "Actual":  500,
+        "Result":  "FAIL",
+        "Duration":  "41ms"
+    },
+    {
+        "Category":  "TikTok-Sec",
+        "Code":  "TIK-01",
+        "Name":  "RBAC: Admin cố gọi API lấy link TikTok OAuth của Reseller -\u003e 403",
+        "Expected":  "403",
+        "Actual":  403,
+        "Result":  "PASS",
+        "Duration":  "18ms"
+    },
+    {
+        "Category":  "TikTok-Sec",
+        "Code":  "TIK-02",
+        "Name":  "RBAC: Admin cố gọi API đăng ký Social Video của Reseller -\u003e 403",
+        "Expected":  "403",
+        "Actual":  403,
+        "Result":  "PASS",
+        "Duration":  "48ms"
+    },
+    {
+        "Category":  "TikTok-SRS",
+        "Code":  "TIK-03",
+        "Name":  "SRS: Reseller lấy URL đăng nhập TikTok OAuth",
+        "Expected":  "200/400/409/503",
+        "Actual":  409,
+        "Result":  "PASS",
+        "Duration":  "21ms"
+    },
+    {
+        "Category":  "TikTok-Edge",
+        "Code":  "TIK-04",
+        "Name":  "Edge Case: Gọi TikTok Callback với state giả mạo / thiếu code (Không 500)",
+        "Expected":  "400/401/403",
+        "Actual":  400,
+        "Result":  "PASS",
+        "Duration":  "12ms"
+    },
+    {
+        "Category":  "TikTok-Val",
+        "Code":  "TIK-05",
+        "Name":  "Validation: Gửi Body rỗng {} khi đăng ký Social Video -\u003e 400",
+        "Expected":  "400",
+        "Actual":  400,
+        "Result":  "PASS",
+        "Duration":  "20ms"
+    },
+    {
+        "Category":  "TikTok-Val",
+        "Code":  "TIK-06",
+        "Name":  "Validation: Gửi URL không hợp lệ \u0026 UUID không hợp lệ khi đăng ký Video -\u003e 400",
+        "Expected":  "400",
+        "Actual":  400,
+        "Result":  "PASS",
+        "Duration":  "28ms"
+    },
+    {
+        "Category":  "TikTok-Edge",
+        "Code":  "TIK-07",
+        "Name":  "Edge Case: Reseller chưa liên kết TikTok gọi lấy danh sách Video (Không 500)",
+        "Expected":  "200/400/404",
+        "Actual":  404,
+        "Result":  "PASS",
+        "Duration":  "32ms"
+    },
+    {
+        "Category":  "TikTok-Val",
+        "Code":  "TIK-08",
+        "Name":  "Validation: Truyền sai định dạng UUID khi xem Video theo socialAccountId -\u003e 400",
+        "Expected":  "400",
+        "Actual":  400,
+        "Result":  "PASS",
+        "Duration":  "18ms"
+    },
+    {
+        "Category":  "TikTok-Edge",
+        "Code":  "TIK-09",
+        "Name":  "Edge Case \u0026 IDOR: Xem Video của socialAccountId không tồn tại / của người khác -\u003e 403/404",
+        "Expected":  "403/404",
+        "Actual":  404,
+        "Result":  "PASS",
+        "Duration":  "29ms"
+    }
+]

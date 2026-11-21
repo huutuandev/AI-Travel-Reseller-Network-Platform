@@ -1,7 +1,7 @@
 spring:
   # 1. Cấu hình kết nối PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/mydatabase
+    url: jdbc:postgresql://localhost:5433/mydatabase
     username: root
     password: rootpassword
     driver-class-name: org.postgresql.Driver

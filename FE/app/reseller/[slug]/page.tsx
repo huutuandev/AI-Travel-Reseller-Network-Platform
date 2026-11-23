@@ -9,11 +9,11 @@ export function generateStaticParams() {
   return [...Object.keys(resellerTables), ...specialPages].map((slug) => ({ slug }))
 }
 
-export default async function ResellerPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ campaign?: string; from?: string }> }) {
+export default async function ResellerPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ campaign?: string; campaignId?: string; from?: string }> }) {
   const { slug } = await params
-  const { campaign, from } = await searchParams
+  const { campaign, campaignId, from } = await searchParams
   if (slug === "ai-content") redirect("/reseller/my-campaigns")
-  if (specialPages.has(slug)) return <ResellerSpecialPage slug={slug} campaignName={campaign} returnTo={from} />
+  if (specialPages.has(slug)) return <ResellerSpecialPage slug={slug} campaignName={campaign} campaignId={campaignId} returnTo={from} />
   const config = resellerTables[slug]
   if (!config) notFound()
   return <WireframeTablePage config={config} hrefPrefix="/reseller" />

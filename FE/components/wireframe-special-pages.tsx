@@ -15,6 +15,8 @@ import { resellerCampaignCards, publishedAiAssets, tenantTables } from "@/lib/wi
 import { storefrontJourneys } from "@/lib/storefront-data"
 import { useResellerCampaignMembership } from "@/lib/reseller-campaign-membership"
 import { getBackendAccessToken } from "@/lib/backend-api"
+import { displayStatus, formatCommission, resellerApi, type BackendApplication, type BackendCampaign, type BackendTikTokVideo, type BackendTikTokVideos } from "@/lib/reseller-api"
+import { useBackendResellerSession } from "@/lib/use-backend-reseller-session"
 
 const inputClass = "h-10 rounded-md border border-input bg-background px-3 text-sm"
 const fieldLabelClass = "text-sm font-medium"
@@ -30,7 +32,7 @@ function SocialPlatformLogo({ platform, className = "size-5" }: { platform: "Tik
 }
 
 type SocialPlatform = "TikTok" | "Facebook"
-type SocialPostEntry = { id: string; url: string; views: number | null; likes: number | null; error: string }
+type SocialPostEntry = { id: string; url: string; views: number | null; likes: number | null; error: string; registeredStatus?: string }
 
 function CampaignCreate() {
   const [feedback, setFeedback] = useState("")
@@ -92,20 +94,100 @@ function TenantSettings() {
 }
 
 function Marketplace() {
-  const [query,setQuery]=useState("")
-  const [category,setCategory]=useState("All categories")
-  const [destination,setDestination]=useState("All destinations")
-  const [commission,setCommission]=useState("Any commission")
-  const [participationFilter,setParticipationFilter]=useState("All participation")
-  const [feedback,setFeedback]=useState("")
-const { memberships, requestToJoin } = useResellerCampaignMembership()
-  const items=useMemo(()=>resellerCampaignCards.filter(item=>`${item.name} ${item.product} ${item.destination}`.toLowerCase().includes(query.toLowerCase())&&(category==="All categories"||item.category===category)&&(destination==="All destinations"||item.destination===destination)&&(commission==="Any commission"||(commission==="10%+"&&Number.parseFloat(item.commission)>=10))&&(participationFilter==="All participation"||participationFilter==="Active"&&memberships[item.name]?.status==="Active"||participationFilter==="Pending approval"&&memberships[item.name]?.status==="Pending"||participationFilter==="Not joined"&&!memberships[item.name])),[category,commission,destination,memberships,participationFilter,query])
-  function join(name:string){requestToJoin(name);setFeedback(`${name}: join request sent. You can follow its status in My campaigns.`)}
-  return <><PageHeading eyebrow="Reseller Portal" title="Campaign marketplace" description="Browse all travel campaigns and manage participation from their details."/><Card className="border-slate-200/80 shadow-sm"><CardContent className="grid gap-3 pt-5 md:grid-cols-2 xl:grid-cols-5"><div className="space-y-2"><Label htmlFor="campaign-search">Search</Label><Input id="campaign-search" type="search" className={inputClass+" w-full"} placeholder="Search destinations" value={query} onChange={event=>setQuery(event.target.value)} /></div><Pick label="Category" value={category} setValue={setCategory} options={["All categories","Tours & cruises","Hotels","Packages"]}/><Pick label="Destination" value={destination} setValue={setDestination} options={["All destinations","Ha Long Bay","Hoi An","Phu Quoc"]}/><Pick label="Commission" value={commission} setValue={setCommission} options={["Any commission","10%+"]}/><Pick label="Participation status" value={participationFilter} setValue={setParticipationFilter} options={["All participation","Active","Pending approval","Not joined"]}/></CardContent></Card>{feedback&&<p role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">{feedback} <Link href="/reseller/my-campaigns" className="font-semibold underline">View My campaigns</Link></p>}<div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{items.map(item=>{const participation=memberships[item.name];const membershipLabel=participation?.status==="Active"?"Active":participation?.status==="Pending"?"Pending approval":"Not joined";return <Card key={item.name} className="group overflow-hidden rounded-2xl border-slate-200/80 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"><div className="relative h-48 overflow-hidden bg-slate-100"><Image src={item.image} alt={`${item.destination}, Vietnam`} fill sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105"/><div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#14271e]/65 via-transparent to-black/5"/><span className="absolute bottom-3 left-4 text-xs font-semibold text-white drop-shadow">{item.destination}, Vietnam</span></div><CardHeader><div className="flex items-start justify-between gap-3"><div><CardTitle className="text-lg">{item.name}</CardTitle><CardDescription className="mt-1">{item.product} · {item.destination}</CardDescription></div><Badge className={participation?.status==="Pending"?"bg-amber-50 text-amber-900":participation?.status==="Active"?"bg-blue-50 text-blue-700":"bg-emerald-50 text-emerald-800"}>{membershipLabel}</Badge></div></CardHeader><CardContent><div className="flex items-center justify-between text-sm"><span className="text-slate-500">Commission</span><strong>{item.commission}</strong></div><p className="mt-2 text-xs text-slate-500">Campaign dates: {item.dates}</p><Link href={`/reseller/campaign-detail?campaign=${encodeURIComponent(item.name)}&from=campaign-marketplace`} className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-teal-800">View details <ArrowRight className="size-4"/></Link>{participation?.status==="Active"?<Link href={`/reseller/campaign-detail?campaign=${encodeURIComponent(item.name)}&from=campaign-marketplace`} className="mt-3 inline-flex h-10 min-h-10 w-full items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700">Manage campaign</Link>:participation?.status==="Pending"?<Button className="mt-3 h-10 min-h-10 w-full border-amber-300 bg-amber-50 text-amber-900 opacity-100 hover:bg-amber-50" variant="outline" disabled>Pending approval</Button>:<Button className="mt-3 h-10 min-h-10 w-full bg-emerald-700 hover:bg-emerald-800" onClick={()=>join(item.name)}>Request to join</Button>}</CardContent></Card>})}</div>{items.length===0&&<p className="py-8 text-center text-sm text-slate-500">No campaigns match these filters.</p>}</>
-}
+  const [query, setQuery] = useState("")
+  const [category, setCategory] = useState("All categories")
+  const [destination, setDestination] = useState("All destinations")
+  const [commission, setCommission] = useState("Any commission")
+  const [participationFilter, setParticipationFilter] = useState("All participation")
+  const [feedback, setFeedback] = useState("")
+  const [apiError, setApiError] = useState("")
+  const backendMode = useBackendResellerSession()
+  const [apiLoaded, setApiLoaded] = useState(false)
+  const apiLoading = backendMode && !apiLoaded
+  const [backendCampaigns, setBackendCampaigns] = useState<BackendCampaign[]>([])
+  const [backendApplications, setBackendApplications] = useState<BackendApplication[]>([])
+  const { memberships, requestToJoin } = useResellerCampaignMembership()
+  useEffect(() => {
+    if (!backendMode) return
+    let cancelled = false
+    Promise.all([
+      resellerApi<BackendCampaign[]>("campaigns"),
+      resellerApi<BackendApplication[]>("campaigns/applications"),
+    ]).then(([campaigns, applications]) => {
+      if (cancelled) return
+      setBackendCampaigns(campaigns)
+      setBackendApplications(applications)
+    }).catch((error) => {
+      if (!cancelled) setApiError(error instanceof Error ? error.message : "Could not load campaigns.")
+    }).finally(() => { if (!cancelled) setApiLoaded(true) })
+    return () => { cancelled = true }
+  }, [backendMode])
 
-function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }: { campaignName?: string; returnTo?: string }) {
+  const campaigns = useMemo(() => backendMode
+    ? backendCampaigns.map((item) => {
+      const mock = resellerCampaignCards.find((campaign) => campaign.name.toLowerCase() === item.title.toLowerCase())
+      const dateRange = [item.startDate, item.endDate].filter(Boolean).map((date) => new Date(date as string).toLocaleDateString()).join(" - ")
+      return {
+        id: item.id,
+        name: item.title,
+        product: mock?.product ?? "Travel experience",
+        category: mock?.category ?? "Travel experiences",
+        destination: mock?.destination ?? "Vietnam",
+        commission: formatCommission(item.commissionType, item.commissionRate, item.commissionCurrency),
+        dates: dateRange || "Dates to be confirmed",
+        status: item.status,
+        image: mock?.image ?? "/images/halong-bay-photo.jpg",
+        description: item.description ?? "Campaign details will be provided by the travel partner.",
+      }
+    })
+    : resellerCampaignCards.map((item) => ({ ...item, id: "", description: "" })), [backendCampaigns, backendMode])
+
+  const getParticipation = (item: (typeof campaigns)[number]) => backendMode
+    ? backendApplications.find((application) => application.campaignId === item.id)
+    : memberships[item.name]
+  const items = useMemo(() => campaigns.filter((item) => {
+    const participation = backendMode ? backendApplications.find((application) => application.campaignId === item.id) : memberships[item.name]
+    const status = participation ? displayStatus("applicationStatus" in participation ? participation.applicationStatus : participation.status) : "Not joined"
+    return `${item.name} ${item.product} ${item.destination}`.toLowerCase().includes(query.toLowerCase())
+      && (category === "All categories" || item.category === category)
+      && (destination === "All destinations" || item.destination === destination)
+      && (commission === "Any commission" || (commission === "10%+" && Number.parseFloat(item.commission) >= 10))
+      && (participationFilter === "All participation" || participationFilter === status || (participationFilter === "Pending approval" && status === "Pending") || (participationFilter === "Not joined" && status === "Not joined"))
+  }), [backendApplications, backendMode, campaigns, category, commission, destination, memberships, participationFilter, query])
+
+  async function join(item: (typeof campaigns)[number]) {
+    setFeedback("")
+    if (!backendMode || !("id" in item)) {
+      requestToJoin(item.name)
+      setFeedback(`${item.name}: join request sent. You can follow its status in My campaigns.`)
+      return
+    }
+    try {
+      const result = await resellerApi<{ id: string; campaignId: string; status: string; appliedAt: string }>(`campaigns/${item.id}/applications`, { method: "POST" })
+      setBackendApplications((current) => [{ applicationId: result.id, campaignId: result.campaignId, title: item.name, description: item.description, campaignStatus: item.status, applicationStatus: result.status, commissionType: "PERCENTAGE", commissionRate: Number.parseFloat(item.commission) || 0, appliedAt: result.appliedAt }, ...current.filter((application) => application.campaignId !== item.id)])
+      setFeedback(`${item.name}: ${displayStatus(result.status)} application recorded.`)
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Could not submit this campaign application.")
+    }
+  }
+
+  return <><PageHeading eyebrow="Reseller Portal" title="Campaign marketplace" description="Browse all travel campaigns and manage participation from their details."/>
+    <Card className="border-slate-200/80 shadow-sm"><CardContent className="grid gap-3 pt-5 md:grid-cols-2 xl:grid-cols-5"><div className="space-y-2"><Label htmlFor="campaign-search">Search</Label><Input id="campaign-search" type="search" className={inputClass+" w-full"} placeholder="Search destinations" value={query} onChange={(event)=>setQuery(event.target.value)}/></div><Pick label="Category" value={category} setValue={setCategory} options={["All categories","Tours & cruises","Hotels","Packages","Travel experiences"]}/><Pick label="Destination" value={destination} setValue={setDestination} options={["All destinations","Ha Long Bay","Hoi An","Phu Quoc","Vietnam"]}/><Pick label="Commission" value={commission} setValue={setCommission} options={["Any commission","10%+"]}/><Pick label="Participation status" value={participationFilter} setValue={setParticipationFilter} options={["All participation","Active","Pending approval","Not joined"]}/></CardContent></Card>
+    {apiLoading&&<p role="status" className="rounded-lg border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-sky-900">Loading campaigns from your account...</p>}{apiError&&<p role="alert" className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">{apiError}</p>}{feedback&&<p role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">{feedback} {!backendMode&&<Link href="/reseller/my-campaigns" className="font-semibold underline">View My campaigns</Link>}</p>}
+    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{items.map((item)=>{const participation=getParticipation(item);const status=participation?displayStatus("applicationStatus" in participation?participation.applicationStatus:participation.status):"Not joined";const id=item.id;return <Card key={id||item.name} className="group overflow-hidden rounded-2xl border-slate-200/80 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"><div className="relative h-48 overflow-hidden bg-slate-100"><Image src={item.image} alt={`${item.destination}, Vietnam`} fill sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105"/><div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#14271e]/65 via-transparent to-black/5"/><span className="absolute bottom-3 left-4 text-xs font-semibold text-white drop-shadow">{item.destination}, Vietnam</span></div><CardHeader><div className="flex items-start justify-between gap-3"><div><CardTitle className="text-lg">{item.name}</CardTitle><CardDescription className="mt-1">{item.product} · {item.destination}</CardDescription></div><Badge className={status==="Pending"?"bg-amber-50 text-amber-900":status==="Active"?"bg-blue-50 text-blue-700":"bg-emerald-50 text-emerald-800"}>{status}</Badge></div></CardHeader><CardContent><div className="flex items-center justify-between text-sm"><span className="text-slate-500">Commission</span><strong>{item.commission}</strong></div><p className="mt-2 text-xs text-slate-500">Campaign dates: {item.dates}</p><Link href={`/reseller/campaign-detail?campaign=${encodeURIComponent(item.name)}${id?`&campaignId=${encodeURIComponent(id)}`:""}&from=campaign-marketplace`} className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-teal-800">View details <ArrowRight className="size-4"/></Link>{status==="Active"?<Link href={`/reseller/campaign-detail?campaign=${encodeURIComponent(item.name)}${id?`&campaignId=${encodeURIComponent(id)}`:""}&from=campaign-marketplace`} className="mt-3 inline-flex h-10 min-h-10 w-full items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700">Manage campaign</Link>:status==="Pending"?<Button className="mt-3 h-10 min-h-10 w-full border-amber-300 bg-amber-50 text-amber-900 opacity-100 hover:bg-amber-50" variant="outline" disabled>Pending approval</Button>:<Button className="mt-3 h-10 min-h-10 w-full bg-emerald-700 hover:bg-emerald-800" disabled={apiLoading} onClick={()=>void join(item)}>Request to join</Button>}</CardContent></Card>})}</div>
+    {!apiLoading&&items.length===0&&<p className="py-8 text-center text-sm text-slate-500">No campaigns match these filters.</p>}
+  </>
+}
+function ResellerCampaignDetail({ campaignName: selectedCampaignName, campaignId: selectedCampaignId, returnTo }: { campaignName?: string; campaignId?: string; returnTo?: string }) {
   const campaignName=selectedCampaignName??resellerCampaignCards[0].name
+  const backendMode=useBackendResellerSession()
+  const [backendCampaign,setBackendCampaign]=useState<BackendCampaign|null>(null)
+  const [backendApplications,setBackendApplications]=useState<BackendApplication[]>([])
+  const [resolvedCampaignId,setResolvedCampaignId]=useState(selectedCampaignId??"")
+  const [apiLoaded,setApiLoaded]=useState(false)
+  const apiLoading=backendMode&&!apiLoaded
+  const [apiError,setApiError]=useState("")
+  const [applyFeedback,setApplyFeedback]=useState("")
   const [activeImageIndex,setActiveImageIndex]=useState(0)
   const [galleryOffset,setGalleryOffset]=useState(0)
   const [socialEntries,setSocialEntries]=useState<Record<SocialPlatform,SocialPostEntry[]>>({
@@ -115,9 +197,48 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
   const [isConnectingTikTok,setIsConnectingTikTok]=useState(false)
   const [isLoadingTikTokMetrics,setIsLoadingTikTokMetrics]=useState(false)
   const [tiktokConnectMessage,setTikTokConnectMessage]=useState("")
+  const [tiktokSocialAccountId,setTikTokSocialAccountId]=useState("")
+  const [tiktokVideos,setTikTokVideos]=useState<BackendTikTokVideo[]>([])
+  const [tiktokVideosCursor,setTikTokVideosCursor]=useState<number|null>(null)
+  const [tiktokVideosHasMore,setTikTokVideosHasMore]=useState(false)
+  const [isLoadingTikTokList,setIsLoadingTikTokList]=useState(false)
+  const [tiktokVideosError,setTikTokVideosError]=useState("")
+  const [registeringSocialVideo,setRegisteringSocialVideo]=useState("")
+  const [socialVideoError,setSocialVideoError]=useState("")
   const { memberships, requestToJoin } = useResellerCampaignMembership()
-  const campaign=resellerCampaignCards.find(item=>item.name===campaignName)??resellerCampaignCards[0]
-  const participation=memberships[campaign.name]
+  useEffect(() => {
+    if (!backendMode) return
+    let cancelled = false
+    async function loadDetail() {
+      try {
+        const applicationsPromise = resellerApi<BackendApplication[]>("campaigns/applications")
+        let campaign: BackendCampaign
+        if (selectedCampaignId) {
+          campaign = await resellerApi<BackendCampaign>(`campaigns/${encodeURIComponent(selectedCampaignId)}`)
+        } else {
+          const campaigns = await resellerApi<BackendCampaign[]>("campaigns")
+          const match = campaigns.find((item) => item.title === campaignName)
+          if (!match) throw new Error("This campaign is not available in your account.")
+          campaign = await resellerApi<BackendCampaign>(`campaigns/${encodeURIComponent(match.id)}`)
+        }
+        const applications = await applicationsPromise
+        if (cancelled) return
+        setBackendCampaign(campaign)
+        setResolvedCampaignId(campaign.id)
+        setBackendApplications(applications)
+      } catch (error) {
+        if (!cancelled) setApiError(error instanceof Error ? error.message : "Could not load campaign details.")
+      } finally {
+        if (!cancelled) setApiLoaded(true)
+      }
+    }
+    void loadDetail()
+    return () => { cancelled = true }
+  }, [backendMode, campaignName, selectedCampaignId])
+  const mockCampaign=resellerCampaignCards.find(item=>item.name===campaignName)??resellerCampaignCards[0]
+  const campaign=backendCampaign?{...mockCampaign,name:backendCampaign.title,commission:formatCommission(backendCampaign.commissionType,backendCampaign.commissionRate,backendCampaign.commissionCurrency),dates:[backendCampaign.startDate,backendCampaign.endDate].filter(Boolean).map((date)=>new Date(date as string).toLocaleDateString()).join(" - ")||"Dates to be confirmed"}:mockCampaign
+  const liveApplication=backendApplications.find((application)=>application.campaignId===resolvedCampaignId)
+  const participation=backendMode?(liveApplication?{status:displayStatus(liveApplication.applicationStatus),joinedAt:new Date(liveApplication.appliedAt).toLocaleDateString()}:undefined):memberships[campaign.name]
   const detailCopy:Record<string,{subtitle:string;description:string;expectations:string}>={
     "Ha Long Bay":{subtitle:"A slower way to see the bay",description:"A two-night cruise through the limestone karsts of Ha Long Bay, with quiet mornings on the water and time to explore hidden coves.",expectations:"A comfortable overnight cruise, meals on board and time to take in the limestone landscape at an unhurried pace."},
     "Hoi An":{subtitle:"A riverside stay close to the old town",description:"Three nights beside the Thu Bon River, with lantern-lit evenings, local dining and time to explore Hoi An at your own pace.",expectations:"A boutique riverside stay, easy access to the old town and unhurried evenings among Hoi An's lantern-lit streets."},
@@ -130,7 +251,7 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
   }
   const galleryImages=photosByDestination[campaign.destination]??photosByDestination["Ha Long Bay"]
   const visibleGalleryImages=Array.from({length:4},(_,index)=>(galleryOffset+index)%galleryImages.length)
-  const description=detailCopy[campaign.destination]??detailCopy["Ha Long Bay"]
+  const description=backendCampaign?.description?{...(detailCopy[campaign.destination]??detailCopy["Ha Long Bay"]),description:backendCampaign.description,expectations:backendCampaign.description}:(detailCopy[campaign.destination]??detailCopy["Ha Long Bay"])
   const moveGallery=(direction:number)=>{const index=(activeImageIndex+direction+galleryImages.length)%galleryImages.length;setActiveImageIndex(index);setGalleryOffset(index)}
   function updateSocialEntry(platform:SocialPlatform,id:string,updates:Partial<SocialPostEntry>){
     setSocialEntries(current=>({...current,[platform]:current[platform].map(entry=>entry.id===id?{...entry,...updates}:entry)}))
@@ -152,28 +273,51 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
     updateSocialEntry(platform,id,{url:normalizedUrl,views,likes,error:""})
   }
   async function connectTikTok(){
-    const accessToken=getBackendAccessToken()
-    if(!accessToken){
+    if(!getBackendAccessToken()){
       setTikTokConnectMessage("Sign in with a real reseller account first. Local demo accounts cannot authorize TikTok.")
       return
     }
     setIsConnectingTikTok(true)
     setTikTokConnectMessage("")
     try{
-      const response=await fetch("/api/backend/reseller/tiktok/oauth-url",{headers:{Authorization:"Bearer "+accessToken},cache:"no-store"})
-      const result=await response.json().catch(()=>null) as {success?:boolean;message?:string;data?:{authorizationUrl?:string}}|null
-      if(!response.ok||!result||!result.success||!result.data||!result.data.authorizationUrl){
-        setTikTokConnectMessage((result&&result.message)||"Could not start TikTok authorization. Check the BE TikTok app configuration.")
-        setIsConnectingTikTok(false)
-        return
-      }
-      window.location.assign(result.data.authorizationUrl)
-    }catch{
-      setTikTokConnectMessage("Could not reach the backend to start TikTok authorization.")
+      const result=await resellerApi<{authorizationUrl:string}>("social-accounts/tiktok/oauth-url")
+      if(!result.authorizationUrl)throw new Error("The backend did not return a TikTok authorization URL.")
+      window.location.assign(result.authorizationUrl)
+    }catch(error){
+      setTikTokConnectMessage(error instanceof Error?error.message:"Could not reach the backend to start TikTok authorization.")
       setIsConnectingTikTok(false)
     }
+  }  async function loadTikTokVideos(loadMore=false){
+    if(isLoadingTikTokList)return
+    if(loadMore&&(!tiktokSocialAccountId||tiktokVideosCursor===null))return
+    setIsLoadingTikTokList(true)
+    setTikTokVideosError("")
+    try{
+      const path=loadMore
+        ?`social-accounts/tiktok/${encodeURIComponent(tiktokSocialAccountId)}/videos?maxCount=20&cursor=${encodeURIComponent(String(tiktokVideosCursor))}`
+        :"social-accounts/tiktok/videos?maxCount=20"
+      const data=await resellerApi<BackendTikTokVideos>(path)
+      if(data.socialAccountId)setTikTokSocialAccountId(data.socialAccountId)
+      setTikTokVideos(current=>loadMore?[...current,...data.videos]:data.videos)
+      setTikTokVideosCursor(data.cursor)
+      setTikTokVideosHasMore(data.hasMore)
+    }catch(error){
+      setTikTokVideosError(error instanceof Error?error.message:"Could not load videos from the connected TikTok account.")
+    }finally{
+      setIsLoadingTikTokList(false)
+    }
   }
-  async function showSocialMetrics(platform:SocialPlatform,id:string){
+  function chooseTikTokVideo(video:BackendTikTokVideo){
+    const url=video.shareUrl||`https://www.tiktok.com/video/${video.id}`
+    setSocialEntries(current=>{
+      const entries=[...current.TikTok]
+      const emptyIndex=entries.findIndex(entry=>!entry.url.trim())
+      const selected={id:emptyIndex>=0?entries[emptyIndex].id:crypto.randomUUID(),url,views:video.viewCount,likes:video.likeCount,error:""}
+      if(emptyIndex>=0)entries[emptyIndex]=selected
+      else entries.push(selected)
+      return {...current,TikTok:entries}
+    })
+  }  async function showSocialMetrics(platform:SocialPlatform,id:string){
     const entry=socialEntries[platform].find(item=>item.id===id)
     if(!entry)return
     const rawUrl=entry.url
@@ -203,29 +347,17 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
     updateSocialEntry(platform,id,{url:normalizedUrl,views:null,likes:null,error:""})
     setIsLoadingTikTokMetrics(true)
     try{
-      const response=await fetch("/api/backend/reseller/tiktok/videos?videoId="+encodeURIComponent(videoId),{
-        headers:{Authorization:"Bearer "+accessToken},
-        cache:"no-store",
-      })
-      const result=await response.json().catch(()=>null) as {
-        success?:boolean
-        message?:string
-        data?:{videos?:Array<{id:string;viewCount:number|null;likeCount:number|null}>}
-      }|null
-      const video=result&&result.data&&result.data.videos
-        ?result.data.videos.find(item=>item.id===videoId)
-        :undefined
-      if(!response.ok||!result||!result.success||!video){
-        const message=response.status===401
-          ?"Your backend session is not valid. Sign in again with your reseller account."
-          :(result&&result.message)||"This video was not found among videos available to the connected TikTok account."
-        updateSocialEntry(platform,id,{error:message})
+      const result=await resellerApi<BackendTikTokVideos>(`social-accounts/tiktok/videos?videoId=${encodeURIComponent(videoId)}`)
+      const video=result.videos.find(item=>item.id===videoId)
+      if(!video){
+        updateSocialEntry(platform,id,{error:"This video was not found among videos available to the connected TikTok account."})
         return
       }
       if(typeof video.viewCount!=="number"||typeof video.likeCount!=="number"){
         updateSocialEntry(platform,id,{error:"TikTok did not return view and like counts for this video."})
         return
       }
+      if(result.socialAccountId)setTikTokSocialAccountId(result.socialAccountId)
       updateSocialEntry(platform,id,{views:video.viewCount,likes:video.likeCount,error:""})
     }catch{
       updateSocialEntry(platform,id,{error:"Could not reach the TikTok video API. Check that the backend is running."})
@@ -236,9 +368,32 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
   function fillSocialSample(platform:SocialPlatform,id:string){updateSocialEntry(platform,id,{url:platform==="TikTok"?"https://www.tiktok.com/@wayfarer.demo/video/7350000000000000001":"https://www.facebook.com/watch/?v=7350000000000000002",views:null,likes:null,error:""})}
   function addSocialEntry(platform:SocialPlatform){setSocialEntries(current=>({...current,[platform]:[...current[platform],{id:crypto.randomUUID(),url:"",views:null,likes:null,error:""}]}))}
   function removeSocialEntry(platform:SocialPlatform,id:string){setSocialEntries(current=>({...current,[platform]:current[platform].length>1?current[platform].filter(entry=>entry.id!==id):current[platform]}))}
+  const activeCampaignApplication=backendApplications.find((application)=>application.campaignId===resolvedCampaignId&&application.applicationStatus.toUpperCase()==="APPROVED")
+  async function applyToCampaign(){
+    if(!backendMode||!resolvedCampaignId){requestToJoin(campaign.name);return}
+    setApplyFeedback("")
+    try{
+      const result=await resellerApi<{id:string;campaignId:string;status:string;appliedAt:string}>(`campaigns/${encodeURIComponent(resolvedCampaignId)}/applications`,{method:"POST"})
+      const application:BackendApplication={applicationId:result.id,campaignId:result.campaignId,title:campaign.name,description:backendCampaign?.description??null,campaignStatus:backendCampaign?.status??"OPEN",applicationStatus:result.status,commissionType:backendCampaign?.commissionType??"PERCENTAGE",commissionRate:backendCampaign?.commissionRate??0,appliedAt:result.appliedAt}
+      setBackendApplications((current)=>[application,...current.filter((item)=>item.campaignId!==result.campaignId)])
+      setApplyFeedback(`Application ${displayStatus(result.status).toLowerCase()} successfully.`)
+    }catch(error){setApplyFeedback(error instanceof Error?error.message:"Could not apply to this campaign.")}
+  }
+  async function registerSocialVideo(id:string){
+    if(!activeCampaignApplication||!tiktokSocialAccountId){setSocialVideoError("Connect TikTok and join an approved campaign before registering this post.");return}
+    const entry=socialEntries.TikTok.find((item)=>item.id===id)
+    if(!entry)return
+    setRegisteringSocialVideo(id)
+    setSocialVideoError("")
+    try{
+      const saved=await resellerApi<{metricsStatus:string}>("social-videos",{method:"POST",body:{postUrl:entry.url,socialAccountId:tiktokSocialAccountId,campaignApplicationId:activeCampaignApplication.applicationId}})
+      updateSocialEntry("TikTok",id,{registeredStatus:saved.metricsStatus})
+    }catch(error){setSocialVideoError(error instanceof Error?error.message:"Could not register this post with the campaign.")}
+    finally{setRegisteringSocialVideo("")}
+  }
   const backToMyCampaigns=returnTo==="my-campaigns"
   return <div className="space-y-5">
-    <Link href={backToMyCampaigns?"/reseller/my-campaigns":"/reseller/campaign-marketplace"} className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-teal-800 transition hover:bg-teal-50 hover:underline"><ArrowRight className="size-4 rotate-180"/>Back to {backToMyCampaigns?"My campaigns":"Campaign Marketplace"}</Link>
+    <Link href={backToMyCampaigns?"/reseller/my-campaigns":"/reseller/campaign-marketplace"} className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-teal-800 transition hover:bg-teal-50 hover:underline"><ArrowRight className="size-4 rotate-180"/>Back to {backToMyCampaigns?"My campaigns":"Campaign Marketplace"}</Link>{apiLoading&&<p role="status" className="rounded-lg border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-sky-900">Loading campaign details...</p>}{apiError&&<p role="alert" className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">{apiError}</p>}{applyFeedback&&<p role="status" className="rounded-lg border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-sky-900">{applyFeedback}</p>}
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex flex-wrap items-end justify-between gap-5 p-6 sm:p-8"><div className="max-w-3xl"><p className="text-xs font-semibold uppercase tracking-[.15em] text-teal-800">{campaign.destination} · Vietnam</p><h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">{campaign.name}</h1><div className="mt-3"><Badge className={participation?.status==="Active"?"bg-emerald-50 text-emerald-800":participation?.status==="Pending"?"bg-amber-50 text-amber-900":"bg-slate-100 text-slate-700"}>{participation?.status??"Not joined"}</Badge>{participation&&<span className="ml-2 text-xs text-slate-500">{participation.status==="Active"?"Joined":"Requested"} {participation.joinedAt}</span>}</div><p className="mt-2 text-lg text-slate-600">{description.subtitle}</p><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">{description.description}</p></div><div className="rounded-xl border border-emerald-100 bg-emerald-50/70 px-5 py-3"><span className="block text-[10px] font-semibold uppercase tracking-[.12em] text-emerald-800">Commission</span><strong className="mt-0.5 block text-2xl font-semibold text-emerald-950">{campaign.commission}</strong><span className="text-xs text-emerald-800/75">per eligible booking</span></div></div>
       <div className="grid gap-4 border-t border-slate-100 bg-[#f8faf8] p-4 sm:p-6 lg:grid-cols-[minmax(0,1.55fr)_minmax(270px,.85fr)]">
@@ -270,6 +425,12 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
                 </div>
 
                 {isTikTok&&tiktokConnectMessage&&<p role="status" className="mb-3 rounded-lg border border-sky-100 bg-sky-50 px-3 py-2 text-xs leading-5 text-sky-900">{tiktokConnectMessage}</p>}
+                {isTikTok&&backendMode&&<div className="mb-3 rounded-xl border border-sky-100 bg-sky-50/50 p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2"><div><p className="text-xs font-semibold text-slate-800">Your TikTok videos</p><p className="mt-1 text-[11px] text-slate-500">Load posts from the authorized account and use their live metrics.</p></div><Button type="button" variant="outline" size="sm" className="h-8 rounded-lg bg-white text-xs" disabled={isLoadingTikTokList} onClick={()=>void loadTikTokVideos(false)}><Video className="mr-1.5 size-3.5"/>{isLoadingTikTokList?"Loading videos...":"Load my videos"}</Button></div>
+                  {tiktokVideosError&&<p role="alert" className="mt-2 text-xs text-rose-700">{tiktokVideosError}</p>}
+                  {tiktokVideos.length>0&&<div className="mt-3 max-h-64 space-y-2 overflow-y-auto">{tiktokVideos.map(video=><div key={video.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white bg-white p-2.5"><div className="min-w-0"><p className="truncate text-xs font-medium text-slate-800">{video.title||video.description||`TikTok video ${video.id}`}</p><p className="mt-1 text-[10px] text-slate-500">{(video.viewCount??0).toLocaleString()} views · {(video.likeCount??0).toLocaleString()} likes</p></div><Button type="button" size="sm" variant="outline" className="h-8 shrink-0 text-xs" onClick={()=>chooseTikTokVideo(video)}>Use video</Button></div>)}</div>}
+                  {tiktokVideosHasMore&&<Button type="button" variant="ghost" size="sm" className="mt-2 h-8 text-xs text-sky-800" disabled={isLoadingTikTokList} onClick={()=>void loadTikTokVideos(true)}>{isLoadingTikTokList?"Loading...":"Load more videos"}</Button>}
+                </div>}
                 <div className="space-y-3">
                   {entries.map((entry,index)=>{
                     const inputId=`social-${platform.toLowerCase()}-${entry.id}`
@@ -287,7 +448,7 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
                       {entry.views!==null&&entry.likes!==null&&<div aria-live="polite" className="mt-4 grid gap-2.5 border-t border-slate-100 pt-3 sm:grid-cols-2">
                         <div className="flex items-center justify-between gap-2 rounded-xl border border-sky-100 bg-gradient-to-br from-sky-50/80 to-white p-3"><div><p className="text-[10px] font-bold uppercase tracking-[.12em] text-sky-700">Views</p><p className="mt-1 text-xl font-bold tracking-tight text-slate-900">{entry.views.toLocaleString()}</p></div><span className="grid size-9 place-items-center rounded-lg bg-white text-sky-700 shadow-sm"><Eye className="size-4.5"/></span></div>
                         <div className="flex items-center justify-between gap-2 rounded-xl border border-rose-100 bg-gradient-to-br from-rose-50/70 to-white p-3"><div><p className="text-[10px] font-bold uppercase tracking-[.12em] text-rose-700">Likes</p><p className="mt-1 text-xl font-bold tracking-tight text-slate-900">{entry.likes.toLocaleString()}</p></div><span className="grid size-9 place-items-center rounded-lg bg-white text-rose-600 shadow-sm"><Heart className="size-4.5"/></span></div>
-                        <p className="text-[10px] leading-4 text-slate-500 sm:col-span-2">{isTikTok?"Live metrics returned by TikTok for the connected account.":"Illustrative Facebook preview values; these are not live platform metrics."}</p>
+                        <p className="text-[10px] leading-4 text-slate-500 sm:col-span-2">{isTikTok?"Live metrics returned by TikTok for the connected account.":"Illustrative Facebook preview values; these are not live platform metrics."}</p>{isTikTok&&backendMode&&<div className="flex flex-wrap items-center gap-2 sm:col-span-2"><Button type="button" variant="outline" disabled={!activeCampaignApplication||!tiktokSocialAccountId||registeringSocialVideo===entry.id||Boolean(entry.registeredStatus)} onClick={()=>void registerSocialVideo(entry.id)}>{entry.registeredStatus?`Post registered (${entry.registeredStatus})`:registeringSocialVideo===entry.id?"Registering...":"Register post to campaign"}</Button>{!activeCampaignApplication&&<span className="text-xs text-slate-500">Available after the campaign application is approved.</span>}{entry.registeredStatus&&<span role="status" className="text-xs text-emerald-800">The BE received this post; platform metric sync status: {entry.registeredStatus}.</span>}</div>}{isTikTok&&socialVideoError&&<p role="alert" className="text-xs text-rose-700 sm:col-span-2">{socialVideoError}</p>}
                       </div>}
                     </div>
                   })}
@@ -300,7 +461,7 @@ function ResellerCampaignDetail({ campaignName: selectedCampaignName, returnTo }
         </CardContent>
       </Card>
     )}
-    <div className="grid gap-4 lg:grid-cols-[1fr_0.8fr]"><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Offer details</CardTitle></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2"><Detail label="Travel product" value={campaign.product}/><Detail label="Travel dates" value={campaign.dates}/><Detail label="Commission" value={`${campaign.commission} per confirmed booking`}/><Detail label="Category" value={campaign.category}/><div className="sm:col-span-2"><Detail label="What travelers can expect" value={description.expectations}/></div></CardContent></Card><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>{participation?.status==="Active"?"Your campaign":"Participation terms"}</CardTitle><CardDescription>{participation?.status==="Active"?"Manage your promotion and performance.":participation?.status==="Pending"?"Your participation request is awaiting review.":"Before you request to join"}</CardDescription></CardHeader><CardContent className="space-y-3 text-sm leading-6 text-slate-600"><p>Commissions apply to completed bookings attributed to your active referral link.</p><p>Use accurate product details in your recommendations. Cancelled bookings are not eligible.</p>{participation?.status==="Active"?<div className="flex flex-col gap-2 pt-2"><Link href="/reseller/tracking-links" className="inline-flex min-h-10 items-center justify-center rounded-md bg-teal-800 px-4 text-sm font-medium text-white hover:bg-teal-900">Manage tracking links <ArrowRight className="ml-2 size-4"/></Link><Link href={`/reseller/campaign-content?campaign=${encodeURIComponent(campaign.name)}`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-teal-900 hover:bg-slate-50">Get content <ArrowRight className="ml-2 size-4"/></Link><Link href="/reseller/analytics" className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-teal-900 hover:bg-slate-50">View stats <ArrowRight className="ml-2 size-4"/></Link></div>:participation?.status==="Pending"?<div className="rounded-xl border border-amber-200 bg-amber-50 p-4"><p className="font-semibold text-amber-950">Pending approval</p><p className="mt-1 text-xs leading-5 text-amber-900/80">Your request was sent on {participation.joinedAt}. You cannot submit another request while it is under review.</p></div>:<Button className="mt-2 w-full bg-teal-800 hover:bg-teal-900" onClick={()=>requestToJoin(campaign.name)}>Apply to join campaign</Button>}</CardContent></Card></div>
+    <div className="grid gap-4 lg:grid-cols-[1fr_0.8fr]"><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>Offer details</CardTitle></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2"><Detail label="Travel product" value={campaign.product}/><Detail label="Travel dates" value={campaign.dates}/><Detail label="Commission" value={`${campaign.commission} per confirmed booking`}/><Detail label="Category" value={campaign.category}/><div className="sm:col-span-2"><Detail label="What travelers can expect" value={description.expectations}/></div></CardContent></Card><Card className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>{participation?.status==="Active"?"Your campaign":"Participation terms"}</CardTitle><CardDescription>{participation?.status==="Active"?"Manage your promotion and performance.":participation?.status==="Pending"?"Your participation request is awaiting review.":"Before you request to join"}</CardDescription></CardHeader><CardContent className="space-y-3 text-sm leading-6 text-slate-600"><p>Commissions apply to completed bookings attributed to your active referral link.</p><p>Use accurate product details in your recommendations. Cancelled bookings are not eligible.</p>{participation?.status==="Active"?<div className="flex flex-col gap-2 pt-2"><Link href="/reseller/tracking-links" className="inline-flex min-h-10 items-center justify-center rounded-md bg-teal-800 px-4 text-sm font-medium text-white hover:bg-teal-900">Manage tracking links <ArrowRight className="ml-2 size-4"/></Link><Link href={`/reseller/campaign-content?campaign=${encodeURIComponent(campaign.name)}`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-teal-900 hover:bg-slate-50">Get content <ArrowRight className="ml-2 size-4"/></Link><Link href="/reseller/analytics" className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-teal-900 hover:bg-slate-50">View stats <ArrowRight className="ml-2 size-4"/></Link></div>:participation?.status==="Pending"?<div className="rounded-xl border border-amber-200 bg-amber-50 p-4"><p className="font-semibold text-amber-950">Pending approval</p><p className="mt-1 text-xs leading-5 text-amber-900/80">Your request was sent on {participation.joinedAt}. You cannot submit another request while it is under review.</p></div>:<Button className="mt-2 w-full bg-teal-800 hover:bg-teal-900" onClick={()=>void applyToCampaign()}>Apply to join campaign</Button>}</CardContent></Card></div>
   </div>
 }
 
@@ -401,9 +562,9 @@ export function TenantProductsPage() {
   </>
 }
 
-export function ResellerSpecialPage({ slug, campaignName, returnTo }: { slug: string; campaignName?: string; returnTo?: string }) {
+export function ResellerSpecialPage({ slug, campaignName, campaignId, returnTo }: { slug: string; campaignName?: string; campaignId?: string; returnTo?: string }) {
   if(slug==="campaign-marketplace")return <Marketplace/>
-  if(slug==="campaign-detail")return <ResellerCampaignDetail key={campaignName??resellerCampaignCards[0].name} campaignName={campaignName} returnTo={returnTo}/>
+  if(slug==="campaign-detail")return <ResellerCampaignDetail key={campaignName??resellerCampaignCards[0].name} campaignName={campaignName} campaignId={campaignId} returnTo={returnTo}/>
   if(slug==="campaign-content"||slug==="campaign-videos")return <ResellerCampaignVideos key={campaignName??storefrontJourneys[0].title} campaignName={campaignName}/>
   if(slug==="profile-settings")return <ResellerProfile/>
   if(slug==="ai-content")return <ResellerAiLibrary/>

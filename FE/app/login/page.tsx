@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { authenticate, MOCK_USERS, ROLE_HOME, saveDemoSession } from "@/lib/mock-auth"
-import { BACKEND_ACCESS_TOKEN_KEY, decodeBackendAccessToken } from "@/lib/backend-api"
+import { BACKEND_ACCESS_TOKEN_KEY, BACKEND_REFRESH_TOKEN_KEY, decodeBackendAccessToken } from "@/lib/backend-api"
 
 export default function LoginPage() {
   return <Suspense fallback={<main className="grid min-h-screen place-items-center bg-white text-sm text-slate-500">Loading sign in…</main>}><LoginForm /></Suspense>
@@ -35,6 +35,7 @@ function LoginForm() {
     const demoUser = authenticate(email, password)
     if (demoUser) {
       window.sessionStorage.removeItem(BACKEND_ACCESS_TOKEN_KEY)
+      window.sessionStorage.removeItem(BACKEND_REFRESH_TOKEN_KEY)
       saveDemoSession(demoUser)
       router.push(ROLE_HOME[demoUser.role])
       return
@@ -50,9 +51,9 @@ function LoginForm() {
       const result = await response.json().catch(() => null) as {
         success?: boolean
         message?: string
-        data?: { accessToken?: string }
+        data?: { accessToken?: string; refreshToken?: string }
       } | null
-      if (!response.ok || !result || !result.success || !result.data || !result.data.accessToken) {
+      if (!response.ok || !result || !result.success || !result.data || !result.data.accessToken || !result.data.refreshToken) {
         setMessage(result && result.message ? result.message : "Sign in failed. Check your credentials and make sure the backend is running.")
         return
       }
@@ -71,6 +72,7 @@ function LoginForm() {
         .replace(/\b\w/g, (letter) => letter.toUpperCase())
       const accountId = String((claims && claims.id) || accountEmail)
       window.sessionStorage.setItem(BACKEND_ACCESS_TOKEN_KEY, accessToken)
+      window.sessionStorage.setItem(BACKEND_REFRESH_TOKEN_KEY, result.data.refreshToken)
       saveDemoSession({
         id: accountId,
         name: accountName,

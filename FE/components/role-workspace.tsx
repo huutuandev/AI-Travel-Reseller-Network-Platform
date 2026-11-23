@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { Bell, CheckCheck, ChevronDown, UserRound } from "lucide-react"
 import { clearDemoSession, getDemoSession, getDemoSessionSnapshot, ROLE_HOME, subscribeDemoSession, type UserRole } from "@/lib/mock-auth"
 import { AppSidebar } from "@/components/app-sidebar"
+import { logoutBackendSession } from "@/lib/backend-api"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
@@ -38,6 +39,7 @@ export function RoleWorkspace({ role, children }: { role: UserRole | "any"; chil
   }, [role, router, session, sessionSnapshot])
 
   function logout() {
+    if (session?.authMode === "backend") void logoutBackendSession()
     clearDemoSession()
     router.replace("/login")
   }

@@ -75,6 +75,7 @@ export function saveDemoSession(session: DemoSession): void {
 export function clearDemoSession(): void {
   window.localStorage.removeItem(SESSION_KEY)
   window.sessionStorage.removeItem("wayfarer-backend-access-token")
+  window.sessionStorage.removeItem("wayfarer-backend-refresh-token")
   window.dispatchEvent(new Event(SESSION_EVENT))
 }
 

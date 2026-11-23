@@ -14,6 +14,7 @@ services:
       - /app/.next
     environment:
       - NODE_ENV=development
+      - BACKEND_API_URL=http://backend:8080
     # Override CMD to run in dev mode with hot-reload
     command: npm run dev -- --hostname 0.0.0.0
     depends_on:
@@ -45,7 +46,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: mydatabase
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped

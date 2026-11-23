@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { resellerCampaignCards, tenantTables, type WireframeTable } from "@/lib/wireframe-mocks"
 import { useResellerCampaignMembership } from "@/lib/reseller-campaign-membership"
+import { displayStatus, formatCommission as formatApiCommission, resellerApi, type BackendApplication, type BackendCommission, type BackendTrackingLink } from "@/lib/reseller-api"
+import { useBackendResellerSession } from "@/lib/use-backend-reseller-session"
 
 const badgeStyles: Record<string, string> = {
   Active:"bg-emerald-50 text-emerald-800", Approved:"bg-emerald-50 text-emerald-800", Paid:"bg-sky-50 text-sky-800",
@@ -23,6 +25,13 @@ export function WireframeTablePage({ config, hrefPrefix }: { config: WireframeTa
   const [feedback, setFeedback] = useState("")
   const [copied, setCopied] = useState("")
   const [showAllResellers, setShowAllResellers] = useState(false)
+  const backendMode = useBackendResellerSession()
+  const [apiLoaded, setApiLoaded] = useState(false)
+  const shouldLoadResellerApi = ["My campaigns", "Commissions", "Tracking links", "Performance analytics"].includes(config.title)
+  const apiLoading = backendMode && shouldLoadResellerApi && !apiLoaded
+  const [apiError, setApiError] = useState("")
+  const [backendCommissions, setBackendCommissions] = useState<BackendCommission[]>([])
+  const [backendTrackingLinks, setBackendTrackingLinks] = useState<BackendTrackingLink[]>([])
   const [resellerTab, setResellerTab] = useState<"score" | "commission" | "management">("score")
 
   useEffect(() => {
@@ -34,7 +43,7 @@ export function WireframeTablePage({ config, hrefPrefix }: { config: WireframeTa
     syncResellerTab()
     window.addEventListener("popstate", syncResellerTab)
     return () => window.removeEventListener("popstate", syncResellerTab)
-  }, [config.title])
+  }, [backendMode, config.title])
 
   function selectResellerTab(tab: "score" | "commission" | "management") {
     setResellerTab(tab)
@@ -44,12 +53,47 @@ export function WireframeTablePage({ config, hrefPrefix }: { config: WireframeTa
     window.history.replaceState(null, "", nextUrl)
   }
   const { memberships } = useResellerCampaignMembership(config.title === "My campaigns")
-  const sourceRows = useMemo(() => config.title === "My campaigns"
+  useEffect(() => {
+    if (!backendMode) return
+    const page = config.title
+    if (page !== "My campaigns" && page !== "Commissions" && page !== "Tracking links" && page !== "Performance analytics") return
+    let cancelled = false
+    async function loadPage() {
+      try {
+        if (page === "My campaigns") {
+          const data = await resellerApi<BackendApplication[]>("campaigns/applications")
+          if (!cancelled) setRows(data.map((item) => [item.title, formatApiCommission(item.commissionType, item.commissionRate), displayStatus(item.applicationStatus), item.appliedAt ? new Date(item.appliedAt).toLocaleDateString() : "—", displayStatus(item.applicationStatus) === "Active" ? "View · Tracking link · Get content" : "View"]))
+        } else if (page === "Tracking links" || page === "Performance analytics") {
+          const data = await resellerApi<BackendTrackingLink[]>("tracking-links")
+          if (!cancelled) {
+            setBackendTrackingLinks(data)
+            setRows(data.map((item) => page === "Tracking links" ? [item.campaign, item.trackingUrl, String(item.clicks), String(item.conversions), item.created ? new Date(item.created).toLocaleDateString() : "-", "Copy link"] : [item.campaign, String(item.clicks), String(item.conversions), `${item.clicks ? (item.conversions * 100 / item.clicks).toFixed(2) : "0.00"}%`]))
+          }
+        } else {
+          const data = await resellerApi<BackendCommission[]>("commissions")
+          if (!cancelled) {
+            setBackendCommissions(data)
+            setRows(data.map((item) => [item.campaign, item.orderAmount == null ? "—" : new Intl.NumberFormat("en-US", { style: "currency", currency: item.currency || "USD" }).format(item.orderAmount), new Intl.NumberFormat("en-US", { style: "currency", currency: item.currency || "USD" }).format(item.commissionAmount), item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "—", (item.status.toUpperCase()==="APPROVED"?"Approved":displayStatus(item.status))]))
+          }
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setRows([])
+          setApiError(error instanceof Error ? error.message : "Could not load reseller data.")
+        }
+      } finally {
+        if (!cancelled) setApiLoaded(true)
+      }
+    }
+    void loadPage()
+    return () => { cancelled = true }
+  }, [backendMode, config.title])
+  const sourceRows = useMemo(() => config.title === "My campaigns" && !backendMode
     ? resellerCampaignCards.flatMap((campaign) => {
       const participation = memberships[campaign.name]
       return participation ? [[campaign.name, campaign.commission, participation.status, participation.joinedAt, participation.status === "Active" ? "View · Tracking link · Get content" : "View"]] : []
     })
-    : rows, [config.title, memberships, rows])
+    : backendMode && apiLoading ? [] : rows, [apiLoading, backendMode, config.title, memberships, rows])
   const filteredRows = useMemo(() => sourceRows.filter((row) => {
     const matchesQuery = row.join(" ").toLowerCase().includes(query.toLowerCase())
     const matchesFilters = (config.filters ?? []).every((filter,index) => {
@@ -243,11 +287,11 @@ export function WireframeTablePage({ config, hrefPrefix }: { config: WireframeTa
         </CardContent>
       </Card>
     )}
-    {config.metrics&&<div className={`grid gap-4 sm:grid-cols-2 ${config.metrics.length>3?"xl:grid-cols-4":"xl:grid-cols-3"}`}>{config.metrics.map((metric)=><Card key={metric.label} className="border-slate-200/80 shadow-sm"><CardHeader className="pb-2"><CardDescription>{metric.label}</CardDescription><CardTitle className="text-2xl">{metric.value}</CardTitle></CardHeader>{metric.note&&<CardContent className="text-xs text-slate-500">{metric.note}</CardContent>}</Card>)}</div>}
+    {apiLoading&&<p role="status" className="rounded-lg border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-sky-900">Loading account data...</p>}{apiError&&<p role="alert" className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">{apiError}</p>}
+    {config.metrics&&<div className={`grid gap-4 sm:grid-cols-2 ${config.metrics.length>3?"xl:grid-cols-4":"xl:grid-cols-3"}`}>{(backendMode&&config.title==="Performance analytics"?(()=>{const clicks=backendTrackingLinks.reduce((sum,item)=>sum+item.clicks,0);const conversions=backendTrackingLinks.reduce((sum,item)=>sum+item.conversions,0);return config.metrics!.map((metric)=>({...metric,value:metric.label==="Clicks"?clicks.toLocaleString():metric.label==="Conversions"?conversions.toLocaleString():metric.label==="Conversion rate"?`${clicks?(conversions*100/clicks).toFixed(2):"0.00"}%`:metric.value}))})():backendMode&&config.title==="Commissions"?(()=>{const total=backendCommissions.reduce((sum,item)=>sum+Number(item.commissionAmount||0),0);const amountBy=(status:string)=>backendCommissions.filter(item=>(item.status.toUpperCase()==="APPROVED"?"Approved":displayStatus(item.status))===status).reduce((sum,item)=>sum+Number(item.commissionAmount||0),0);const currency=backendCommissions[0]?.currency||"USD";const money=(amount:number)=>new Intl.NumberFormat("en-US",{style:"currency",currency}).format(amount);return config.metrics!.map((metric)=>({...metric,value:metric.label==="Total commission"?money(total):money(amountBy(metric.label))}))})():config.metrics).map((metric)=><Card key={metric.label} className="border-slate-200/80 shadow-sm"><CardHeader className="pb-2"><CardDescription>{metric.label}</CardDescription><CardTitle className="text-2xl">{metric.value}</CardTitle></CardHeader>{metric.note&&<CardContent className="text-xs text-slate-500">{metric.note}</CardContent>}</Card>)}</div>}
     {config.title==="Performance analytics"&&<Card className="border-slate-200/80 shadow-sm"><CardHeader className="flex flex-row items-center justify-between"><CardTitle>Clicks &amp; conversions</CardTitle><select aria-label="Analytics period" value={filters[0]} onChange={event=>setFilters(current=>current.map((value,index)=>index===0?event.target.value:value))} className="h-9 rounded-md border border-input bg-background px-3 text-sm"><option>Last 30 days</option></select></CardHeader><CardContent><div className="flex h-56 items-end gap-2 border-b border-slate-100 px-1 sm:gap-4">{[[40,20],[55,35],[47,27],[72,52],[64,44],[83,63],[67,47],[94,74],[76,56],[86,66],[71,51],[100,80]].map(([clicks,conversions],index)=><div key={index} className="flex h-full flex-1 items-end justify-center gap-1"><span className="w-2/5 rounded-t bg-teal-700" style={{height:`${clicks}%`}}/><span className="w-2/5 rounded-t bg-amber-400" style={{height:`${conversions}%`}}/></div>)}</div><div className="mt-3 flex justify-between text-[10px] text-slate-400"><span>Sep 15</span><span>Sep 22</span><span>Sep 29</span><span>Oct 6</span><span>Oct 13</span></div><div className="mt-3 flex gap-5 text-xs text-slate-500"><span className="flex items-center gap-2"><i className="size-2.5 rounded-sm bg-teal-700"/>Clicks</span><span className="flex items-center gap-2"><i className="size-2.5 rounded-sm bg-amber-400"/>Conversions</span></div></CardContent></Card>}
     {(config.title !== "Resellers" || resellerTab === "management") && <Card id={config.title === "Resellers" ? "reseller-management-panel" : undefined} role={config.title === "Resellers" ? "tabpanel" : undefined} aria-labelledby={config.title === "Resellers" ? "reseller-management-tab" : undefined} className="border-slate-200/80 shadow-sm"><CardHeader><CardTitle>{config.title}</CardTitle><CardDescription>{config.description}</CardDescription></CardHeader><CardContent className="space-y-4"><div className="flex flex-col gap-3 lg:flex-row"><div className="relative min-w-[220px] flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"/><Input type="search" aria-label={config.searchPlaceholder} placeholder={config.searchPlaceholder} value={query} onChange={(event)=>setQuery(event.target.value)} className="pl-9"/></div>{config.filters?.filter((filter)=>config.title!=="Performance analytics"||filter.column>=0).map((filter,index)=><select key={filter.label} aria-label={filter.label} value={filters[index]} onChange={(event)=>setFilters((current)=>current.map((value,i)=>i===index?event.target.value:value))} className="h-9 rounded-md border border-input bg-background px-3 text-sm"><option disabled>{filter.label}</option>{filter.values.map((value)=><option key={value}>{value}</option>)}</select>)}</div>
-    <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead><tr className="border-b text-xs text-slate-500">{config.columns.map((column)=><th key={column} className="pb-3 pr-3 font-medium">{column}</th>)}</tr></thead><tbody>{filteredRows.map((row,rowIndex)=><tr key={`${row[0]}-${rowIndex}`} className="border-b align-top last:border-0">{row.map((cell,columnIndex)=><td key={`${columnIndex}-${cell}`} className="py-3.5 pr-3 text-slate-700">{columnIndex===config.statusColumn||badgeStyles[cell]?<Badge className={badgeStyles[cell]??"bg-slate-100 text-slate-700"}>{cell}</Badge>:columnIndex===row.length-1&&config.action==="review"?cell.split(" · ").map((action)=><Button key={action} size="sm" variant={action==="Approve"?"default":"outline"} className="mr-1 mb-1" disabled={cell==="Reviewed"} onClick={()=>reviewRow(rowIndex,action==="Approve")}>{cell==="Reviewed"?<Check className="size-3.5"/>:null}{cell==="Reviewed"?"Reviewed":action}</Button>):columnIndex===row.length-1&&config.action==="copy"?<Button size="sm" variant="outline" onClick={()=>copyValue(row[1])}>{copied===row[1]?<Check className="size-3.5"/>:<Copy className="size-3.5"/>}{copied===row[1]?"Copied":"Copy link"}</Button>:columnIndex===row.length-1&&config.action==="details"?config.title==="Resellers"?cell.split(" · ").map((action)=><Link key={action} className="mr-2 inline-flex items-center gap-1 text-sm font-medium text-teal-800 hover:underline" href={`/tenant/reseller-detail?reseller=${encodeURIComponent(row[0].split(" Â· ")[0])}&tab=${resellerTab}`}>{action}<ArrowUpRight className="size-3.5"/></Link>):(config.title.toLowerCase().includes("campaign")||config.title==="My campaigns")?cell.split(" · ").map((action)=>action==="View"?<Link key={action} className="mr-2 inline-flex items-center gap-1 text-sm font-medium text-teal-800 hover:underline" href={`${hrefPrefix}/campaign-detail?campaign=${encodeURIComponent(row[0])}${config.title==="My campaigns"?"&from=my-campaigns":""}`}>{action}<ArrowUpRight className="size-3.5"/></Link>:config.title==="My campaigns"&&action==="Tracking link"?<Link key={action} className="mr-2 inline-flex items-center gap-1 text-sm font-medium text-teal-800 hover:underline" href="/reseller/tracking-links">{action}<ArrowUpRight className="size-3.5"/></Link>:config.title==="My campaigns"&&action==="Get content"?<Link key={action} className="mr-2 inline-flex items-center gap-1 text-sm font-medium text-teal-800 hover:underline" href={`/reseller/campaign-content?campaign=${encodeURIComponent(row[0])}`}><Video className="size-3.5"/>{action}</Link>:<Button key={action} size="sm" variant="outline" className="mr-1" onClick={()=>performDetailAction(action,row)}>{action}</Button>):cell.split(" · ").map((action)=><Button key={action} size="sm" variant="outline" className="mr-1" onClick={()=>performDetailAction(action,row)}>{action}</Button>):cell}</td>)}</tr>)}</tbody></table>{filteredRows.length===0&&<p className="py-10 text-center text-sm text-slate-500">No records match the current search and filters.</p>}</div><div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500"><span>Showing {filteredRows.length} of {rows.length} sample records</span>{feedback&&<span role="status" className="text-emerald-800">{feedback}</span>}</div></CardContent></Card>}
+    <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead><tr className="border-b text-xs text-slate-500">{config.columns.map((column)=><th key={column} className="pb-3 pr-3 font-medium">{column}</th>)}</tr></thead><tbody>{filteredRows.map((row,rowIndex)=><tr key={`${row[0]}-${rowIndex}`} className="border-b align-top last:border-0">{row.map((cell,columnIndex)=><td key={`${columnIndex}-${cell}`} className="py-3.5 pr-3 text-slate-700">{columnIndex===config.statusColumn||badgeStyles[cell]?<Badge className={badgeStyles[cell]??"bg-slate-100 text-slate-700"}>{cell}</Badge>:columnIndex===row.length-1&&config.action==="review"?cell.split(" · ").map((action)=><Button key={action} size="sm" variant={action==="Approve"?"default":"outline"} className="mr-1 mb-1" disabled={cell==="Reviewed"} onClick={()=>reviewRow(rowIndex,action==="Approve")}>{cell==="Reviewed"?<Check className="size-3.5"/>:null}{cell==="Reviewed"?"Reviewed":action}</Button>):columnIndex===row.length-1&&config.action==="copy"?<Button size="sm" variant="outline" onClick={()=>copyValue(row[1])}>{copied===row[1]?<Check className="size-3.5"/>:<Copy className="size-3.5"/>}{copied===row[1]?"Copied":"Copy link"}</Button>:columnIndex===row.length-1&&config.action==="details"?config.title==="Resellers"?cell.split(" · ").map((action)=><Link key={action} className="mr-2 inline-flex items-center gap-1 text-sm font-medium text-teal-800 hover:underline" href={`/tenant/reseller-detail?reseller=${encodeURIComponent(row[0].split(" Â· ")[0])}&tab=${resellerTab}`}>{action}<ArrowUpRight className="size-3.5"/></Link>):(config.title.toLowerCase().includes("campaign")||config.title==="My campaigns")?cell.split(" · ").map((action)=>action==="View"?<Link key={action} className="mr-2 inline-flex items-center gap-1 text-sm font-medium text-teal-800 hover:underline" href={`${hrefPrefix}/campaign-detail?campaign=${encodeURIComponent(row[0])}${config.title==="My campaigns"?"&from=my-campaigns":""}`}>{action}<ArrowUpRight className="size-3.5"/></Link>:config.title==="My campaigns"&&action==="Tracking link"?<Link key={action} className="mr-2 inline-flex items-center gap-1 text-sm font-medium text-teal-800 hover:underline" href="/reseller/tracking-links">{action}<ArrowUpRight className="size-3.5"/></Link>:config.title==="My campaigns"&&action==="Get content"?<Link key={action} className="mr-2 inline-flex items-center gap-1 text-sm font-medium text-teal-800 hover:underline" href={`/reseller/campaign-content?campaign=${encodeURIComponent(row[0])}`}><Video className="size-3.5"/>{action}</Link>:<Button key={action} size="sm" variant="outline" className="mr-1" onClick={()=>performDetailAction(action,row)}>{action}</Button>):cell.split(" · ").map((action)=><Button key={action} size="sm" variant="outline" className="mr-1" onClick={()=>performDetailAction(action,row)}>{action}</Button>):cell}</td>)}</tr>)}</tbody></table>{filteredRows.length===0&&<p className="py-10 text-center text-sm text-slate-500">No records match the current search and filters.</p>}</div><div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500"><span>{backendMode?`Showing ${filteredRows.length} account records`:`Showing ${filteredRows.length} of ${rows.length} sample records`}</span>{feedback&&<span role="status" className="text-emerald-800">{feedback}</span>}</div></CardContent></Card>}
     {config.note&&<p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">{config.note}</p>}
   </>
 }
-

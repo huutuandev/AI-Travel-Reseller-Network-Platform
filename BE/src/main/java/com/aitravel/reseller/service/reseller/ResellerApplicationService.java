@@ -5,6 +5,7 @@ import com.aitravel.reseller.dto.respone.reseller.RegisteredCampaignResponse;
 import com.aitravel.reseller.repository.ResellerProfileRepository;
 import com.aitravel.reseller.repository.reseller.ResellerApplicationRepository;
 import com.aitravel.reseller.security.user.CustomUserDetails;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -37,16 +38,30 @@ public class ResellerApplicationService {
 
         UUID resellerId = currentResellerId();
 
+        if (!repository.campaignExists(campaignId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign not found");
+        }
+
         if (!repository.isCampaignEligible(campaignId)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Campaign is not available for application");
         }
 
-        return repository.create(campaignId, resellerId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.CONFLICT,
-                        "You have already applied to this campaign"));
+        if (repository.applicationExists(campaignId, resellerId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "You have already applied to this campaign");
+        }
+
+        try {
+            return repository.create(campaignId, resellerId)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.CONFLICT,
+                            "You have already applied to this campaign"));
+        } catch (DuplicateKeyException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "You have already applied to this campaign", e);
+        }
     }
 
     private UUID currentResellerId() {

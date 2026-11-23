@@ -6,7 +6,7 @@
         "Expected":  "401/403",
         "Actual":  401,
         "Result":  "PASS",
-        "Duration":  "129ms"
+        "Duration":  "32ms"
     },
     {
         "Category":  "Security",
@@ -15,7 +15,7 @@
         "Expected":  "401/403",
         "Actual":  401,
         "Result":  "PASS",
-        "Duration":  "36ms"
+        "Duration":  "13ms"
     },
     {
         "Category":  "Security",
@@ -24,7 +24,7 @@
         "Expected":  "403",
         "Actual":  403,
         "Result":  "PASS",
-        "Duration":  "55ms"
+        "Duration":  "17ms"
     },
     {
         "Category":  "Security",
@@ -33,7 +33,7 @@
         "Expected":  "403",
         "Actual":  403,
         "Result":  "PASS",
-        "Duration":  "69ms"
+        "Duration":  "20ms"
     },
     {
         "Category":  "Security",
@@ -42,7 +42,7 @@
         "Expected":  "200/400",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "126ms"
+        "Duration":  "31ms"
     },
     {
         "Category":  "Security",
@@ -51,7 +51,7 @@
         "Expected":  "403",
         "Actual":  403,
         "Result":  "PASS",
-        "Duration":  "58ms"
+        "Duration":  "17ms"
     },
     {
         "Category":  "Security",
@@ -60,7 +60,7 @@
         "Expected":  "403",
         "Actual":  403,
         "Result":  "PASS",
-        "Duration":  "58ms"
+        "Duration":  "17ms"
     },
     {
         "Category":  "Validation",
@@ -69,7 +69,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "65ms"
+        "Duration":  "22ms"
     },
     {
         "Category":  "Validation",
@@ -78,7 +78,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "72ms"
+        "Duration":  "21ms"
     },
     {
         "Category":  "Validation",
@@ -87,7 +87,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "62ms"
+        "Duration":  "14ms"
     },
     {
         "Category":  "Validation",
@@ -96,7 +96,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "43ms"
+        "Duration":  "13ms"
     },
     {
         "Category":  "Validation",
@@ -105,7 +105,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "88ms"
+        "Duration":  "19ms"
     },
     {
         "Category":  "Validation",
@@ -114,7 +114,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "65ms"
+        "Duration":  "18ms"
     },
     {
         "Category":  "Validation",
@@ -123,7 +123,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "68ms"
+        "Duration":  "19ms"
     },
     {
         "Category":  "Marketplace",
@@ -132,7 +132,7 @@
         "Expected":  "200",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "97ms"
+        "Duration":  "24ms"
     },
     {
         "Category":  "Marketplace",
@@ -141,7 +141,7 @@
         "Expected":  "200/404",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "145ms"
+        "Duration":  "29ms"
     },
     {
         "Category":  "Marketplace",
@@ -150,34 +150,34 @@
         "Expected":  "404",
         "Actual":  404,
         "Result":  "PASS",
-        "Duration":  "152ms"
+        "Duration":  "17ms"
     },
     {
         "Category":  "Applications",
         "Code":  "SRS-03",
         "Name":  "SRS: Reseller gửi đơn tham gia chiến dịch (Apply to Campaign)",
         "Expected":  "200/201/409/400",
-        "Actual":  500,
-        "Result":  "FAIL",
-        "Duration":  "323ms"
+        "Actual":  201,
+        "Result":  "PASS",
+        "Duration":  "60ms"
     },
     {
         "Category":  "Applications",
         "Code":  "EDG-02",
         "Name":  "SRS: Chặn đăng ký trùng chiến dịch (Duplicate Apply -\u003e 409 Conflict)",
         "Expected":  "409/400",
-        "Actual":  500,
-        "Result":  "FAIL",
-        "Duration":  "99ms"
+        "Actual":  409,
+        "Result":  "PASS",
+        "Duration":  "16ms"
     },
     {
         "Category":  "Applications",
         "Code":  "EDG-03",
         "Name":  "SRS: Apply vào Campaign không tồn tại / không khả dụng -\u003e 400/404",
         "Expected":  "400/404",
-        "Actual":  400,
+        "Actual":  404,
         "Result":  "PASS",
-        "Duration":  "86ms"
+        "Duration":  "19ms"
     },
     {
         "Category":  "Applications",
@@ -186,7 +186,7 @@
         "Expected":  "200",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "148ms"
+        "Duration":  "32ms"
     },
     {
         "Category":  "Operations",
@@ -195,7 +195,7 @@
         "Expected":  "200",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "130ms"
+        "Duration":  "30ms"
     },
     {
         "Category":  "Operations",
@@ -204,7 +204,7 @@
         "Expected":  "200",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "129ms"
+        "Duration":  "28ms"
     },
     {
         "Category":  "Dashboard",
@@ -213,7 +213,7 @@
         "Expected":  "200",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "245ms"
+        "Duration":  "50ms"
     },
     {
         "Category":  "Dashboard",
@@ -222,7 +222,7 @@
         "Expected":  "403",
         "Actual":  403,
         "Result":  "PASS",
-        "Duration":  "67ms"
+        "Duration":  "17ms"
     },
     {
         "Category":  "TikTok-Sec",
@@ -231,7 +231,7 @@
         "Expected":  "403",
         "Actual":  403,
         "Result":  "PASS",
-        "Duration":  "66ms"
+        "Duration":  "16ms"
     },
     {
         "Category":  "TikTok-Sec",
@@ -240,7 +240,7 @@
         "Expected":  "403",
         "Actual":  403,
         "Result":  "PASS",
-        "Duration":  "106ms"
+        "Duration":  "22ms"
     },
     {
         "Category":  "TikTok-SRS",
@@ -249,7 +249,7 @@
         "Expected":  "200/400/409/503",
         "Actual":  409,
         "Result":  "PASS",
-        "Duration":  "70ms"
+        "Duration":  "20ms"
     },
     {
         "Category":  "TikTok-Edge",
@@ -258,7 +258,7 @@
         "Expected":  "400/401/403",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "63ms"
+        "Duration":  "15ms"
     },
     {
         "Category":  "TikTok-Val",
@@ -267,7 +267,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "109ms"
+        "Duration":  "27ms"
     },
     {
         "Category":  "TikTok-Val",
@@ -276,7 +276,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "68ms"
+        "Duration":  "19ms"
     },
     {
         "Category":  "TikTok-Edge",
@@ -285,7 +285,7 @@
         "Expected":  "200/400/404",
         "Actual":  404,
         "Result":  "PASS",
-        "Duration":  "138ms"
+        "Duration":  "58ms"
     },
     {
         "Category":  "TikTok-Val",
@@ -294,7 +294,7 @@
         "Expected":  "400",
         "Actual":  400,
         "Result":  "PASS",
-        "Duration":  "98ms"
+        "Duration":  "19ms"
     },
     {
         "Category":  "TikTok-Edge",
@@ -303,7 +303,7 @@
         "Expected":  "403/404",
         "Actual":  404,
         "Result":  "PASS",
-        "Duration":  "91ms"
+        "Duration":  "29ms"
     },
     {
         "Category":  "Merchant-Rank",
@@ -312,7 +312,7 @@
         "Expected":  "200",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "127ms"
+        "Duration":  "39ms"
     },
     {
         "Category":  "Merchant-Rank",
@@ -321,7 +321,7 @@
         "Expected":  "200",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "107ms"
+        "Duration":  "34ms"
     },
     {
         "Category":  "Merchant-Rank",
@@ -330,6 +330,6 @@
         "Expected":  "200/400",
         "Actual":  200,
         "Result":  "PASS",
-        "Duration":  "102ms"
+        "Duration":  "32ms"
     }
 ]

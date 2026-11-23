@@ -119,13 +119,13 @@ def create_report(output_path="docs/Bao_cao_Kiem_thu_Toan_Bo_Reseller_Hien.xlsx"
         (14, "VAL-07", "Validation", "minCommissionPercent vượt ngoài khoảng 0-100 (ví dụ 150)", "GET /api/v1/reseller/campaigns", "Query: minCommissionPercent=150", "400", 400, "PASS", "68ms", "Đạt chuẩn SRS: Ràng buộc giá trị phần trăm hợp lệ từ chối tham số phi lý."),
 
         # Nhóm 3: Marketplace & Applications (7 test cases)
-        (15, "SRS-01", "Marketplace", "Lấy danh sách Campaign Marketplace (chỉ ACTIVE & AVAILABLE)", "GET /api/v1/reseller/campaigns", "Token Reseller hợp lệ", "200", 200, "PASS", "97ms", "Đạt chuẩn SRS: Trả về danh sách chiến dịch đang hoạt động kèm sản phẩm khả dụng."),
-        (16, "SRS-02", "Marketplace", "Xem chi tiết Campaign hợp lệ theo UUID", "GET /api/v1/reseller/campaigns/{id}", "ID chiến dịch có thật trong CSDL", "200", 200, "PASS", "145ms", "Đạt chuẩn SRS: Trả về thông tin chi tiết, điều khoản và tỷ lệ hoa hồng."),
-        (17, "EDG-01", "Marketplace", "UUID hợp lệ nhưng không tồn tại trong hệ thống", "GET /api/v1/reseller/campaigns/{id}", "UUID: 00000000-0000-0000-0000-000000000099", "404", 404, "PASS", "152ms", "Đạt chuẩn: ResourceNotFoundException chuyển sang 404 Not Found rõ ràng."),
-        (18, "SRS-03", "Applications", "Reseller nộp đơn tham gia chiến dịch (Apply to Campaign)", "POST /api/v1/reseller/campaigns/{id}/applications", "Token Reseller hợp lệ, nộp đơn chiến dịch", "200/201/409/400", 500, "FAIL", "323ms", "Lỗi Bug #02 (OPEN): Thiếu cột commission_type_snapshot NOT NULL trong INSERT."),
-        (19, "EDG-02", "Applications", "Chặn đăng ký trùng chiến dịch (Duplicate Apply)", "POST /api/v1/reseller/campaigns/{id}/applications", "Nộp đơn lần 2 vào cùng chiến dịch", "409/400", 500, "FAIL", "99ms", "Lỗi Bug #02 (OPEN): Do lệnh INSERT bị crash 500 nên luồng không đến bước 409 Conflict."),
-        (20, "EDG-03", "Applications", "Apply vào Campaign không tồn tại / không khả dụng", "POST /api/v1/reseller/campaigns/{id}/applications", "UUID không tồn tại", "400/404", 400, "PASS", "86ms", "Đạt chuẩn SRS: Kiểm tra chiến dịch không tồn tại/không active và trả 400 Bad Request."),
-        (21, "SRS-04", "Applications", "Lấy danh sách chiến dịch đã đăng ký (My Applications)", "GET /api/v1/reseller/campaigns/applications", "Token Reseller", "200", 200, "PASS", "148ms", "Đạt chuẩn SRS: Lấy đúng danh sách chiến dịch của chính Reseller đang đăng nhập."),
+        (15, "SRS-01", "Marketplace", "Lấy danh sách Campaign Marketplace (chỉ ACTIVE & AVAILABLE)", "GET /api/v1/reseller/campaigns", "Token Reseller hợp lệ", "200", 200, "PASS", "24ms", "Đạt chuẩn SRS: Trả về danh sách chiến dịch đang hoạt động kèm sản phẩm khả dụng."),
+        (16, "SRS-02", "Marketplace", "Xem chi tiết Campaign hợp lệ theo UUID", "GET /api/v1/reseller/campaigns/{id}", "ID chiến dịch có thật trong CSDL", "200", 200, "PASS", "29ms", "Đạt chuẩn SRS: Trả về thông tin chi tiết, điều khoản và tỷ lệ hoa hồng."),
+        (17, "EDG-01", "Marketplace", "UUID hợp lệ nhưng không tồn tại trong hệ thống", "GET /api/v1/reseller/campaigns/{id}", "UUID: 00000000-0000-0000-0000-000000000099", "404", 404, "PASS", "17ms", "Đạt chuẩn: ResourceNotFoundException chuyển sang 404 Not Found rõ ràng."),
+        (18, "SRS-03", "Applications", "Reseller nộp đơn tham gia chiến dịch (Apply to Campaign)", "POST /api/v1/reseller/campaigns/{id}/applications", "Token Reseller hợp lệ, nộp đơn chiến dịch", "200/201/409", 201, "PASS", "60ms", "Đạt chuẩn SRS: Đã được Dev sửa trong commit 0f7c4aa, ghi nhận đơn thành công trả 201 Created."),
+        (19, "EDG-02", "Applications", "Chặn đăng ký trùng chiến dịch (Duplicate Apply)", "POST /api/v1/reseller/campaigns/{id}/applications", "Nộp đơn lần 2 vào cùng chiến dịch", "409/400", 409, "PASS", "16ms", "Đạt chuẩn SRS: Đã được Dev sửa trong commit 0f7c4aa, bắt nộp trùng trả đúng 409 Conflict."),
+        (20, "EDG-03", "Applications", "Apply vào Campaign không tồn tại / không khả dụng", "POST /api/v1/reseller/campaigns/{id}/applications", "UUID không tồn tại", "400/404", 404, "PASS", "19ms", "Đạt chuẩn SRS: Dev đã thêm campaignExists() trả về đúng 404 Not Found."),
+        (21, "SRS-04", "Applications", "Lấy danh sách chiến dịch đã đăng ký (My Applications)", "GET /api/v1/reseller/campaigns/applications", "Token Reseller", "200", 200, "PASS", "32ms", "Đạt chuẩn SRS: Lấy đúng danh sách chiến dịch của chính Reseller đang đăng nhập."),
 
         # Nhóm 4: Tracking Links, Commissions & Dashboard (4 test cases)
         (22, "SRS-05", "Operations", "Lấy danh sách Tracking Links của Reseller", "GET /api/v1/reseller/tracking-links", "Token Reseller", "200", 200, "PASS", "130ms", "Đạt chuẩn SRS: Đã fix lỗi SQL (commit 468d41c), lấy đúng link và số lượt clicks."),
@@ -233,14 +233,14 @@ def create_report(output_path="docs/Bao_cao_Kiem_thu_Toan_Bo_Reseller_Hien.xlsx"
 
     bug_data = [
         (
-            1, "BUG-02", "OPEN (Chưa sửa)", "High (Nghiêm trọng)",
+            1, "BUG-02", "RESOLVED (Đã sửa)", "High (Nghiêm trọng)",
             "Lỗi HTTP 500 Internal Server Error khi Reseller nộp đơn tham gia chiến dịch (Apply to Campaign)",
             "POST /api/v1/reseller/campaigns/{id}/applications",
             "1. Đăng nhập bằng tài khoản Reseller ('reseller1@test.com') lấy Bearer Token.\n2. Lấy 1 Campaign ID hợp lệ đang ACTIVE từ CSDL (ví dụ '50000000-0000-0000-0000-000000000001').\n3. Gửi HTTP POST tới /api/v1/reseller/campaigns/{id}/applications kèm Bearer Token.",
-            "Server trả về HTTP 500 Internal Server Error (Database constraint violation).",
+            "Trước đây Server trả về HTTP 500. Sau khi Dev fix: Lần 1 nộp trả về 201 Created thành công, lần 2 nộp trùng trả về 409 Conflict.",
             "Lần đầu nộp đơn: Phải ghi nhận đơn thành công, trả về HTTP 200 OK hoặc 201 Created. Nếu nộp đơn trùng lần 2: Phải trả về HTTP 409 Conflict ('Reseller already applied').",
             "Trong CSDL bảng 'campaign_applications' (Flyway migration V7), hai cột 'commission_type_snapshot' (VARCHAR) và 'commission_rate_snapshot' (NUMERIC) được khai báo là NOT NULL. Tuy nhiên trong mã nguồn 'ResellerApplicationRepository.create()', câu lệnh SQL INSERT chỉ chèn (id, campaign_id, reseller_id, status, applied_at) mà bỏ quên 2 cột snapshot này. PostgreSQL ném lỗi: null value in column 'commission_type_snapshot' violates not-null constraint.",
-            "Bổ sung việc đọc commission_type và commission_rate từ bảng campaigns để điền vào 2 cột commission_type_snapshot và commission_rate_snapshot trong câu lệnh SQL INSERT tại ResellerApplicationRepository.create()."
+            "Dev đã sửa thành công ở commit 0f7c4aa: Cập nhật SQL INSERT bổ sung 2 cột snapshot từ bảng campaigns, bổ sung migration V20 trigger và kiểm tra 404/409 trong Service."
         ),
         (
             2, "BUG-01", "RESOLVED (Đã sửa)", "Medium (Trung bình)",

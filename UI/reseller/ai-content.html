@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Browse tenant-published marketing content for your travel campaigns.">
+  <title>AI Content Library - Wayfarer Network</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <script defer src="../shared/scripts.js"></script>
+  <script defer src="ai-content.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">W</span> Wayfarer <span class="muted">Network</span></a>
+      <div class="nav-label">Reseller Portal</div>
+      <nav class="nav">
+        <a href="dashboard.html">Overview</a><a href="campaign-marketplace.html">Marketplace</a><a href="my-campaigns.html">My campaigns</a><a href="tracking-links.html">Tracking links</a><a class="active" href="ai-content.html">AI Content Library</a><a href="commissions.html">Commissions</a><a href="analytics.html">Analytics</a><a href="profile-settings.html">Profile settings</a>
+      </nav>
+      <div class="sidebar-foot">Partner workspace · Sample data</div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div><button class="mobile-menu secondary" data-menu aria-label="Toggle navigation">Menu</button> <span class="crumb">Reseller Portal / AI Content Library</span></div><div class="top-actions"><a class="top-notice" href="../tenant/ai-content.html">Tenant AI Content</a></div></header>
+      <div class="content">
+        <div class="page-heading"><div><div class="eyebrow">READY-TO-USE CAMPAIGN ASSETS</div><h1>AI Content Library</h1><p>Browse and adapt content published by your tenant partners. Copy a caption, script or CTA and pair it with your tracking link.</p></div></div>
+        <section class="panel library-toolbar" aria-label="Filter campaign content">
+          <label>Campaign<select data-library-filter="campaign"><option value="">All campaigns</option></select></label>
+          <label>Product<select data-library-filter="product"><option value="">All products</option></select></label>
+          <label>Content type<select data-library-filter="type"><option value="">All content types</option></select></label>
+          <label>Language<select data-library-filter="language"><option value="">All languages</option></select></label>
+          <label class="library-search">Search<input type="search" data-library-search placeholder="Search published copy" aria-label="Search published copy"></label>
+        </section>
+        <div class="library-count-row"><span data-library-count>0 published items</span><a href="campaign-marketplace.html">Browse campaigns <span aria-hidden="true">→</span></a></div>
+        <section data-library-results aria-live="polite"><div class="ai-empty-state"><strong>No campaign content is available yet</strong><span>When a tenant publishes campaign content, it will appear here with its product and campaign details.</span><a class="button secondary" href="campaign-marketplace.html">Explore campaign marketplace</a><a class="library-tenant-link" href="../tenant/ai-content.html">Open the tenant content setup in this demo</a></div></section>
+        <p class="demo-note">Published campaign assets are shared through this browser's local storage for this prototype. No backend or AI service is connected.</p>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

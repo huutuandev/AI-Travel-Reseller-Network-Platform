@@ -19,15 +19,21 @@ public class ResellerCommissionRepository {
 
         String sql = """
                 SELECT
-                    c.title AS campaign,
-                    cm.order_amount,
-                    cm.commission_amount,
+                    COALESCE(c.title, 'Direct booking') AS campaign,
+                    b.total_amount AS order_amount,
+                    cm.amount AS commission_amount,
                     cm.currency,
                     cm.status,
                     cm.created_at
                 FROM travel_v2.commissions cm
-                JOIN travel_v2.campaigns c
-                    ON c.id = cm.campaign_id
+                JOIN travel_v2.bookings b
+                    ON b.id = cm.booking_id
+                LEFT JOIN travel_v2.tracking_links tl
+                    ON tl.id = b.tracking_link_id
+                LEFT JOIN travel_v2.campaign_applications ca
+                    ON ca.id = tl.campaign_application_id
+                LEFT JOIN travel_v2.campaigns c
+                    ON c.id = ca.campaign_id
                 WHERE cm.reseller_id = :resellerId
                 ORDER BY cm.created_at DESC
                 """;

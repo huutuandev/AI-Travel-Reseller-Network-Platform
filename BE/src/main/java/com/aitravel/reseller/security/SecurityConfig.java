@@ -59,6 +59,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/reseller/social-accounts/tiktok/callback")
                         .permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/merchant/bookings/webhook").permitAll()
                         .anyRequest().authenticated());
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -52,13 +52,14 @@ public final class MerchantBookingDtos {
     ) {}
 
     public record ConversionReviewRequest(
-        @NotBlank String decision
+                @NotBlank String decision
     ) {}
 
     public record ConversionReviewResponse(
-            UUID bookingId,
-            String conversionStatus,
-            String bookingStatus,
-            Instant updatedAt
-    ) {}
+                UUID bookingId,
+                String conversionStatus,
+                String bookingStatus,
+                Instant updatedAt,
+                boolean commissionVerified
+        ) {}
 }

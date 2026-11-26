@@ -83,5 +83,9 @@ app:
       redirect-uri: ${TIKTOK_REDIRECT_URI:}
   social-token-encryption-key: ${SOCIAL_TOKEN_ENCRYPTION_KEY:}
 
+merchant:
+  webhook:
+    master-secret: ${MERCHANT_WEBHOOK_MASTER_SECRET:}
+
 server:
   port: ${SERVER_PORT:8080} # Port của ứng dụng Spring Boot

@@ -221,13 +221,14 @@ public class MerchantBookingService {
 
         @Transactional
         public MerchantBookingDtos.ConversionReviewResponse reviewConversion(
-                        UUID bookingId,
-                        MerchantBookingDtos.ConversionReviewRequest request,
-                        CustomUserDetails user
-                ) {
+                UUID bookingId,
+                MerchantBookingDtos.ConversionReviewRequest request,
+                CustomUserDetails user
+        ) {
                 Merchant merchant = requireActiveMerchant(user);
 
-                if (request == null || request.decision() == null
+                if (request == null
+                        || request.decision() == null
                         || request.decision().isBlank()) {
                         throw new IllegalArgumentException("decision is required");
                 }
@@ -297,6 +298,22 @@ public class MerchantBookingService {
                         );
                 }
 
+                boolean commissionVerified = false;
+                if ("APPROVE".equals(decision)) {
+                        financeRepository.createCommissionForApprovedBooking(
+                                merchant.getId(),
+                                bookingId
+                        );
+
+                        // Repository chỉ trả về khi đã xác minh commission tồn tại.
+                        commissionVerified = true;
+                        } else if ("REVERSE".equals(decision)) {
+                        financeRepository.reverseCommissionForBooking(
+                                merchant.getId(),
+                                bookingId
+                        );
+                }
+
                 MerchantBookingDtos.BookingItem updatedBooking =
                         bookingRepository.findDetailForMerchant(
                                         merchant.getId(),
@@ -310,7 +327,8 @@ public class MerchantBookingService {
                         bookingId,
                         conversionStatus,
                         updatedBooking.bookingStatus(),
-                        updatedBooking.updatedAt()
+                        updatedBooking.updatedAt(),
+                        commissionVerified
                 );
         }
 

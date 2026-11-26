@@ -17,6 +17,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.List;
 
+import com.aitravel.reseller.repository.merchant.MerchantCommissionPayoutRepository;
+
 @Service
 @RequiredArgsConstructor
 public class MerchantBookingService {
@@ -30,6 +32,7 @@ public class MerchantBookingService {
 
     private final MerchantBookingQueryRepository bookingRepository;
     private final MerchantRepository merchantRepository;
+    private final MerchantCommissionPayoutRepository financeRepository;
 
     @Transactional(readOnly = true)
     public MerchantBookingDtos.PageResponse list(

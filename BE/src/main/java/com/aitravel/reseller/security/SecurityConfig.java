@@ -58,7 +58,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/v1/reseller/social-accounts/tiktok/callback")
                         .permitAll()
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ROLE_ADMIN", "PLATFORM_ADMIN")
                         .anyRequest().authenticated());
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

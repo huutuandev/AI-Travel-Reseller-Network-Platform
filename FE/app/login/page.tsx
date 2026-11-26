@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { authenticate, MOCK_USERS, ROLE_HOME, saveDemoSession } from "@/lib/mock-auth"
+import { sessionFromAccessToken, type ApiEnvelope } from "@/lib/admin/api"
 
 export default function LoginPage() {
   return <Suspense fallback={<main className="grid min-h-screen place-items-center bg-white text-sm text-slate-500">Loading sign in…</main>}><LoginForm /></Suspense>
@@ -27,8 +28,29 @@ function LoginForm() {
     if (customerIntent) router.replace("/storefront")
   }, [customerIntent, router])
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setMessage("")
+    try {
+      const response = await fetch("/api/backend/api/v1/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ email, password }),
+      })
+      const envelope = await response.json().catch(() => null) as ApiEnvelope<{ accessToken: string; refreshToken: string }> | null
+      if (response.ok && envelope?.success && envelope.data?.accessToken && envelope.data.refreshToken) {
+        const session = sessionFromAccessToken(envelope.data.accessToken, envelope.data.refreshToken)
+        saveDemoSession(session)
+        router.push(ROLE_HOME[session.role])
+        return
+      }
+      if (response.status !== 502 && response.status !== 404 && !authenticate(email, password)) {
+        setMessage(envelope?.message || "Email or password is incorrect.")
+        return
+      }
+    } catch {
+      // Keep the existing local demo sign-in available when BE is not running.
+    }
     const user = authenticate(email, password)
     if (user) {
       saveDemoSession(user)

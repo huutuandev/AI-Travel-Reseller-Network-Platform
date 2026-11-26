@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Bell, CheckCheck, ChevronDown, UserRound } from "lucide-react"
 import { clearDemoSession, getDemoSession, getDemoSessionSnapshot, ROLE_HOME, subscribeDemoSession, type UserRole } from "@/lib/mock-auth"
+import { signOutBackend } from "@/lib/admin/api"
 import { AppSidebar } from "@/components/app-sidebar"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -37,7 +38,8 @@ export function RoleWorkspace({ role, children }: { role: UserRole | "any"; chil
     if (role !== "any" && session.role !== role) router.replace(ROLE_HOME[session.role])
   }, [role, router, session, sessionSnapshot])
 
-  function logout() {
+  async function logout() {
+    await signOutBackend(session)
     clearDemoSession()
     router.replace("/login")
   }
@@ -67,7 +69,7 @@ export function RoleWorkspace({ role, children }: { role: UserRole | "any"; chil
         </DropdownMenuContent>
       </DropdownMenu>
     </div></header>
-    <div className="mx-auto w-full max-w-[1440px] space-y-6 p-4 sm:p-7">{children}<p className="text-center text-xs text-slate-400">Development preview · Mock account · No backend connected</p></div>
+    <div className="mx-auto w-full max-w-[1440px] space-y-6 p-4 sm:p-7">{children}<p className="text-center text-xs text-slate-400">{session.accessToken ? "Connected account · Platform API" : "Development preview · Mock account · No backend session"}</p></div>
   </SidebarInset></SidebarProvider>
 }
 

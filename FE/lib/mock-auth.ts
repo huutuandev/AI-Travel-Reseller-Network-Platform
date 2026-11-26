@@ -11,7 +11,7 @@ export type MockUser = {
   status: "active"
 }
 
-export type DemoSession = Omit<MockUser, "password">
+export type DemoSession = Omit<MockUser, "password"> & { accessToken?: string; refreshToken?: string }
 
 // Development-only credentials. Replace this adapter with the real auth service when available.
 export const MOCK_USERS: MockUser[] = [
@@ -49,7 +49,10 @@ export function getDemoSession(): DemoSession | null {
     const value = window.localStorage.getItem(SESSION_KEY)
     if (!value) return null
     const session = JSON.parse(value) as DemoSession
-    return MOCK_USERS.some((user) => user.id === session.id && user.role === session.role) ? session : null
+    return MOCK_USERS.some((user) => user.id === session.id && user.role === session.role)
+      || (typeof session.accessToken === "string" && typeof session.refreshToken === "string" && ["platform-admin", "tenant", "reseller"].includes(session.role))
+      ? session
+      : null
   } catch {
     return null
   }

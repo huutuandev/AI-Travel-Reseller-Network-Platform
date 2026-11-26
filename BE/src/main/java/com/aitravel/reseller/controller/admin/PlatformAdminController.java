@@ -16,7 +16,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'PLATFORM_ADMIN')")
 @Tag(name = "Platform Admin")
 @SecurityRequirement(name = "BearerAuth")
 public class PlatformAdminController {

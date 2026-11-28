@@ -40,7 +40,30 @@ public final class CampaignDtos {
             @Digits(integer = 8, fraction = 2)
             BigDecimal commissionRate,
 
-            @Pattern(regexp = "[A-Z]{3}")
+
+                // AUD: Đô la Úc
+                // CAD: Đô la Canada
+                // CHF: Franc Thụy Sĩ
+                // CNY: Nhân dân tệ Trung Quốc
+                // EUR: Euro
+                // GBP: Bảng Anh
+                // HKD: Đô la Hồng Kông
+                // IDR: Rupiah Indonesia
+                // INR: Rupee Ấn Độ
+                // JPY: Yên Nhật
+                // KRW: Won Hàn Quốc
+                // MYR: Ringgit Malaysia
+                // NZD: Đô la New Zealand
+                // PHP: Peso Philippines
+                // SGD: Đô la Singapore
+                // THB: Baht Thái Lan
+                // TWD: Đô la Đài Loan mới
+                // USD: Đô la Mỹ
+                // VND: Đồng Việt Nam
+            @Pattern(
+                regexp = "AUD|CAD|CHF|CNY|EUR|GBP|HKD|IDR|INR|JPY|KRW|MYR|NZD|PHP|SGD|THB|TWD|USD|VND",
+                message = "commissionCurrency must be a supported currency"
+            )
             String commissionCurrency,
 
             @NotNull

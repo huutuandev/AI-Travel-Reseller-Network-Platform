@@ -40,9 +40,32 @@ public final class ProductDtos {
 
             @DecimalMin("0.00")
             BigDecimal salePrice,
+        
 
+                // AUD: Đô la Úc
+                // CAD: Đô la Canada
+                // CHF: Franc Thụy Sĩ
+                // CNY: Nhân dân tệ Trung Quốc
+                // EUR: Euro
+                // GBP: Bảng Anh
+                // HKD: Đô la Hồng Kông
+                // IDR: Rupiah Indonesia
+                // INR: Rupee Ấn Độ
+                // JPY: Yên Nhật
+                // KRW: Won Hàn Quốc
+                // MYR: Ringgit Malaysia
+                // NZD: Đô la New Zealand
+                // PHP: Peso Philippines
+                // SGD: Đô la Singapore
+                // THB: Baht Thái Lan
+                // TWD: Đô la Đài Loan mới
+                // USD: Đô la Mỹ
+                // VND: Đồng Việt Nam
             @NotBlank
-            @Pattern(regexp = "[A-Z]{3}")
+            @Pattern(
+                regexp = "AUD|CAD|CHF|CNY|EUR|GBP|HKD|IDR|INR|JPY|KRW|MYR|NZD|PHP|SGD|THB|TWD|USD|VND",
+                message = "currency must be a supported currency"
+            )
             String currency,
 
             @NotBlank

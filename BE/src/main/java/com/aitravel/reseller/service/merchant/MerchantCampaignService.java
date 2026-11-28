@@ -33,6 +33,12 @@ public class MerchantCampaignService {
     private static final Set<String> COMMISSION_TYPES =
             Set.of("PERCENTAGE", "FIXED_AMOUNT");
 
+    private static final Set<String> SUPPORTED_COMMISSION_CURRENCIES = Set.of(
+            "AUD", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR",
+            "INR", "JPY", "KRW", "MYR", "NZD", "PHP", "SGD", "THB",
+            "TWD", "USD", "VND"
+    );
+
     private static final Set<String> CAMPAIGN_STATUSES =
             Set.of(
                     "DRAFT",
@@ -158,6 +164,14 @@ public class MerchantCampaignService {
         validateRequest(request);
 
         Product product = findOwnedProduct(merchant.getId(), request.productId());
+        String availabilityStatus = product.getAvailabilityStatus();
+
+        if (availabilityStatus != null
+                && "SOLD_OUT".equalsIgnoreCase(availabilityStatus.trim())) {
+                throw new IllegalStateException(
+                        "A campaign cannot be created for a sold-out product"
+                );
+        }
         Campaign campaign = new Campaign();
 
         applyRequest(campaign, request, product);
@@ -390,9 +404,17 @@ public class MerchantCampaignService {
             }
         } else {
             if (request.commissionCurrency() == null
-                    || !request.commissionCurrency().matches("[A-Z]{3}")) {
+                    || !SUPPORTED_COMMISSION_CURRENCIES.contains(
+                            request.commissionCurrency()
+                    )) {
                 throw new IllegalArgumentException(
-                        "Fixed commission requires a three-letter uppercase currency"
+                        "Fixed commission currency must be one of the supported currencies: "
+                                + String.join(
+                                        ", ",
+                                        SUPPORTED_COMMISSION_CURRENCIES.stream()
+                                                .sorted()
+                                                .toList()
+                                )
                 );
             }
         }

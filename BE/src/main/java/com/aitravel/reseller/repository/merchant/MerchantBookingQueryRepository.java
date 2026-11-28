@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -152,8 +154,8 @@ public class MerchantBookingQueryRepository {
                 .addValue("status", status)
                 .addValue("productId", productId)
                 .addValue("resellerId", resellerId)
-                .addValue("from", from)
-                .addValue("to", to);
+                .addValue("from", toUtcOffsetDateTime(from))
+                .addValue("to", toUtcOffsetDateTime(to));
     }
 
     private String buildWhere(
@@ -203,6 +205,12 @@ public class MerchantBookingQueryRepository {
 
         return where.toString();
     }
+
+    private OffsetDateTime toUtcOffsetDateTime(Instant instant) {
+        return instant == null
+                ? null
+                : instant.atOffset(ZoneOffset.UTC);
+        }
 
     private MerchantBookingDtos.BookingItem mapBooking(
             ResultSet rs,
